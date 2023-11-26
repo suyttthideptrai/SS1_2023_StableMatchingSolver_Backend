@@ -61,6 +61,7 @@ public class Matches implements Serializable {
     }
     public boolean isFull (int target){
         for (MatchItem match : matches) {
+            // hmm
             if (match.getIndividual1Index() == target) {
                 int cap = match.getCapacity();
                 return match.getIndividualMatches().size() >= cap;
@@ -82,6 +83,9 @@ public class Matches implements Serializable {
             }
         }
     }
+    public List<Integer> getIndividualMatches(int target){
+        return matches.get(target).getIndividualMatches();
+    }
     public String toString(){
         StringBuilder s = new StringBuilder();
         s.append("Matches {\n");
@@ -95,7 +99,7 @@ public class Matches implements Serializable {
         for (Integer leftOver : leftOvers) {
             s.append("[");
             s.append(leftOver.toString());
-            s.append("]\n");
+            s.append("],");
         }
         s.append("}");
         return s.toString();

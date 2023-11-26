@@ -20,6 +20,7 @@ public class HomeController {
 
     @Autowired
     private GameTheorySolver gameTheorySolver;
+    private StableMatchingSolver stableMatchingSolver;
 
 
     @PostMapping("/stable-matching-solver")

@@ -2,7 +2,7 @@ package com.example.SS2_Backend.util;
 
 import java.util.List;
 import java.util.ArrayList;
-import com.example.SS2_Backend.model.StableMatching.PreferenceLists.IndexValue;
+import com.example.SS2_Backend.model.StableMatching.PreferenceList.IndexValue;
 
 public class MergeSortPair {
     public static void mergeSort(List<IndexValue> list) {

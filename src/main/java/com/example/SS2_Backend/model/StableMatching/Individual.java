@@ -63,17 +63,14 @@ public class Individual {
             }
         }else{
             if(item.contains(":")){
-                System.out.println("contains :");
                 String[] parts = item.split(":");
                 result[0] = parts[0].trim();
                 result[1] = parts[1].trim();
             }else if(item.contains("++")){
-                System.out.println("Contains ++");
                 String[] parts = item.split("\\+\\+");
                 result[0] = parts[0].trim();
                 result[1] = "++";
             } else if (item.contains("--")) {
-                System.out.println("Contains --");
                 String[] parts = item.split("--");
                 result[0] = parts[0].trim();
                 result[1] = "--";

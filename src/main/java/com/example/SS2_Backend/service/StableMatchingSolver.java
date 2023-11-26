@@ -48,10 +48,13 @@ public class StableMatchingSolver {
                     request.getEvolutionRate(),
                     request.getMaximumExecutionTime()
             );
+
             long endTime = System.currentTimeMillis();
             double runtime = ((double) (endTime - startTime) / 1000 / 60);
             runtime = Math.round(runtime * 100.0) / 100.0;
+            System.out.println("Runtime: " + runtime + " Second(s).");
             MatchingSolution matchingSolution = formatSolution(problem, results, runtime);
+            System.out.println("RESPOND TO FRONT_END:");
             System.out.println(matchingSolution);
             return ResponseEntity.ok(
                     Response.builder()
@@ -73,13 +76,11 @@ public class StableMatchingSolver {
     private static MatchingSolution formatSolution(StableMatchingProblem problem, NondominatedPopulation result, double Runtime){
         Solution solution = result.get(0);
         MatchingSolution matchingSolution = new MatchingSolution();
-        List<List<PreferenceLists.IndexValue>> preferenceLists = problem.getPreferenceLists();
         double fitnessValue = solution.getObjective(0);
         Matches matches = (Matches) solution.getAttribute("matches");
 
 
-        matchingSolution.setFitnessValue(fitnessValue);
-        //matchingSolution.setPreferenceLists(preferenceLists);
+        matchingSolution.setFitnessValue(-fitnessValue);
         matchingSolution.setMatches(matches);
         matchingSolution.setAlgorithm("NSGAII");
         matchingSolution.setRuntime(Runtime);
@@ -117,6 +118,12 @@ public class StableMatchingSolver {
                 .withProperty("populationSize", 200)
                 .distributeOnAllCores()
                 .run();
+        for (Solution solution : result) {
+            System.out.println("Randomized Individuals Input Order (by MOEA): " + solution.getVariable(0).toString());
+            Matches matches = (Matches) solution.getAttribute("matches");
+            System.out.println("Output Matches (by Gale Shapley):\n" + matches.toString());
+            System.out.println("Fitness Score: " + -solution.getObjective(0));
+        }
         return result;
     }
 

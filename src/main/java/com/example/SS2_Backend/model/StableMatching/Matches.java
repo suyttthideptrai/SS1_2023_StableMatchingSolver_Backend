@@ -48,7 +48,7 @@ public class Matches implements Serializable {
         return matches.size();
     }
 
-    public void disMatch(int target){
+    public void disMatchPair(int target){
         for(int i = 0; i < matches.size(); i++){
             if(matches.get(i).getIndividual1Index() == target){
                 matches.remove(i);
@@ -58,6 +58,16 @@ public class Matches implements Serializable {
                 break;
             }
         }
+    }
+    public boolean alreadyMatch(int Node1, int Node2){
+        for (MatchItem match : matches){
+            if(match.getIndividual1Index() == Node1){
+                if(match.getIndividualMatches().contains(Node2)){
+                    return true;
+                }
+            }
+        }
+        return false;
     }
     public boolean isFull (int target){
         for (MatchItem match : matches) {
@@ -99,9 +109,9 @@ public class Matches implements Serializable {
         for (Integer leftOver : leftOvers) {
             s.append("[");
             s.append(leftOver.toString());
-            s.append("],");
+            s.append("]");
         }
-        s.append("}");
+        s.append("\n}");
         return s.toString();
     }
 

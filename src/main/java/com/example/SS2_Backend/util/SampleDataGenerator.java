@@ -22,7 +22,7 @@ public class SampleDataGenerator {
 
     public static void main(String[] args) {
         // Generate Individuals data Randomly
-        ArrayList<Individual> individuals = generateSampleIndividualsWithCapacity(12, 20, 4);
+        ArrayList<Individual> individuals = generateSampleIndividualsWithCapacity(40, 1, false, 10, 4, false, 4);
 
         String[] propNames = {"Prop1", "Prop2", "Prop3", "Prop4"};
 
@@ -48,13 +48,6 @@ public class SampleDataGenerator {
         System.out.println(
                 "\n[ Algorithm Output Solution ]\n"
         );
-//        List<Integer> oldPLayers = new ArrayList<>();
-//        oldPLayers.add(7);
-//        oldPLayers.add(11);
-//        oldPLayers.add(6);
-//        System.out.println(oldPLayers);
-//        System.out.println(problem.Compete(0, 12, oldPLayers));
-
         // Run algorithm:
         long startTime = System.currentTimeMillis();
 
@@ -78,6 +71,7 @@ public class SampleDataGenerator {
             System.out.println("Fitness Score: " + -solution.getObjective(0));
         }
         System.out.println("\nExecution time: " + runtime + " Second(s) with Algorithm: " + "NSGAII");
+
 
 
     }
@@ -121,14 +115,18 @@ public class SampleDataGenerator {
         }
         return individuals;
     }
-    public static ArrayList<Individual> generateSampleIndividualsWithCapacity(int numSet1, int numSet2, int numProps) {
+    public static ArrayList<Individual> generateSampleIndividualsWithCapacity(int numSet1, int set1PeakCap, boolean cap1Randomize, int numSet2, int set2PeakCap, boolean cap2Randomize, int numProps) {
         ArrayList<Individual> individuals = new ArrayList<>();
 
         for (int i = 1; i <= numSet1; i++) {
             String individualName = "Individual Name" + i;
-            int individualSet;
-            individualSet = 0;
-            int individualCapacity = new Random().nextInt(5) + 1;
+            int individualSet = 0;
+            int individualCapacity;
+            if(cap1Randomize) {
+                individualCapacity = new Random().nextInt(set1PeakCap-1) + 1;
+            }else {
+                individualCapacity = set1PeakCap;
+            }
             Individual individual = new Individual();
             individual.setIndividualName(individualName);
             individual.setIndividualSet(individualSet);
@@ -161,8 +159,12 @@ public class SampleDataGenerator {
             String individualName = "Individual Name" + i;
             int individualSet;
             individualSet = 1;
-//            int individualCapacity = new Random().nextInt(4) + 1;
-            int individualCapacity = 1;
+            int individualCapacity;
+            if(cap2Randomize) {
+                individualCapacity = new Random().nextInt(set2PeakCap-1) + 1;
+            }else {
+                individualCapacity = set2PeakCap;
+            }
             Individual individual = new Individual();
             individual.setIndividualName(individualName);
             individual.setIndividualSet(individualSet);

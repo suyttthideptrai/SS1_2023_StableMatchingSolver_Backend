@@ -1,0 +1,223 @@
+# Gale Shapley based Stable Matching/ Stable Marriage Algorithm
+    public Matches stableMatching(Variable var) {
+        Matches matches = new Matches();
+        Queue<Integer> unmatchedMales = new LinkedList<>();
+        LinkedList<Integer> engagedFemale = new LinkedList<>();
+
+        String s = var.toString();
+
+        String[] decodedSolution = s.split(",");
+        for (String token : decodedSolution) {
+            try {
+                // Convert each token to an Integer and add it to the queue
+                int i = Integer.parseInt(token);
+                if (Individuals.get(i).getIndividualSet() == 1) {
+                    unmatchedMales.add(i);
+                }
+            } catch (NumberFormatException e) {
+                // Handle invalid tokens (non-integer values)
+                System.err.println("Skipping invalid token: " + token);
+                return null;
+            }
+            //System.out.println("Solution: " + java.util.Arrays.toString(decodedSolution));
+        }
+
+        while (!unmatchedMales.isEmpty()) {
+            int male = unmatchedMales.poll();
+            //System.out.println("working on Individual:" + male);
+            PreferenceList preferenceList = preferenceLists.get(male);
+            //System.out.print("Hmm ... He prefers Individual ");
+            for (int i = 0; i < preferenceList.size(); i++) {
+                int female = preferenceList.getByIndex(i).getIndividualIndex();
+                //System.out.println(female);
+                if (!engagedFemale.contains(female)) {
+                    engagedFemale.add(female);
+                    matches.add(new Pair(male, female));
+                    //System.out.println(male + female + " is now together");
+                    break;
+                } else {
+                    int currentMale = Integer.parseInt(matches.findCompany(female));
+                    //System.out.println("Oh no, she is with " + currentMale + " let see if she prefers " + male + " than " + currentMale );
+                    if (isPreferredOver(male, currentMale, female)) {
+                        matches.disMatchPair(currentMale);
+                        unmatchedMales.add(currentMale);
+                        matches.add(new Pair(male, female));
+                        //System.out.println("Hell yeah! " + female + " ditch the guy " + currentMale + " to be with " + male + "!");
+                        break;
+                    }
+                    else {
+                        if(preferenceList.getByIndex(preferenceList.size()-1).getIndividualIndex() == female){
+                            matches.addLeftOver(male);
+                        }
+                        //System.out.println(male + " lost the game, back to the hood...");
+                    }
+                }
+            }
+        }
+        for(int i = 0; i < Individuals.size(); i++){
+            if(Individuals.get(i).getIndividualSet() == 0){
+                if(!engagedFemale.contains(i)){
+                    matches.addLeftOver(i);
+                }
+            }
+        }
+        //System.out.println("Matching Complete!!");
+        return matches;
+    }
+
+# Many to Many Algorithm:
+private Matches StableMatchingExtra(Variable var){
+        //Parse Variable
+        Matches matches = new Matches();
+        Queue<Integer> UnMatchedNode = new LinkedList<>();
+        List<Integer> MatchedNode = new LinkedList<>();
+
+        String s = var.toString();
+
+        String[] decodedSolution = s.split(",");
+        for (int i = 0; i < decodedSolution.length; i++) {
+            matches.add(new MatchSet(i, getCapacityOfIndividual(i)));
+        }
+        for (String token : decodedSolution) {
+            try {
+                // Convert each token to an Integer and add it to the queue
+                int i = Integer.parseInt(token);
+                UnMatchedNode.add(i);
+            } catch (NumberFormatException e) {
+                // Handle invalid tokens (non-integer values)
+                System.err.println("Skipping invalid token: " + token);
+                return null;
+            }
+        }
+        while(!UnMatchedNode.isEmpty()){
+            System.out.println(matches);
+            int Node = UnMatchedNode.poll();
+            if(MatchedNode.contains(Node)){
+                continue;
+            }
+            System.out.println("working on Node:" + Node);
+            //Get pref List of LeftNode
+            PreferenceList NodePreference = preferenceLists.get(Node);
+           //Loop through LeftNode's preference list to find a Match
+            for (int i = 0; i < NodePreference.size(); i++){
+                //Next Match (RightNode) is found on the list
+                int preferNode = NodePreference.getByIndex(i).getIndividualIndex();
+                System.out.println(Node + " Prefer : " + preferNode);
+                if(matches.alreadyMatch(preferNode, Node)){
+                    System.out.println(Node + " is already match with " + preferNode);
+                    break;
+                }
+                //If the RightNode Capacity is not full -> create connection between LeftNode - RightNode
+                if(!matches.isFull(preferNode)) {
+                    System.out.println(preferNode + " is not full.");
+                    //AddMatch (Node, NodeToConnect)
+                    matches.addMatch(preferNode, Node);
+                    matches.addMatch(Node,preferNode);
+                    MatchedNode.add(preferNode);
+                    break;
+                }else{
+                    //If the RightNode's Capacity is Full then Left Node will Compete with Nodes that are inside RightNode
+                    //Loser will be the return value
+                    System.out.println(preferNode + " is full! Begin making a Compete game involve: " + Node + " ..." );
+                    int Loser = Compete(preferNode, Node, matches.getIndividualMatches(preferNode));
+                    //If RightNode is the LastChoice of Loser -> then
+                    // Loser will be terminated and Saved in Matches.LeftOvers Container
+                    System.out.println("Found Loser: " + Loser);
+                    if(Loser == Node){
+                        if(LastChoice(Node) == preferNode){
+                            System.out.println(Node + " has no where to go. Go to LeftOvers!");
+                            matches.addLeftOver(Loser);
+                            break;
+                        }
+                    //Or else Loser go back to UnMatched Queue & Waiting for it's Matching Procedure
+                    }else{
+                        matches.disMatch(preferNode, Loser);
+                        matches.disMatch(Loser, preferNode);
+                        UnMatchedNode.add(Loser);
+                        System.out.println(Loser + " lost the game, waiting for another chance.");
+                        matches.addMatch(preferNode, Node);
+                        matches.addMatch(Node, preferNode);
+                        MatchedNode.add(Node);
+                        System.out.println(Node + " is more suitable than " + Loser + " matched with " + preferNode);
+                        break;
+                    }
+                }
+            }
+        }
+        return matches;
+    }
+
+    # Unusable - Developing
+    private Matches StableMatchingFinal(Variable var){
+            Matches matches = new Matches();
+            Queue<Integer> UnMatchedNode = new LinkedList<>();
+            List<Integer> MatchedNode = new LinkedList<>();
+
+            String s = var.toString();
+
+            String[] decodedSolution = s.split(",");
+            for (int i = 0; i < decodedSolution.length; i++) {
+                if(Individuals.get(i).getIndividualSet() == 0) {
+                    matches.add(new MatchSet(i, getCapacityOfIndividual(i)));
+                }
+            }
+            for (String token : decodedSolution) {
+                try {
+                    // Convert each token to an Integer and add it to the queue
+                    int i = Integer.parseInt(token);
+                    UnMatchedNode.add(i);
+                } catch (NumberFormatException e) {
+                    // Handle invalid tokens (non-integer values)
+                    System.err.println("Skipping invalid token: " + token);
+                    return null;
+                }
+            }
+            while(!UnMatchedNode.isEmpty()){
+                System.out.println(matches);
+                int Node = UnMatchedNode.poll();
+                if(MatchedNode.contains(Node)){
+                    continue;
+                }
+                System.out.println("working on Node:" + Node);
+                //Get pref List of LeftNode
+                PreferenceList NodePreference = preferenceLists.get(Node);
+                //Loop through LeftNode's preference list to find a Match
+                for (int i = 0; i < NodePreference.size(); i++){
+                    int prefNode = NodePreference.getByIndex(i).getIndividualIndex();
+                    if(Individuals.get(Node).getIndividualSet() == 1){
+                        if(!matches.isFull(prefNode)){
+                            matches.addMatch(prefNode, Node);
+                            MatchedNode.add(Node);
+                            break;
+                        }else{
+                            int Loser = Compete(prefNode, Node, matches.getIndividualMatches(prefNode));
+                            if(Loser == Node){
+                                if(LastChoice(Node) == prefNode){
+                                    matches.addLeftOver(Node);
+                                    break;
+                                }
+                            }else{
+                                matches.disMatch(prefNode, Loser);
+                                matches.addMatch(prefNode, Node);
+                                MatchedNode.remove((Integer) Loser);
+                                UnMatchedNode.add(Loser);
+                            }
+                        }
+                    }else{
+                        if(!MatchedNode.contains(prefNode)){
+                            matches.addMatch(Node, prefNode);
+                            MatchedNode.add(prefNode);
+                            break;
+                        }else{
+                            int current = matches.findCompany(prefNode);
+                            if(isPreferredOver(Node, current, prefNode)){
+                                matches.disMatch(current, prefNode);
+                                matches.addMatch(Node, prefNode);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            return matches;
+        }

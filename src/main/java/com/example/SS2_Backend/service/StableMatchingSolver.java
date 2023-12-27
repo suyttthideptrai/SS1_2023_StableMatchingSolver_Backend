@@ -14,166 +14,172 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
-
 @Service
 public class StableMatchingSolver {
 //    SimpMessageSendingOperations simpMessagingTemplate;
 //    private static final int RUN_COUNT_PER_ALGORITHM = 10; // for insight running, each algorithm will be run for 10 times
 
-    public static List<PreferenceList> preferencesList;
+	public static List<PreferenceList> preferencesList;
 
-    public static ArrayList<Double> coupleFitnessList = new ArrayList<>();
+	public static ArrayList<Double> coupleFitnessList = new ArrayList<>();
 
-    public ResponseEntity<Response> solveStableMatching(StableMatchingProblemDTO request) {
+	public ResponseEntity<Response> solveStableMatching(StableMatchingProblemDTO request) {
 
-        try{
-            StableMatchingProblem problem = new StableMatchingProblem();
+		try {
+			StableMatchingProblem problem = new StableMatchingProblem();
 
-            problem.setPopulation(request.getIndividuals());
-            problem.setAllPropertyNames(request.getAllPropertyNames());
-            problem.setFitnessFunction(request.getFitnessFunction());
+			problem.setEvaluateFunctionForSet1(request.getEvaluateFunction()[0]);
+			problem.setEvaluateFunctionForSet2(request.getEvaluateFunction()[1]);
+			problem.setPopulation(request.getIndividuals());
+			problem.setAllPropertyNames(request.getAllPropertyNames());
+			problem.setFitnessFunction(request.getFitnessFunction());
 
-//            System.out.println(problem.printPreferenceLists());
+			System.out.println("Load Problem...");
+			System.out.println(problem);
+			System.out.println("\nProblem loaded!");
 
-            long startTime = System.currentTimeMillis();
+			long startTime = System.currentTimeMillis();
 
+			NondominatedPopulation results = solveProblem(
+			    problem,
+			    request.getAlgorithm(),
+			    request.getPopulationSize(),
+			    request.getGeneration(),
+			    100000,
+			    request.getDistributedCores()
+			);
+			System.out.println(results);
+			ArrayList<Individual> individualsList = request.getIndividuals();
 
-            NondominatedPopulation results = solveProblem(
-                    problem,
-                    request.getAlgorithm(),
-                    request.getPopulationSize(),
-                    request.getGeneration(),
-                    request.getMaxTime(),
-                    request.getDistributedCores()
-            );
+			long endTime = System.currentTimeMillis();
+			double runtime = ((double) (endTime - startTime) / 1000 / 60);
+			runtime = (runtime * 1000.0);
+			System.out.println("Runtime: " + runtime + " Millisecond(s).");
+			String algorithm = request.getAlgorithm();
+			MatchingSolution matchingSolution = formatSolution(problem, algorithm, results, runtime);
+			matchingSolution.setIndividuals(individualsList);
+			System.out.println("RESPOND TO FRONT_END:");
+			System.out.println(matchingSolution);
+			System.out.println(matchingSolution.getMatches().getCoupleFitness());
+			return ResponseEntity.ok(
+			    Response.builder()
+			        .status(200)
+			        .message("Solve stable matching problem successfully!")
+			        .data(matchingSolution)
+			        .build()
+			);
+		} catch (Exception e) {
+			System.out.println("Caught exception: " + e.getMessage());
+			// Handle exceptions and return an error response
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+			    .body(Response.builder()
+			        .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+			        .message("Error solving stable matching problem.")
+			        .data(null)
+			        .build());
+		}
+	}
 
-            ArrayList<Individual> individualsList = request.getIndividuals();
+	private MatchingSolution formatSolution(StableMatchingProblem problem, String algorithm, NondominatedPopulation result, double Runtime) {
+		Solution solution = result.get(0);
+		MatchingSolution matchingSolution = new MatchingSolution();
+		double fitnessValue = solution.getObjective(0);
+		Matches matches = (Matches) solution.getAttribute("matches");
 
-            long endTime = System.currentTimeMillis();
-            double runtime = ((double) (endTime - startTime) / 1000 / 60);
-            runtime = (runtime * 1000.0);
-            System.out.println("Runtime: " + runtime + " Millisecond(s).");
-            MatchingSolution matchingSolution = formatSolution(problem, results, runtime);
-            matchingSolution.setIndividuals(individualsList);
-            System.out.println("RESPOND TO FRONT_END:");
-            System.out.println(matchingSolution);
-            System.out.println(matchingSolution.getMatches().getCoupleFitness());
-            return ResponseEntity.ok(
-                    Response.builder()
-                            .status(200)
-                            .message("Solve stable matching problem successfully!")
-                            .data(matchingSolution)
-                            .build()
-            );
-        } catch (Exception e) {
-            // Handle exceptions and return an error response
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Response.builder()
-                            .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                            .message("Error solving stable matching problem.")
-                            .data(null)
-                            .build());
-        }
-    }
-    private MatchingSolution formatSolution(StableMatchingProblem problem, NondominatedPopulation result, double Runtime){
-        Solution solution = result.get(0);
-        MatchingSolution matchingSolution = new MatchingSolution();
-        double fitnessValue = solution.getObjective(0);
-        Matches matches = (Matches) solution.getAttribute("matches");
+		matchingSolution.setFitnessValue(-fitnessValue);
+		matchingSolution.setMatches(matches);
+		matchingSolution.setAlgorithm(algorithm);
+		matchingSolution.setRuntime(Runtime);
 
-        matchingSolution.setFitnessValue(-fitnessValue);
-        matchingSolution.setMatches(matches);
-        matchingSolution.setAlgorithm(problem.getAlgorithm());
-        matchingSolution.setRuntime(Runtime);
-
-        return matchingSolution;
-    }
-
-
-    public String convertObjectToJson(Object object) {
-        try {
-            // Create an instance of ObjectMapper
-            ObjectMapper objectMapper = new ObjectMapper();
-
-            StableMatchingProblemDTO stableMatchingProblem = objectMapper.convertValue(object, StableMatchingProblemDTO.class);
-
-            return objectMapper.writeValueAsString(stableMatchingProblem);
-        } catch (Exception e) {
-            // Handle exception if needed
-            e.printStackTrace();
-            return "Error converting object to JSON";
-        }
-    }
+		return matchingSolution;
+	}
 
 
+	public String convertObjectToJson(Object object) {
+		try {
+			// Create an instance of ObjectMapper
+			ObjectMapper objectMapper = new ObjectMapper();
 
-    private NondominatedPopulation solveProblem(StableMatchingProblem problem,
-                                                       String algorithm,
-                                                       int populationSize,
-                                                       int generation,
-                                                       int maxTime,
-                                                       String distributedCores) {
-        NondominatedPopulation result;
-        problem.setAlgorithm(algorithm);
-        try {
-            if (distributedCores.equals("all")) {
-                result = new Executor()
-                        .withProblem(problem)
-                        .withAlgorithm(algorithm)
-                        .withMaxEvaluations(generation * populationSize) // we are using the number of generations and population size to calculate the number of evaluations
-                        .withProperty("populationSize", populationSize)
-                        .withProperty("maxTime", maxTime)
-                        .distributeOnAllCores()
-                        .run();
+			StableMatchingProblemDTO stableMatchingProblem = objectMapper.convertValue(object, StableMatchingProblemDTO.class);
+
+			return objectMapper.writeValueAsString(stableMatchingProblem);
+		} catch (Exception e) {
+			// Handle exception if needed
+			e.printStackTrace();
+			return "Error converting object to JSON";
+		}
+	}
 
 
-            } else {
-                int numberOfCores = Integer.parseInt(distributedCores);
-                result = new Executor()
-                        .withProblem(problem)
-                        .withAlgorithm(algorithm)
-                        .withMaxEvaluations(generation * populationSize) // we are using the number of generations and population size to calculate the number of evaluations
-                        .withProperty("populationSize", populationSize)
-                        .withProperty("maxTime", maxTime)
-                        .distributeOn(numberOfCores)
-                        .run();
-            }
-            return result;
-        } catch (Exception e) {
+	private NondominatedPopulation solveProblem(StableMatchingProblem problem,
+					    String algorithm,
+					    int populationSize,
+					    int generation,
+					    int maxTime,
+					    String distributedCores) {
+		NondominatedPopulation result;
+		if(algorithm == null){
+			algorithm = "PESA2";
+		}
+		if(distributedCores == null){
+			distributedCores = "all";
+		}
+		try {
+			if (distributedCores.equals("all")) {
+				result = new Executor()
+				    .withProblem(problem)
+				    .withAlgorithm(algorithm)
+				    .withMaxEvaluations(generation * populationSize) // we are using the number of generations and population size to calculate the number of evaluations
+				    .withProperty("populationSize", populationSize)
+				    .withProperty("maxTime", maxTime)
+				    .distributeOnAllCores()
+				    .run();
+			} else {
+				int numberOfCores = Integer.parseInt(distributedCores);
+				result = new Executor()
+				    .withProblem(problem)
+				    .withAlgorithm(algorithm)
+				    .withMaxEvaluations(generation * populationSize) // we are using the number of generations and population size to calculate the number of evaluations
+				    .withProperty("populationSize", populationSize)
+				    .withProperty("maxTime", maxTime)
+				    .distributeOn(numberOfCores)
+				    .run();
+			}
+			return result;
+		} catch (Exception e) {
 
-            // second attempt to solve the problem if the first run got some error
-            if (distributedCores.equals("all")) {
-                result = new Executor()
-                        .withProblem(problem)
-                        .withAlgorithm(algorithm)
-                        .withMaxEvaluations(generation * populationSize) // we are using the number of generations and population size to calculate the number of evaluations
-                        .withProperty("populationSize", populationSize)
-                        .withProperty("maxTime", maxTime)
-                        .distributeOnAllCores()
-                        .run();
+			// second attempt to solve the problem if the first run got some error
+			if (distributedCores.equals("all")) {
+				result = new Executor()
+				    .withProblem(problem)
+				    .withAlgorithm(algorithm)
+				    .withMaxEvaluations(generation * populationSize) // we are using the number of generations and population size to calculate the number of evaluations
+				    .withProperty("populationSize", populationSize)
+				    .withProperty("maxTime", maxTime)
+				    .distributeOnAllCores()
+				    .run();
 
 
-            } else {
-                int numberOfCores = Integer.parseInt(distributedCores);
-                result = new Executor()
-                        .withProblem(problem)
-                        .withAlgorithm(algorithm)
-                        .withMaxEvaluations(generation * populationSize) // we are using the number of generations and population size to calculate the number of evaluations
-                        .withProperty("populationSize", populationSize)
-                        .withProperty("maxTime", maxTime)
-                        .distributeOn(numberOfCores)
-                        .run();
-            }
-            return result;
-        }
+			} else {
+				int numberOfCores = Integer.parseInt(distributedCores);
+				result = new Executor()
+				    .withProblem(problem)
+				    .withAlgorithm(algorithm)
+				    .withMaxEvaluations(generation * populationSize) // we are using the number of generations and population size to calculate the number of evaluations
+				    .withProperty("populationSize", populationSize)
+				    .withProperty("maxTime", maxTime)
+				    .distributeOn(numberOfCores)
+				    .run();
+			}
+			return result;
+		}
 
 //        for (Solution solution : result) {
 //            System.out.println("Randomized Individuals Input Order (by MOEA): " + solution.getVariable(0).toString());
 //            Matches matches = (Matches) solution.getAttribute("matches");
 //            System.out.println("Output Matches (by Gale Shapley):\n" + matches.toString());
 //            System.out.println("Fitness Score: " + -solution.getObjective(0));
-    }
-
+	}
 
 
 //    public ResponseEntity<Response> getProblemResultInsights(StableMatchingProblemDTO request, String sessionCode) {

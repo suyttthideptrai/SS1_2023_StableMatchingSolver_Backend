@@ -19,6 +19,7 @@ public class StableMatchingProblemDTO {
     @JsonDeserialize(contentUsing = IndividualDeserializer.class)
     private ArrayList<Individual> Individuals;
     private String[] allPropertyNames;
+    private String[] evaluateFunction;
     private String fitnessFunction;
     private int populationSize;
     private int generation;
@@ -61,16 +62,16 @@ public class StableMatchingProblemDTO {
     }
 
     public String toString() {
-        return "Matching_Theory_Problem {" +
-                ", ProblemName= " + problemName + '\'' +
-                ", NumberOfSets= " + numberOfSets + "\n" +
-                ", NumberOfIndividuals= " + numberOfIndividuals +
-                ", Individuals= " + Individuals.toString() +
-                ", AllPropertyName= " + java.util.Arrays.toString(allPropertyNames) +
-                ", fitnessFunction= '" + fitnessFunction + '\'' +
-                ", PopulationSize= " + populationSize +
-                ", Generation= " +generation +
-                ", MaximumExecutionTime" + maxTime +
+        return "Matching_Theory_Problem {" + "\n" +
+                " ProblemName = " + problemName + "\n" +
+                ", NumberOfSets = " + numberOfSets + "\n" +
+                ", NumberOfIndividuals = " + numberOfIndividuals + "\n" +
+                ", Individuals = " + Individuals.toString() + "\n" +
+                ", AllPropertyName = " + java.util.Arrays.toString(allPropertyNames) +
+                ", fitnessFunction = '" + fitnessFunction + "\n" +
+                ", PopulationSize = " + populationSize + "\n" +
+                ", Generation = " +generation + "\n" +
+                ", MaximumExecutionTime: " + maxTime + "\n" +
                 "}";
     }
 }

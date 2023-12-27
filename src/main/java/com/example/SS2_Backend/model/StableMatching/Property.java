@@ -11,10 +11,9 @@ import java.util.Objects;
 import static com.example.SS2_Backend.util.Utils.isDouble;
 import static com.example.SS2_Backend.util.Utils.isInteger;
 
+@Getter
 public class Property {
-    @Getter
     private final Double value;
-    @Getter
     private final int weight;
     private final Requirement requirement;
 
@@ -48,9 +47,6 @@ public class Property {
         }
     }
 
-    public Requirement getRequirement(){
-        return this.requirement;
-    }
     @Override
     public String toString() {
         return "Value: " + value + " , Requirement " + requirement + " , Weight: " + weight;

@@ -50,7 +50,7 @@ public class Matches implements Serializable {
 		return matches.size();
 	}
 
-	public boolean alreadyMatch(int Node1, int Node2) {
+	public boolean isAlreadyMatch(int Node1, int Node2) {
 		for (MatchSet match : matches) {
 			if (match.getIndividualIndex() == Node1) {
 				if (match.getIndividualMatches().contains(Node2)) {
@@ -88,8 +88,8 @@ public class Matches implements Serializable {
 		}
 	}
 
-	public List<Integer> getIndividualMatches(int target) {
-		return matches.get(target).getIndividualMatches();
+	public int[] getIndividualMatches(int target) {
+		return matches.get(target).getIndividualMatches().stream().mapToInt(Integer::intValue).toArray();
 	}
 
 	public String toString() {

@@ -1,23 +1,22 @@
 package com.example.SS2_Backend.model.StableMatching;
 
+import lombok.Getter;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.example.SS2_Backend.model.StableMatching.PreferenceList.MergeSortPair.mergeSort;
 import static com.example.SS2_Backend.util.Utils.formatDouble;
 
+@Getter
 public class PreferenceList {
-	private List<IndexValue> preferenceList = new ArrayList<>();
+	private final List<IndexValue> preferenceList = new ArrayList<>();
 
 	public PreferenceList() {
 	}
 
-	public IndexValue getByIndex(int index) {
-		return this.preferenceList.get(index);
-	}
-
-	public List<IndexValue> getPreferenceList() {
-		return this.preferenceList;
+	public IndexValue getByIndex(int indexOnPreferenceList) {
+		return this.preferenceList.get(indexOnPreferenceList);
 	}
 
 	public int size() {
@@ -28,15 +27,25 @@ public class PreferenceList {
 		return this.preferenceList.isEmpty();
 	}
 
-	public IndexValue getByKey(int index) {
-		for (int i = 0; i < this.preferenceList.size(); i++) {
-			if (preferenceList.get(i).getIndividualIndex() == index) {
-				return preferenceList.get(i);
+	public IndexValue getIndexValueByKey(int indexOnIndividualList) {
+		for (IndexValue indexValue : this.preferenceList) {
+			if (indexValue.getIndividualIndex() == indexOnIndividualList) {
+				return indexValue;
 			}
 		}
 		return null;
 	}
 
+	public int getLeastNode(int newNode, int[] currentNodes){
+		int leastNode = newNode;
+		for(int i = 0; i < currentNodes.length; i++){
+			int currentNode = currentNodes[i];
+			if(this.getIndexValueByKey(leastNode).getValue() > this.getIndexValueByKey(currentNode).getValue()){
+				leastNode = currentNode;
+			}
+		}
+		return leastNode;
+	}
 	public void add(IndexValue indexValue) {
 		this.preferenceList.add(indexValue);
 	}
@@ -58,6 +67,7 @@ public class PreferenceList {
 		return sb.toString();
 	}
 
+	@Getter
 	public static class IndexValue {
 		private final int IndividualIndex;
 		private final double Value;
@@ -65,14 +75,6 @@ public class PreferenceList {
 		public IndexValue(int IndividualIndex, double Value) {
 			this.IndividualIndex = IndividualIndex;
 			this.Value = Value;
-		}
-
-		public int getIndividualIndex() {
-			return IndividualIndex;
-		}
-
-		public double getValue() {
-			return Value;
 		}
 
 		public String toString() {
@@ -134,6 +136,12 @@ public class PreferenceList {
 		System.out.println(pref);
 		pref.sort();
 		System.out.println(pref);
+		//get leastNode
+		IndexValue newNode = new IndexValue(6, 12.4);
+		pref.add(newNode);
+		int[] currentNodes = {1,2,3};
+		int n = pref.getLeastNode(6, currentNodes);
+		System.out.println(n);
 
 	}
 }

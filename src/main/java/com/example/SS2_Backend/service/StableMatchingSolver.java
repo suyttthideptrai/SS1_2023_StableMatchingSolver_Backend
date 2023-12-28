@@ -3,24 +3,25 @@ package com.example.SS2_Backend.service;
 import com.example.SS2_Backend.dto.request.StableMatchingProblemDTO;
 import com.example.SS2_Backend.dto.response.Response;
 import com.example.SS2_Backend.model.StableMatching.*;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.moeaframework.Executor;
-import org.moeaframework.core.NondominatedPopulation;
-import org.moeaframework.core.Solution;
+import org.moeaframework.core.*;
+import org.moeaframework.core.spi.AlgorithmFactory;
+import org.moeaframework.core.spi.ProviderNotFoundException;
+import org.moeaframework.core.termination.MaxFunctionEvaluations;
+import org.moeaframework.util.TypedProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.List;
+
 
 @Service
+@Slf4j
 public class StableMatchingSolver {
 //    SimpMessageSendingOperations simpMessagingTemplate;
 //    private static final int RUN_COUNT_PER_ALGORITHM = 10; // for insight running, each algorithm will be run for 10 times
-
-	public static List<PreferenceList> preferencesList;
-
 	public static ArrayList<Double> coupleFitnessList = new ArrayList<>();
 
 	public ResponseEntity<Response> solveStableMatching(StableMatchingProblemDTO request) {
@@ -30,21 +31,21 @@ public class StableMatchingSolver {
 
 			problem.setEvaluateFunctionForSet1(request.getEvaluateFunction()[0]);
 			problem.setEvaluateFunctionForSet2(request.getEvaluateFunction()[1]);
+			problem.setFitnessFunction(request.getFitnessFunction());
 			problem.setPopulation(request.getIndividuals());
 			problem.setAllPropertyNames(request.getAllPropertyNames());
-			problem.setFitnessFunction(request.getFitnessFunction());
 
 			System.out.println("Load Problem...");
 			System.out.println(problem);
 			System.out.println("\nProblem loaded!");
-
 			long startTime = System.currentTimeMillis();
 
+//			NondominatedPopulation results = new NondominatedPopulation();
 			NondominatedPopulation results = solveProblem(
 			    problem,
 			    request.getAlgorithm(),
-			    request.getPopulationSize(),
-			    request.getGeneration(),
+			    10,
+			    20,
 			    100000,
 			    request.getDistributedCores()
 			);
@@ -69,7 +70,7 @@ public class StableMatchingSolver {
 			        .build()
 			);
 		} catch (Exception e) {
-			System.out.println("Caught exception: " + e.getMessage());
+			log.error("Error solving stable matching problem: {}", e.getMessage(), e);
 			// Handle exceptions and return an error response
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 			    .body(Response.builder()
@@ -95,22 +96,6 @@ public class StableMatchingSolver {
 	}
 
 
-	public String convertObjectToJson(Object object) {
-		try {
-			// Create an instance of ObjectMapper
-			ObjectMapper objectMapper = new ObjectMapper();
-
-			StableMatchingProblemDTO stableMatchingProblem = objectMapper.convertValue(object, StableMatchingProblemDTO.class);
-
-			return objectMapper.writeValueAsString(stableMatchingProblem);
-		} catch (Exception e) {
-			// Handle exception if needed
-			e.printStackTrace();
-			return "Error converting object to JSON";
-		}
-	}
-
-
 	private NondominatedPopulation solveProblem(StableMatchingProblem problem,
 					    String algorithm,
 					    int populationSize,
@@ -124,14 +109,18 @@ public class StableMatchingSolver {
 		if(distributedCores == null){
 			distributedCores = "all";
 		}
+		TypedProperties properties = new TypedProperties();
+		properties.setInt("populationSize", 20);
+		properties.setInt("maxTime", maxTime);
+		TerminationCondition maxEval = new MaxFunctionEvaluations(100);
 		try {
 			if (distributedCores.equals("all")) {
 				result = new Executor()
 				    .withProblem(problem)
 				    .withAlgorithm(algorithm)
-				    .withMaxEvaluations(generation * populationSize) // we are using the number of generations and population size to calculate the number of evaluations
-				    .withProperty("populationSize", populationSize)
-				    .withProperty("maxTime", maxTime)
+				    .withMaxEvaluations(generation * populationSize)
+				    .withTerminationCondition(maxEval)
+				    .withProperties(properties)
 				    .distributeOnAllCores()
 				    .run();
 			} else {
@@ -139,39 +128,15 @@ public class StableMatchingSolver {
 				result = new Executor()
 				    .withProblem(problem)
 				    .withAlgorithm(algorithm)
-				    .withMaxEvaluations(generation * populationSize) // we are using the number of generations and population size to calculate the number of evaluations
-				    .withProperty("populationSize", populationSize)
-				    .withProperty("maxTime", maxTime)
+				    .withMaxEvaluations(generation * populationSize)
+				    .withProperties(properties)
 				    .distributeOn(numberOfCores)
 				    .run();
 			}
 			return result;
 		} catch (Exception e) {
-
-			// second attempt to solve the problem if the first run got some error
-			if (distributedCores.equals("all")) {
-				result = new Executor()
-				    .withProblem(problem)
-				    .withAlgorithm(algorithm)
-				    .withMaxEvaluations(generation * populationSize) // we are using the number of generations and population size to calculate the number of evaluations
-				    .withProperty("populationSize", populationSize)
-				    .withProperty("maxTime", maxTime)
-				    .distributeOnAllCores()
-				    .run();
-
-
-			} else {
-				int numberOfCores = Integer.parseInt(distributedCores);
-				result = new Executor()
-				    .withProblem(problem)
-				    .withAlgorithm(algorithm)
-				    .withMaxEvaluations(generation * populationSize) // we are using the number of generations and population size to calculate the number of evaluations
-				    .withProperty("populationSize", populationSize)
-				    .withProperty("maxTime", maxTime)
-				    .distributeOn(numberOfCores)
-				    .run();
-			}
-			return result;
+			log.error("Error solving the problem using MOEA framework: {}", e.getMessage(), e);
+			return null;
 		}
 
 //        for (Solution solution : result) {
@@ -181,6 +146,27 @@ public class StableMatchingSolver {
 //            System.out.println("Fitness Score: " + -solution.getObjective(0));
 	}
 
+	private NondominatedPopulation solveProblem2(StableMatchingProblem problem,
+					    String inputAlgorithm,
+					    int populationSize,
+					    int generation,
+					    int maxTime,
+					    String distributedCores) {
+		TypedProperties properties = new TypedProperties();
+		Algorithm algorithm = null;
+		try {
+			algorithm = AlgorithmFactory.getInstance().getAlgorithm(inputAlgorithm, properties, problem);
+		} catch (ProviderNotFoundException e) {
+			e.printStackTrace();
+		}
+
+		// Set up the custom termination condition
+		int maxEvaluationsWithoutImprovement = 20;
+		TerminationCondition terminationCondition = new MaxEvaluationsWithoutImprovement(maxEvaluationsWithoutImprovement);
+		// Set the termination condition for the algorithm
+		assert algorithm != null;
+		return new NondominatedPopulation();
+	}
 
 //    public ResponseEntity<Response> getProblemResultInsights(StableMatchingProblemDTO request, String sessionCode) {
 ////        log.info("Received request: " + request);

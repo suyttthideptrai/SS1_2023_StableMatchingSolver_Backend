@@ -25,16 +25,16 @@ public class SampleDataGenerator {
 		    10,
 		    1,
 		    false,
-		    3);
+		    4);
 
 		String[] propNames = {"Prop1", "Prop2", "Prop3", "Prop4"};
 
-//		String f1 = "(p1*w1)^2+p2*w2+p3*w3+p4*w4";
-//		String f2 = "p1*w1+p2*w2+p3*w3+p4*w4/20";
-//		String fnf = "SIGMA{6+S0}/6 + SIGMA{S1/(S1+99)}* 3 + M0*2";
-		String f1 = "none";
-		String f2 = "none";
-		String fnf = "none";
+		String f1 = "(p1*w1)^2+p2*w2+p3*w3+p4*w4";
+		String f2 = "p1*w1+p2*w2+p3*w3+p4*w4/20";
+		String fnf = "SIGMA{6+S0}/6 + SIGMA{S1/(S1+99)}* 3 + M0*2";
+//		String f1 = "none";
+//		String f2 = "none";
+//		String fnf = "none";
 
 		    // Create an Instance of StableMatchingProblem class with randomly generated data
 		StableMatchingProblem problem = new StableMatchingProblem();
@@ -44,7 +44,7 @@ public class SampleDataGenerator {
 		problem.setPopulation(individuals);
 		problem.setAllPropertyNames(propNames);
 
-		// Print the whole Population
+		// Print the whole Populations
 		System.out.println(
 		    "\n[ Randomly Generated Population ]\n"
 		);
@@ -65,6 +65,8 @@ public class SampleDataGenerator {
 
 		// Run algorithm:
 		long startTime = System.currentTimeMillis();
+
+
 
 		NondominatedPopulation result = new Executor()
 		    .withProblem(problem)

@@ -194,7 +194,7 @@ public class StableMatchingProblem implements Problem {
 		List<Double> a = new ArrayList<>();
 		int length = result.size();
 		for (int i = 0; i < length; i++) {
-			int tmpSet = Individuals.get(result.getSet(i).getIndividualIndex()).getIndividualSet();
+			int tmpSet = Individuals.get(i).getIndividualSet();
 			if (tmpSet == set) {
 				double val = getSetSatisfactory(result.getSet(i));
 				a.add(val);

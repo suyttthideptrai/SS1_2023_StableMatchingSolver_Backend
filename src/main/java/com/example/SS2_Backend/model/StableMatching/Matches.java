@@ -3,16 +3,29 @@ package com.example.SS2_Backend.model.StableMatching;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
-/**
- * Data Container for Algorithm Result
- * Matches = {Match1, Match2, Match3, ...}
- *
- *
- */
+
 @Data
 public class Matches implements Serializable {
+	/**
+	 * Data Container for Algorithm Result
+	 * Matches = {Match1, Match2, Match3, ...}
+	 * Base Data Structure: Adjacency Matrix boolean[size1][size1]
+	 *
+	 * @global matches
+	 * #if there exist a match of 2 Nodes: x and y where x and y is indices of the two inside total node population
+	 * then => matches[x][y-size1] is equivalent to TRUE (size1 is the number of Nodes in the first set)
+	 *
+	 * @global currentCapacities
+	 * this array records changes of nodes capacities. If method addMatch(int Node, int preferNode) is executed
+	 * capacities of Node & preferNode both increment by one. Vice versa for unMatch(int Node, int nodeToRemove) (decrement)
+	 *
+	 * @global leftOvers
+	 * this Set holds Nodes that not contain any connect to other nodes (not having edge(s))
+	 */
 	private static final long serialVersionUID = 1L;
 	private final int set1Size;
 	private final int size;
@@ -45,11 +58,15 @@ public class Matches implements Serializable {
 	}
 
 	public int size() {
-		return matches.length;
+		return this.size;
 	}
 
 	public boolean isAlreadyMatch(int Node1, int Node2) {
-		return matches[Node1][Node2] && matches[Node2][Node1];
+		if(Node1 < set1Size){
+			return matches[Node1][Node2-set1Size];
+		}else{
+			return matches[Node2][Node1-set1Size];
+		}
 	}
 
 	//
@@ -58,32 +75,32 @@ public class Matches implements Serializable {
 		return boundCapacity >= currentCapacity;
 	}
 
-	public void addMatch(int target, int prefer) {
+	public void addMatch(int index, int prefer) {
 		int set0;
 		int set1;
-		if(target < this.set1Size){
-			set0 = target;
-			set1 = prefer;
+		if(index < this.set1Size){
+			set0 = index;
+			set1 = prefer-set1Size;
 		}else{
 			set0 = prefer;
-			set1 = target;
+			set1 = index-set1Size;
 		}
 		matches[set0][set1] = true;
-		this.currentCapacities[target]++;
+		this.currentCapacities[index]++;
 		this.currentCapacities[prefer]++;
 	}
-	public void unMatch(int target, int nodeToRemove) {
+	public void unMatch(int index, int nodeToRemove) {
 		int set0;
 		int set1;
-		if(target < this.set1Size){
-			set0 = target;
-			set1 = nodeToRemove;
+		if(index < this.set1Size){
+			set0 = index;
+			set1 = nodeToRemove-this.set1Size;
 		}else{
 			set0 = nodeToRemove;
-			set1 = target;
+			set1 = index-this.set1Size;
 		}
 		matches[set0][set1] = false;
-		this.currentCapacities[target]--;
+		this.currentCapacities[index]--;
 		this.currentCapacities[nodeToRemove]--;
 	}
 
@@ -102,7 +119,7 @@ public class Matches implements Serializable {
 		}else{
 			for (int i = 0; i < set1Size; i++) {
 				if(idx == cap) break;
-				if(matches[i][target]){
+				if(matches[i][target-set1Size]){
 					result[idx] = i;
 					idx++;
 				}

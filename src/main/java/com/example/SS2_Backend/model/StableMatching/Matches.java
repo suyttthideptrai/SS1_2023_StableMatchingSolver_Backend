@@ -39,18 +39,25 @@ public class Matches implements Serializable {
 		this.currentCapacities = new int[size];
 		this.matches = new boolean[set1Size][size - set1Size];
 	}
-
-	public MatchSet getSet(int index) {
-		MatchSet matchSet = new MatchSet(index);
-		for (int i = 0; i < this.size; i++) {
-			if(matches[index][i]){
-				matchSet.addMatch(i);
+	public boolean checkSetOne(int index){
+		return index<set1Size;
+	}
+	public Set<Integer> getSet(int index) {
+		Set<Integer> matchedSet = new HashSet<>();
+		if(checkSetOne(index)){
+			for (int i = 0; i < size - set1Size; i++) {
+				if(matches[index][i]){
+					matchedSet.add(i+set1Size);
+				}
 			}
-			if(matches[i][index]){
-				matchSet.addMatch(i);
+		}else{
+			for (int i = 0; i < set1Size; i++) {
+				if(matches[index][i]){
+					matchedSet.add(i);
+				}
 			}
 		}
-		return matchSet;
+		return matchedSet;
 	}
 
 	public void addLeftOver(int index) {
@@ -62,7 +69,7 @@ public class Matches implements Serializable {
 	}
 
 	public boolean isAlreadyMatch(int Node1, int Node2) {
-		if(Node1 < set1Size){
+		if(checkSetOne(Node1)){
 			return matches[Node1][Node2-set1Size];
 		}else{
 			return matches[Node2][Node1-set1Size];
@@ -78,7 +85,7 @@ public class Matches implements Serializable {
 	public void addMatch(int index, int prefer) {
 		int set0;
 		int set1;
-		if(index < this.set1Size){
+		if(checkSetOne(index)){
 			set0 = index;
 			set1 = prefer-set1Size;
 		}else{
@@ -92,7 +99,7 @@ public class Matches implements Serializable {
 	public void unMatch(int index, int nodeToRemove) {
 		int set0;
 		int set1;
-		if(index < this.set1Size){
+		if(checkSetOne(index)){
 			set0 = index;
 			set1 = nodeToRemove-this.set1Size;
 		}else{
@@ -108,7 +115,7 @@ public class Matches implements Serializable {
 		int cap = this.currentCapacities[target];
 		int[] result = new int[cap];
 		int idx = 0;
-		if(target < set1Size){
+		if(checkSetOne(target)){
 			for (int i = 0; i < this.size - set1Size; i++) {
 				if(idx == cap) break;
 				if(matches[target][i]) {
@@ -129,45 +136,30 @@ public class Matches implements Serializable {
 	}
 
 	public String toString() {
-//		StringBuilder s = new StringBuilder();
-//		s.append("Matches {\n");
-//		for (MatchSet match : matches) {
-//			s.append("[");
-//			s.append(match.toString());
-//			s.append("]\n");
-//		}
-//		s.append("}\n");
-//		s.append("LeftOvers {");
-//		for (Integer leftOver : leftOvers) {
-//			s.append("[");
-//			s.append(leftOver.toString());
-//			s.append("]");
-//		}
-//		s.append("\n}");
-//		return s.toString();
 		System.out.println(Arrays.deepToString(this.matches));
 		System.out.println(this.leftOvers);
 		return "\n";
 	}
 
 	public static void main(String[] args) {
-		Matches matches = new Matches(5, 10);
+		Matches matches = new Matches(12, 3);
 
-		matches.addMatch(1, 4);
-		matches.addMatch(1, 5);
-		matches.addMatch(1, 6);
+		matches.addMatch(0, 4);
+		matches.addMatch(0, 5);
+		matches.addMatch(0, 6);
 
-		matches.addMatch(2, 3);
-		matches.addMatch(2, 1);
+		matches.addMatch(1, 3);
+		matches.addMatch(1, 9);
+		matches.addMatch(1, 7);
+
 		matches.addMatch(2, 8);
+		matches.addMatch(2, 10);
+		matches.addMatch(2, 11);
 
-		matches.addMatch(3, 7);
-		matches.addMatch(3, 11);
 
-
-		matches.addLeftOver(12);
-		matches.addLeftOver(10);
-		matches.addLeftOver(9);
+//		matches.addLeftOver(12);
+//		matches.addLeftOver(13);
+//		matches.addLeftOver(11);
 
 //        matches.disMatch(1,4);
 		//matches.remove(2);

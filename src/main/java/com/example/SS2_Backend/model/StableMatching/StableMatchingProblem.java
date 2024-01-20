@@ -30,7 +30,6 @@ public class StableMatchingProblem implements Problem {
 	private int numberOfIndividualOfSet0;
 	@Getter
 	private int numberOfProperties;
-	@Getter
 	private int[] capacities;
 	private String[] PropertiesName;
 	@Getter
@@ -61,10 +60,6 @@ public class StableMatchingProblem implements Problem {
 			this.f2Status = true;
 			this.evaluateFunctionForSet2 = evaluateFunctionForSet2;
 		}
-	}
-
-	private int getCapacityOfIndividual(int target) {
-		return Individuals.get(target).getCapacity();
 	}
 
 	private String getPropertyNameOfIndex(int index) {
@@ -196,7 +191,7 @@ public class StableMatchingProblem implements Problem {
 		for (int i = 0; i < length; i++) {
 			int tmpSet = Individuals.get(i).getIndividualSet();
 			if (tmpSet == set) {
-				double val = getSetSatisfactory(result.getSet(i));
+				double val = getSetSatisfactory(i, result.getSet(i));
 				a.add(val);
 			}
 		}
@@ -254,7 +249,7 @@ public class StableMatchingProblem implements Problem {
 		Permutation castVar = (Permutation) var;
 		int[] decodeVar = castVar.toArray();
 
-		System.out.println(Arrays.toString(decodeVar));
+		//System.out.println(Arrays.toString(decodeVar));
 
 		Queue<Integer> UnMatchedNode = new LinkedList<>();
 		for (int val : decodeVar) {
@@ -368,7 +363,7 @@ public class StableMatchingProblem implements Problem {
 	private double defaultFitnessEvaluation(Matches matches) {
 		double fitnessScore = 0.0;
 		for (int i = 0; i < matches.size(); i++) {
-			fitnessScore += getSetSatisfactory(matches.getSet(i));
+			fitnessScore += getSetSatisfactory(i, matches.getSet(i));
 		}
 		return fitnessScore;
 	}
@@ -426,7 +421,7 @@ public class StableMatchingProblem implements Problem {
 			} else if (ch == 'M') {
 				int ssLength = AfterTokenLength(fitnessFunction, c);
 				int indexOfM = Integer.parseInt(fitnessFunction.substring(c + 1, c + 1 + ssLength));
-				double valueOfM = getSetSatisfactory(matches.getSet(indexOfM));
+				double valueOfM = getSetSatisfactory(indexOfM, matches.getSet(indexOfM));
 				tmpSB.append(valueOfM);
 				c += ssLength;
 			} else {
@@ -484,21 +479,21 @@ public class StableMatchingProblem implements Problem {
 		return num;
 	}
 
-	private double getSetSatisfactory(MatchSet matchSet) {
-		if (matchSet.getIndividualMatches().isEmpty()) {
+	private double getSetSatisfactory(int index, Set<Integer> NodeMatches) {
+		if (NodeMatches.isEmpty()) {
 			return 0.0;
 		}
-		int a = matchSet.getIndividualIndex();
-		int cap = Individuals.get(a).getCapacity();
-		PreferenceList ofInd = preferenceLists.get(a);
+		int cap = Individuals.get(index).getCapacity();
+		PreferenceList ofInd = preferenceLists.get(index);
+		Iterator<Integer> it = NodeMatches.iterator();
 		if (cap == 1) {
-			int IndividualMatch = matchSet.getIndividualMatches().get(0);
-			return ofInd.getIndexValueByKey(IndividualMatch).getValue();
+			int IndividualOnlyMatch = it.next();
+			return ofInd.getIndexValueByKey(IndividualOnlyMatch).getValue();
 		} else {
 			double setScore = 0.0;
-			List<Integer> list = matchSet.getIndividualMatches();
-			for (int x : list) {
-				setScore += ofInd.getIndexValueByKey(x).getValue();
+			while(it.hasNext()) {
+				int Node = it.next();
+				setScore += ofInd.getIndexValueByKey(Node).getValue();
 			}
 			return setScore;
 		}
@@ -508,21 +503,25 @@ public class StableMatchingProblem implements Problem {
 		double totalScore = 0.0;
 		if (set == 0) {
 			for (int i = 0; i < this.numberOfIndividualOfSet0; i++) {
-				int a = matches.getSet(i).getIndividualIndex();
-				List<Integer> list = matches.getSet(i).getIndividualMatches();
-				PreferenceList ofInd = preferenceLists.get(a);
+				Set<Integer> NodeMatches = matches.getSet(i);
+				PreferenceList ofInd = preferenceLists.get(i);
+				Iterator<Integer> it = NodeMatches.iterator();
 				double setScore = 0.0;
-				for (int x : list) {
-					setScore += ofInd.getIndexValueByKey(x).getValue();
+				while (it.hasNext()) {
+					setScore += ofInd.getIndexValueByKey(it.next()).getValue();
 				}
 				totalScore += setScore;
 			}
 		} else {
 			for (int i = this.numberOfIndividualOfSet0; i < numberOfIndividual; i++) {
-				int a = matches.getSet(i).getIndividualIndex();
-				PreferenceList ofInd = preferenceLists.get(a);
-				int index = matches.getSet(i).getIndividualMatches().get(0);
-				totalScore += ofInd.getIndexValueByKey(index).getValue();
+				PreferenceList ofInd = preferenceLists.get(i);
+				Set<Integer> NodeMatches = matches.getSet(i);
+				Iterator<Integer> it = NodeMatches.iterator();
+				double setScore = 0.0;
+				while (it.hasNext()) {
+					setScore += ofInd.getIndexValueByKey(it.next()).getValue();
+				}
+				totalScore += setScore;
 			}
 		}
 		return totalScore;

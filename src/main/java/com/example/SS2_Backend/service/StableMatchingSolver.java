@@ -69,7 +69,6 @@ public class StableMatchingSolver {
 			matchingSolution.setIndividuals(individualsList);
 			System.out.println("RESPOND TO FRONT_END:");
 			System.out.println(matchingSolution);
-			System.out.println(matchingSolution.getMatches().getCoupleFitness());
 			return ResponseEntity.ok(
 			    Response.builder()
 			        .status(200)

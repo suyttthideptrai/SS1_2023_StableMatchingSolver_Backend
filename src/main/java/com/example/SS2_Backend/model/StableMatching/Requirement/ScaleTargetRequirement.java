@@ -3,39 +3,20 @@ package com.example.SS2_Backend.model.StableMatching.Requirement;
 import lombok.Getter;
 
 @Getter
-public class ScaleTargetRequirement implements Requirement{
-    private final int TargetValue;
-
+public class ScaleTargetRequirement extends Requirement{
+    private final int targetValue;
     public ScaleTargetRequirement(int targetValue) {
-        TargetValue = targetValue;
+        super(0);
+        this.targetValue = targetValue;
     }
 
     @Override
-    public int getType() {
-        return 0;
-    }
-
-    @Override
-    public Double getBound() {
-        return null;
-    }
-
-    @Override
-    public String getExpression() {
-        return null;
-    }
-
-    @Override
-    public Double getLowerBound() {
-        return null;
-    }
-    @Override
-    public Double getUpperBound() {
-        return null;
+    public double getValueForFunction() {
+        return targetValue;
     }
 
     @Override
     public String toString() {
-        return "[" + this.TargetValue + "]";
+        return "[" + this.targetValue + "]";
     }
 }

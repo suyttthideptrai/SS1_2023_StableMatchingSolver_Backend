@@ -16,9 +16,9 @@ public class LoggingAspect {
 	public void gameTheorySolver() {
 	}
 
-//	@Pointcut("execution(* com.example.SS2_Backend.service.*.*(..))")
-//	public void stableMatchingSolver() {
-//	}
+	@Pointcut("execution(* com.example.SS2_Backend.service.*.*(..))")
+	public void stableMatchingSolver() {
+	}
 
 	@Around("gameTheorySolver()")
 	public Object logAroundGameTheorySolver(ProceedingJoinPoint joinPoint) throws Throwable {
@@ -32,14 +32,14 @@ public class LoggingAspect {
 	}
 
 
-//	@Around("stableMatchingSolver()")
-//	public Object logAroundStableMatchingSolver(ProceedingJoinPoint joinPoint) throws Throwable {
-//		String className = joinPoint.getSignature().getDeclaringTypeName();
-//		String methodName = joinPoint.getSignature().getName();
-//
-//		log.info("{}.{}() is started", className, methodName);
-//		Object result = joinPoint.proceed();
-//		log.info("{}.{}() is finished", className, methodName);
-//		return result;
-//	}
+	@Around("stableMatchingSolver()")
+	public Object logAroundStableMatchingSolver(ProceedingJoinPoint joinPoint) throws Throwable {
+		String className = joinPoint.getSignature().getDeclaringTypeName();
+		String methodName = joinPoint.getSignature().getName();
+
+		log.info("{}.{}() is started", className, methodName);
+		Object result = joinPoint.proceed();
+		log.info("{}.{}() is finished", className, methodName);
+		return result;
+	}
 }

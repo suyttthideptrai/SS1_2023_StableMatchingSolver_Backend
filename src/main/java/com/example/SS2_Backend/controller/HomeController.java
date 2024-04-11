@@ -41,4 +41,8 @@ public class HomeController {
 	public ResponseEntity<Response> getProblemResultInsights(@RequestBody GameTheoryProblemDTO gameTheoryProblem, @PathVariable String sessionCode) {
 		return gameTheorySolver.getProblemResultInsights(gameTheoryProblem, sessionCode);
 	}
+	@PostMapping("/matching-problem-result-insights/{sessionCode}")
+	public ResponseEntity<Response> getMatchingResultInsights(@RequestBody StableMatchingProblemDTO object, @PathVariable String sessionCode) {
+		return stableMatchingSolver.getProblemResultInsights(object, sessionCode);
+	}
 }

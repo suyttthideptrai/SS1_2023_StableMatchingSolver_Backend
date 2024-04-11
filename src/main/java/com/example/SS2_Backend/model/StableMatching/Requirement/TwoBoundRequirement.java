@@ -5,26 +5,18 @@ import lombok.Getter;
 import static com.example.SS2_Backend.util.Utils.formatDouble;
 
 @Getter
-public class TwoBoundRequirement implements Requirement {
-    private final Double lowerBound;
-    private final Double upperBound;
-    public TwoBoundRequirement(Double lowerBound, Double upperBound) {
+public class TwoBoundRequirement extends Requirement {
+    private final double lowerBound;
+    private final double upperBound;
+    public TwoBoundRequirement(double lowerBound, double upperBound) {
+        super(2);
         this.lowerBound = lowerBound;
         this.upperBound = upperBound;
     }
-    public int getType(){
-        return 2;
-    }
+
     @Override
-    public Double getBound() {
-        return null;
-    }
-    @Override
-    public String getExpression() {
-        return null;
-    }
-    public int getTargetValue(){
-        return 0;
+    public double getValueForFunction() {
+        return (lowerBound + upperBound) / 2;
     }
 
     public String toString(){

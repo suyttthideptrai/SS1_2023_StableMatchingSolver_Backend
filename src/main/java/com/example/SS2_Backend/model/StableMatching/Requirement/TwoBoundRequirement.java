@@ -13,6 +13,12 @@ public class TwoBoundRequirement extends Requirement {
         this.lowerBound = lowerBound;
         this.upperBound = upperBound;
     }
+
+    @Override
+    public double getValueForFunction() {
+        return (lowerBound + upperBound) / 2;
+    }
+
     public String toString(){
         return "[" + formatDouble(lowerBound) + ", " + formatDouble(upperBound) + "]";
     }

@@ -84,7 +84,7 @@ public class StableMatchingProblem implements Problem {
 	 * Preference List of each individual/object inside this whole population
 	 */
 	@Getter
-	private List<PreferenceList> preferenceLists; // Preference List of each Individual
+	private static List<PreferenceList> preferenceLists; // Preference List of each Individual
 	@Getter
 	private String fitnessFunction; // Evaluate total Score of each Solution set
 	private final PreferencesProvider preferencesProvider = new PreferencesProvider();
@@ -275,7 +275,10 @@ public class StableMatchingProblem implements Problem {
 	}
 
 
-
+	/**
+	 * Interface overrides
+	 *
+	 */
 	@Override
 	public String getName() {
 		return "Two Sided Stable Matching Problem";
@@ -301,13 +304,6 @@ public class StableMatchingProblem implements Problem {
 	/**
 	 * Extra Methods for  Stable Matching Problem
 	 */
-
-	/*
-	 * After Matching Gets
-	 */
-	/*
-	 * Evaluate Methods
-	 */
 	public PreferenceList getPreferenceOfIndividual(int index) {
 		PreferenceList a;
 		if(!f1Status && !f2Status){
@@ -316,7 +312,8 @@ public class StableMatchingProblem implements Problem {
 			a = preferencesProvider.getPreferenceListByFunction(index);
 		}
 		// Sort: Individuals with higher score than others sit on the top of the List
-		a.sort();
+		//a.sort();
+		//temporary solution for CPU performance
 		a.transfer(this.numberOfIndividual);
 		// return Sorted list
 		return a;
@@ -362,7 +359,7 @@ public class StableMatchingProblem implements Problem {
 			//Loop through LeftNode's preference list to find a Match
 			for (int i = 0; i < NodePreference.size(); i++) {
 				//Next Match (RightNode) is found on the list
-				int preferNode = NodePreference.getByIndex(i).getIndividualIndex();
+				int preferNode = NodePreference.getByPosition(i).getIndividualIndex();
 				//System.out.println(Node + " Prefer : " + preferNode);
 				if (matches.isAlreadyMatch(preferNode, Node)) {
 					//System.out.println(Node + " is already match with " + preferNode);
@@ -420,7 +417,7 @@ public class StableMatchingProblem implements Problem {
 	// return true if TargetNode is the last choice of Loser
 	private int LastChoice(int loser) {
 		PreferenceList pref = preferenceLists.get(loser);
-		return pref.getByIndex(pref.size() - 1).getIndividualIndex();
+		return pref.getByPosition(pref.size() - 1).getIndividualIndex();
 	}
 
 	private int Compete(int SelectorNode, int newNode, Set<Integer> occupiedNodes) {
@@ -588,7 +585,7 @@ public class StableMatchingProblem implements Problem {
 			PreferenceList ofInd = preferenceLists.get(i);
 			Set<Integer> SetMatches = matches.getSet(i);
 			for (int x : SetMatches) {
-				setScore += ofInd.getIndexValueByKey(x).getScore();
+				setScore += ofInd.getScoreByIndex(x);
 			}
 			satisfactions[i] = setScore;
 		}

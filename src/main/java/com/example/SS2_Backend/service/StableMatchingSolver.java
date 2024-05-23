@@ -168,14 +168,14 @@ public class StableMatchingSolver {
 		MatchingSolutionInsights matchingSolutionInsights = initMatchingSolutionInsights(algorithms);
 
 		int runCount = 1;
-		int maxRunCount = algorithms.length * MATCHING_RUN_COUNT_PER_ALGORITHM;
+		int maxRunCount = algorithms.length * RUN_COUNT_PER_ALGORITHM;
 		// solve the problem with different algorithms and then evaluate the performance of the algorithms
 //        log.info("Start benchmarking the algorithms...");
 		simpMessagingTemplate.convertAndSendToUser(sessionCode, "/progress", createProgressMessage("Start benchmarking the algorithms..."));
 
 		for (String algorithm : algorithms) {
 //            log.info("Running algorithm: " + algorithm + "...");
-			for (int i = 0; i < MATCHING_RUN_COUNT_PER_ALGORITHM; i++) {
+			for (int i = 0; i < RUN_COUNT_PER_ALGORITHM; i++) {
 				System.out.println("Iteration: " + i);
 				long start = System.currentTimeMillis();
 
@@ -194,7 +194,7 @@ public class StableMatchingSolver {
 				double fitnessValue = getFitnessValue(results);
 
 				// send the progress to the client
-				String message = "Algorithm " + algorithm + " finished iteration: #" + (i + 1) + "/" + MATCHING_RUN_COUNT_PER_ALGORITHM;
+				String message = "Algorithm " + algorithm + " finished iteration: #" + (i + 1) + "/" + RUN_COUNT_PER_ALGORITHM;
 				Progress progress = createProgress(message, runtime, runCount, maxRunCount);
 				System.out.println(progress);
 				simpMessagingTemplate.convertAndSendToUser(sessionCode, "/progress", progress);

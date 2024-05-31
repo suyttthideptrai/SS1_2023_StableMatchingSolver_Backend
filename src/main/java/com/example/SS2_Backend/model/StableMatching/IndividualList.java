@@ -64,7 +64,7 @@ public class IndividualList {
     }
 
     /**
-     * Retrieves the capacity of each object.
+     * Retrieves the capacity of each node.
      * ---------------------------------
      * This method returns an array containing the capacity of each object.
      * The capacity of a single object can be obtained by passing its index (in the individual list) to this array.
@@ -78,7 +78,7 @@ public class IndividualList {
     public double getPropertyValueOf(int index, int indexOfProperty) {
         return individuals.get(index).getPropertyValue(indexOfProperty);
     }
-    public int getPropertyWeightOf(int indexOfObject, int indexOfProperty) {
+    public double getPropertyWeightOf(int indexOfObject, int indexOfProperty) {
         return individuals.get(indexOfObject).getPropertyWeight(indexOfProperty);
     }
 

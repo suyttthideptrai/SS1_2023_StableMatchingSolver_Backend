@@ -94,12 +94,12 @@ public class PreferencesProvider {
         return Optional.of(idx);
     }
 
-    public Map<String, Double> getVariableValuesForSet1(int indexOfEvaluator, int indexOfBeEvaluate){
-        return getVariableValues(this.variablesOfSet1, indexOfEvaluator, indexOfBeEvaluate);
+    public Map<String, Double> getVariableValuesForSet1(int indexOfEvaluator, int indexOfBeEvaluated){
+        return getVariableValues(this.variablesOfSet1, indexOfEvaluator, indexOfBeEvaluated);
     }
 
-    public Map<String, Double> getVariableValuesForSet2(int indexOfEvaluator, int indexOfBeEvaluate){
-        return getVariableValues(this.variablesOfSet2, indexOfEvaluator, indexOfBeEvaluate);
+    public Map<String, Double> getVariableValuesForSet2(int indexOfEvaluator, int indexOfBeEvaluated){
+        return getVariableValues(this.variablesOfSet2, indexOfEvaluator, indexOfBeEvaluated);
     }
 
     private Map<String, Double> getVariableValues(Map<String, Set<Integer>> variables, int idx1, int idx2) {
@@ -161,7 +161,6 @@ public class PreferencesProvider {
                     a.add(totalScore);
                 }
         }
-
         a.sort();
         return a;
     }
@@ -177,8 +176,8 @@ public class PreferencesProvider {
                     for (int j = 0; j < numberOfProperties; j++) {
                         double PropertyValue = individuals.getPropertyValueOf(i, j);
                         Requirement requirement = individuals.getRequirementOf(index, j);
-                        int PropertyWeight = individuals.getPropertyWeightOf(index, j);
-                        totalScore += getScale(requirement, PropertyValue) * PropertyWeight;
+                        double PropertyWeight = individuals.getPropertyWeightOf(index, j);
+                        totalScore += getDefaultScaling(requirement, PropertyValue) * PropertyWeight;
                     }
                     // Add
                     a.add(totalScore);
@@ -190,8 +189,8 @@ public class PreferencesProvider {
                     for (int j = 0; j < numberOfProperties; j++) {
                         double PropertyValue = individuals.getPropertyValueOf(i, j);
                         Requirement requirement = individuals.getRequirementOf(index, j);
-                        int PropertyWeight = individuals.getPropertyWeightOf(index, j);
-                        totalScore += getScale(requirement, PropertyValue) * PropertyWeight;
+                        double PropertyWeight = individuals.getPropertyWeightOf(index, j);
+                        totalScore += getDefaultScaling(requirement, PropertyValue) * PropertyWeight;
                     }
                     // Add
                     a.add(totalScore);
@@ -201,15 +200,15 @@ public class PreferencesProvider {
         return a;
     }
 
-    public static double getScale(Requirement requirement, double PropertyValue) {
+    public static double getDefaultScaling(Requirement requirement, double propertyValue) {
         int type = requirement.getType();
         // Case: Scale
         if (type == 0) {
-            int TargetValue = requirement.getTargetValue();
-            if (PropertyValue < 0 || PropertyValue > 10) {
+            int targetValue = requirement.getTargetValue();
+            if (propertyValue < 0 || propertyValue > 10) {
                 return 0.0;
             } else {
-                double Distance = Math.abs(PropertyValue - TargetValue);
+                double Distance = Math.abs(propertyValue - targetValue);
                 if(Distance > 7) return 0;
                 if(Distance > 5) return 1;
                 return (10 - Distance) / 10 + 1;
@@ -219,19 +218,19 @@ public class PreferencesProvider {
             double Bound = requirement.getBound();
             String expression = requirement.getExpression();
             if (Objects.equals(expression, "++")) {
-                if (PropertyValue < Bound) {
+                if (propertyValue < Bound) {
                     return 0.0;
                 } else {
                     if(Bound == 0) return 2.0;
-                    double distance = Math.abs(PropertyValue - Bound);
+                    double distance = Math.abs(propertyValue - Bound);
                     return (Bound + distance) / Bound;
                 }
             } else {
-                if (PropertyValue > Bound) {
+                if (propertyValue > Bound) {
                     return 0.0;
                 } else {
                     if(Bound == 0) return  2.0;
-                    double distance = Math.abs(PropertyValue - Bound);
+                    double distance = Math.abs(propertyValue - Bound);
                     return (Bound + distance) / Bound;
                 }
             }
@@ -239,11 +238,11 @@ public class PreferencesProvider {
         } else {
             double lowerBound = requirement.getLowerBound();
             double upperBound = requirement.getUpperBound();
-            if (PropertyValue < lowerBound || PropertyValue > upperBound || lowerBound == upperBound) {
+            if (propertyValue < lowerBound || propertyValue > upperBound || lowerBound == upperBound) {
                 return 0.0;
             }else{
                 double diff = Math.abs(upperBound - lowerBound)/2;
-                double distance = Math.abs(((lowerBound+upperBound)/2) -PropertyValue);
+                double distance = Math.abs(((lowerBound+upperBound)/2) -propertyValue);
                 return (diff-distance)/diff + 1;
             }
         }

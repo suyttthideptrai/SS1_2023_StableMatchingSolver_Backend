@@ -29,13 +29,13 @@ public class Individual {
 	}
 
 	@JsonProperty("Properties")
-	public void setProperty(Double propertyValue, int propertyWeight, String inputRequirement) {
+	public void setProperty(double propertyValue, double propertyWeight, String inputRequirement) {
 		String[] decodedRequirement = decodeInputRequirement(inputRequirement);
 		Property property = new Property(propertyValue, propertyWeight, decodedRequirement);
 		this.Properties.add(property);
 	}
 
-	public void setProperty(Double propertyValue, int propertyWeight, String[] inputRequirement) {
+	public void setProperty(double propertyValue, double propertyWeight, String[] inputRequirement) {
 		Property property = new Property(propertyValue, propertyWeight, inputRequirement);
 		this.Properties.add(property);
 	}
@@ -128,7 +128,7 @@ public class Individual {
 		}
 	}
 
-	public int getPropertyWeight(int index) {
+	public double getPropertyWeight(int index) {
 		if (index >= 0 && index < this.Properties.size()) {
 			return Properties.get(index).getWeight();
 		} else {

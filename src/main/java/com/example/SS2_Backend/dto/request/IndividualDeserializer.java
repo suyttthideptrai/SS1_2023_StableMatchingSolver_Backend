@@ -40,7 +40,7 @@ public class IndividualDeserializer extends StdDeserializer<Individual> {
 				JsonNode propertyNode = propertiesIterator.next();
 
 				Double propertyValue = propertyNode.get(2).asDouble();
-				int propertyWeight = propertyNode.get(1).asInt();
+				Double propertyWeight = propertyNode.get(1).asDouble();
 				String inputRequirement = propertyNode.get(0).asText();
 
 				individual.setProperty(propertyValue, propertyWeight, inputRequirement);

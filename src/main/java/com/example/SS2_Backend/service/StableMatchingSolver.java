@@ -59,13 +59,15 @@ public class StableMatchingSolver {
 
 
 			assert results != null;
-//			Testing tester = new Testing((Matches) results.get(0).getAttribute("matches"), problem.getNumberOfIndividual(), problem.getCapacities());
-//			System.out.println("[Testing] Solution has duplicate: " + tester.hasDuplicate());
+			//	Testing tester = new Testing((Matches) results.get(0).getAttribute("matches"), problem.getNumberOfIndividual(), problem.getCapacities());
+			//	System.out.println("[Testing] Solution has duplicate: " + tester.hasDuplicate());
 			long endTime = System.currentTimeMillis();
 
 			double runtime = ((double) (endTime - startTime) / 1000);
 			runtime = (runtime * 1000.0);
 			log.info("[Service] Runtime: " + runtime + " Millisecond(s).");
+			//problem.printIndividuals();
+			//System.out.println(problem.printPreferenceLists());
 			String algorithm = request.getAlgorithm();
 
 			MatchingSolution matchingSolution = formatSolution(algorithm, results, runtime);

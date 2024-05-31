@@ -19,15 +19,14 @@ public class SampleDataGenerator {
     public static void main(String[] args) {
         // Generate Individuals data Randomly
         ArrayList<Individual> individuals = generateSampleIndividualsWithCapacity(
-
-                2000,
+                5000,
                 2,
                 false,
-                2,
-                1000,
+                10,
+                500,
                 false,
                 10
-                );
+        );
 
         String[] propNames = {"Prop1", "Prop2", "Prop3", "Prop4", "Prop1", "Prop2", "Prop3", "Prop4", "Prop1", "Prop2", "Prop3", "Prop4",};
 
@@ -116,7 +115,7 @@ public class SampleDataGenerator {
                 // Random property Value (20 -> 50)
                 double propertyValue = new Random().nextDouble() * (70.0 - 20.0) + 20.0;
                 // Random property Weight (1 -> 10)
-                int propertyWeight = new Random().nextInt(10) + 1; // Random property Weight (1 -> 10)
+                double propertyWeight = 1 + (10 - 1) * new Random().nextDouble();
                 // Random property Requirement with types
                 String[] expression = {"", "--", "++"};
                 double propertyBound = new Random().nextDouble() * (70.0 - 20.0) + 20.0;
@@ -154,7 +153,7 @@ public class SampleDataGenerator {
                 // Random property Value (20 -> 50)
                 double propertyValue = new Random().nextDouble() * (70.0 - 20.0) + 20.0;
                 // Random property Weight (1 -> 10)
-                int propertyWeight = new Random().nextInt(10) + 1; // Random property Weight (1 -> 10)
+                double propertyWeight = 1 + (10 - 1) * new Random().nextDouble();
                 // Random property Requirement with types
                 String[] expression = {"", "--", "++"};
                 double propertyBound = new Random().nextDouble() * (70.0 - 20.0) + 20.0;

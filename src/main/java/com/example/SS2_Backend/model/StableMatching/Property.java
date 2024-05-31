@@ -16,11 +16,11 @@ public class Property {
 	private static final boolean INCREMENT = true;
 	private static final boolean DECREMENT = false;
 	private final double value;
-	private final int weight;
+	private final double weight;
 	@Getter
 	private final Requirement requirement;
 
-	public Property(double value, int weight, String[] inputRequirement) {
+	public Property(double value, double weight, String[] inputRequirement) {
 		this.value = value;
 		this.weight = weight;
 		this.requirement = setRequirement(inputRequirement);

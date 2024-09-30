@@ -5,8 +5,10 @@ import com.example.SS2_Backend.dto.response.Progress;
 import com.example.SS2_Backend.dto.response.Response;
 import com.example.SS2_Backend.model.StableMatching.*;
 import com.example.SS2_Backend.model.StableMatching.Matches.Matches;
+import com.example.SS2_Backend.model.StableMatching.Matches.MatchesOTO;
 import com.example.SS2_Backend.model.StableMatching.Matches.MatchingSolution;
 import com.example.SS2_Backend.model.StableMatching.Matches.MatchingSolutionInsights;
+import com.example.SS2_Backend.model.StableMatching.MatchingAlgorithms.OneToOne;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.moeaframework.Executor;
@@ -32,63 +34,95 @@ public class StableMatchingSolver {
 
 
     public ResponseEntity<Response> solveStableMatching(StableMatchingProblemDTO request) {
-
         try {
+            boolean isOneToOne = true;
+            for (Individual individual: request.getIndividuals()) {
+                if (individual.getCapacity() != 1) {
+                    isOneToOne = false;
+                    break;
+                }
+            }
             log.info("[Service] Stable Matching: Load problem...");
             log.info("[Service] Stable Matching: Building preference list...");
-            StableMatchingProblem problem = new StableMatchingProblem();
+            if (isOneToOne) {
+                log.info("[Service] Stable Matching: 1-1 Problem Detected");
+                OneToOne problem = new OneToOne();
+                problem.setProblemName(request.getProblemName());
+                problem.setEvaluateFunctionForSet1(request.getEvaluateFunction()[0]);
+                problem.setEvaluateFunctionForSet2(request.getEvaluateFunction()[1]);
+                problem.setFitnessFunction(request.getFitnessFunction());
+                problem.setPopulation(request.getIndividuals(), request.getAllPropertyNames());
+                log.info("[Service] Stable Matching: Problem: " + problem.getProblemName() +
+                        " loaded successfully!");
+                long startTime = System.currentTimeMillis();
+                NondominatedPopulation results = solveProblem(problem,
+                        request.getAlgorithm(),
+                        request.getPopulationSize(),
+                        request.getGeneration(),
+                        request.getMaxTime(),
+                        request.getDistributedCores());
+                assert results != null;
+                long endTime = System.currentTimeMillis();
+                double runtime = ((double) (endTime - startTime) / 1000);
+                runtime = (runtime * 1000.0);
+                log.info("[Service] Runtime: " + runtime + " Millisecond(s).");
+                String algorithm = request.getAlgorithm();
+                MatchingSolution matchingSolution = formatSolutionOTO(algorithm, results, runtime);
+                matchingSolution.setSetSatisfactions(problem.calculateSatisfaction((MatchesOTO) results
+                        .get(0)
+                        .getAttribute("matches")));
 
-            problem.setProblemName(request.getProblemName());
-            problem.setEvaluateFunctionForSet1(request.getEvaluateFunction()[0]);
-            problem.setEvaluateFunctionForSet2(request.getEvaluateFunction()[1]);
-            problem.setFitnessFunction(request.getFitnessFunction());
-            problem.setPopulation(request.getIndividuals(), request.getAllPropertyNames());
+                return ResponseEntity.ok(Response
+                        .builder()
+                        .status(200)
+                        .message(
+                                "[Service] Stable Matching: Solve stable matching problem successfully!")
+                        .data(matchingSolution)
+                        .build());
+            }  else {
+                StableMatchingProblem problem = new StableMatchingProblem();
+                problem.setProblemName(request.getProblemName());
+                problem.setEvaluateFunctionForSet1(request.getEvaluateFunction()[0]);
+                problem.setEvaluateFunctionForSet2(request.getEvaluateFunction()[1]);
+                problem.setFitnessFunction(request.getFitnessFunction());
+                problem.setPopulation(request.getIndividuals(), request.getAllPropertyNames());
+                log.info("[Service] Stable Matching: Problem: " + problem.getProblemName() +
+                        " loaded successfully!");
+                long startTime = System.currentTimeMillis();
+
+                NondominatedPopulation results = solveProblem(problem,
+                        request.getAlgorithm(),
+                        request.getPopulationSize(),
+                        request.getGeneration(),
+                        request.getMaxTime(),
+                        request.getDistributedCores());
 
 
-            log.info("[Service] Stable Matching: Problem: " + problem.getProblemName() +
-                    " loaded successfully!");
+                assert results != null;
+                long endTime = System.currentTimeMillis();
 
-            long startTime = System.currentTimeMillis();
+                double runtime = ((double) (endTime - startTime) / 1000);
+                runtime = (runtime * 1000.0);
+                log.info("[Service] Runtime: " + runtime + " Millisecond(s).");
+                String algorithm = request.getAlgorithm();
 
-            NondominatedPopulation results = solveProblem(problem,
-                    request.getAlgorithm(),
-                    request.getPopulationSize(),
-                    request.getGeneration(),
-                    request.getMaxTime(),
-                    request.getDistributedCores());
+                MatchingSolution matchingSolution = formatSolution(algorithm, results, runtime);
+                matchingSolution.setSetSatisfactions(problem.getAllSatisfactions((Matches) results
+                        .get(0)
+                        .getAttribute("matches")));
 
-
-            assert results != null;
-            //	Testing tester = new Testing((Matches) results.get(0).getAttribute("matches"), problem.getNumberOfIndividual(), problem.getCapacities());
-            //	System.out.println("[Testing] Solution has duplicate: " + tester.hasDuplicate());
-            long endTime = System.currentTimeMillis();
-
-            double runtime = ((double) (endTime - startTime) / 1000);
-            runtime = (runtime * 1000.0);
-            log.info("[Service] Runtime: " + runtime + " Millisecond(s).");
-            //problem.printIndividuals();
-            //System.out.println(problem.printPreferenceLists());
-            String algorithm = request.getAlgorithm();
-
-            MatchingSolution matchingSolution = formatSolution(algorithm, results, runtime);
-            matchingSolution.setSetSatisfactions(problem.getAllSatisfactions((Matches) results
-                    .get(0)
-                    .getAttribute("matches")));
-            //matchingSolution.setPreferences(problem.getPreferenceLists());
-            //matchingSolution.setIndividuals(problem.getIndividuals().getIndividuals());
-
-            return ResponseEntity.ok(Response
-                    .builder()
-                    .status(200)
-                    .message(
-                            "[Service] Stable Matching: Solve stable matching problem successfully!")
-                    .data(matchingSolution)
-                    .build());
+                return ResponseEntity.ok(Response
+                        .builder()
+                        .status(200)
+                        .message(
+                                "[Service] Stable Matching: Solve stable matching problem successfully!")
+                        .data(matchingSolution)
+                        .build());
+            }
         } catch (Exception e) {
             log.error("[Service] Stable Matching: Error solving stable matching problem: {}",
                     e.getMessage(),
                     e);
-            // Handle exceptions and return an error response
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Response
@@ -116,9 +150,24 @@ public class StableMatchingSolver {
 
         return matchingSolution;
     }
+    private MatchingSolution formatSolutionOTO(String algorithm,
+                                               NondominatedPopulation result,
+                                               double Runtime) {
+        Solution solution = result.get(0);
+        MatchingSolution matchingSolution = new MatchingSolution();
+        double fitnessValue = solution.getObjective(0);
+        MatchesOTO matchesoto = (MatchesOTO) solution.getAttribute("matches");
+        Matches matches = matchesoto.toMatches();
+        matchingSolution.setFitnessValue(-fitnessValue);
+        matchingSolution.setMatches(matches);
+        matchingSolution.setAlgorithm(algorithm);
+        matchingSolution.setRuntime(Runtime);
+
+        return matchingSolution;
+    }
 
 
-    private NondominatedPopulation solveProblem(StableMatchingProblem problem,
+    private NondominatedPopulation solveProblem(Problem problem,
                                                 String algorithm,
                                                 int populationSize,
                                                 int generation,
@@ -166,8 +215,6 @@ public class StableMatchingSolver {
 
     public ResponseEntity<Response> getProblemResultInsights(StableMatchingProblemDTO request,
                                                              String sessionCode) {
-//        log.info("Received request: " + request);
-//		String[] algorithms = {"NSGAII", "NSGAIII", "eMOEA", "PESA2", "VEGA", "MOEAD"};
         String[] algorithms = {"NSGAII", "NSGAIII", "eMOEA", "PESA2", "VEGA"};
 
         simpMessagingTemplate.convertAndSendToUser(sessionCode,

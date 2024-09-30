@@ -2,8 +2,6 @@ package com.example.SS2_Backend.model.StableMatching;
 
 import com.example.SS2_Backend.model.StableMatching.Matches.Matches;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
 import org.moeaframework.core.Problem;

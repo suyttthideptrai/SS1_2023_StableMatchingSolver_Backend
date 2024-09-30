@@ -6,7 +6,7 @@ import java.io.Serializable;
 import java.util.*;
 
 /**
- * Data Structure for result of StableMatchingExtra algorithm
+ * Data Structure for result of StableMatchingAlgorithm algorithm
  * Matches = {Match1, Match2, Match3, ...}
  * Match can be an Object of "Pair" or "MatchSet" Class, both Implement "MatchItem" Interface
  */

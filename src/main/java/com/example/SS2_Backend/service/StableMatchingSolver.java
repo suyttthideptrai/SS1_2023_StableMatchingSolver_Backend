@@ -44,9 +44,8 @@ public class StableMatchingSolver {
             }
             log.info("[Service] Stable Matching: Load problem...");
             log.info("[Service] Stable Matching: Building preference list...");
-            if (isOneToOne) {
                 log.info("[Service] Stable Matching: 1-1 Problem Detected");
-                OneToOne problem = new OneToOne();
+                StableMatching problem = isOneToOne ? new OneToOne() : new StableMatchingProblem();
                 problem.setProblemName(request.getProblemName());
                 problem.setEvaluateFunctionForSet1(request.getEvaluateFunction()[0]);
                 problem.setEvaluateFunctionForSet2(request.getEvaluateFunction()[1]);
@@ -67,10 +66,18 @@ public class StableMatchingSolver {
                 runtime = (runtime * 1000.0);
                 log.info("[Service] Runtime: " + runtime + " Millisecond(s).");
                 String algorithm = request.getAlgorithm();
-                MatchingSolution matchingSolution = formatSolutionOTO(algorithm, results, runtime);
-                matchingSolution.setSetSatisfactions(problem.calculateSatisfaction((MatchesOTO) results
+                MatchingSolution matchingSolution = isOneToOne
+                        ? formatSolutionOTO(algorithm, results, runtime)
+                        : formatSolution(algorithm, results, runtime);
+                if (isOneToOne) {
+                    matchingSolution.setSetSatisfactions(problem.getAllSatisfactions((MatchesOTO) results
                         .get(0)
                         .getAttribute("matches")));
+                } else {
+                    matchingSolution.setSetSatisfactions(problem.getAllSatisfactions((Matches) results
+                        .get(0)
+                        .getAttribute("matches")));
+                }
 
                 return ResponseEntity.ok(Response
                         .builder()
@@ -79,46 +86,46 @@ public class StableMatchingSolver {
                                 "[Service] Stable Matching: Solve stable matching problem successfully!")
                         .data(matchingSolution)
                         .build());
-            }  else {
-                StableMatchingProblem problem = new StableMatchingProblem();
-                problem.setProblemName(request.getProblemName());
-                problem.setEvaluateFunctionForSet1(request.getEvaluateFunction()[0]);
-                problem.setEvaluateFunctionForSet2(request.getEvaluateFunction()[1]);
-                problem.setFitnessFunction(request.getFitnessFunction());
-                problem.setPopulation(request.getIndividuals(), request.getAllPropertyNames());
-                log.info("[Service] Stable Matching: Problem: " + problem.getProblemName() +
-                        " loaded successfully!");
-                long startTime = System.currentTimeMillis();
-
-                NondominatedPopulation results = solveProblem(problem,
-                        request.getAlgorithm(),
-                        request.getPopulationSize(),
-                        request.getGeneration(),
-                        request.getMaxTime(),
-                        request.getDistributedCores());
-
-
-                assert results != null;
-                long endTime = System.currentTimeMillis();
-
-                double runtime = ((double) (endTime - startTime) / 1000);
-                runtime = (runtime * 1000.0);
-                log.info("[Service] Runtime: " + runtime + " Millisecond(s).");
-                String algorithm = request.getAlgorithm();
-
-                MatchingSolution matchingSolution = formatSolution(algorithm, results, runtime);
-                matchingSolution.setSetSatisfactions(problem.getAllSatisfactions((Matches) results
-                        .get(0)
-                        .getAttribute("matches")));
-
-                return ResponseEntity.ok(Response
-                        .builder()
-                        .status(200)
-                        .message(
-                                "[Service] Stable Matching: Solve stable matching problem successfully!")
-                        .data(matchingSolution)
-                        .build());
-            }
+//            }  else {
+//                StableMatchingProblem problem = new StableMatchingProblem();
+//                problem.setProblemName(request.getProblemName());
+//                problem.setEvaluateFunctionForSet1(request.getEvaluateFunction()[0]);
+//                problem.setEvaluateFunctionForSet2(request.getEvaluateFunction()[1]);
+//                problem.setFitnessFunction(request.getFitnessFunction());
+//                problem.setPopulation(request.getIndividuals(), request.getAllPropertyNames());
+//                log.info("[Service] Stable Matching: Problem: " + problem.getProblemName() +
+//                        " loaded successfully!");
+//                long startTime = System.currentTimeMillis();
+//
+//                NondominatedPopulation results = solveProblem(problem,
+//                        request.getAlgorithm(),
+//                        request.getPopulationSize(),
+//                        request.getGeneration(),
+//                        request.getMaxTime(),
+//                        request.getDistributedCores());
+//
+//
+//                assert results != null;
+//                long endTime = System.currentTimeMillis();
+//
+//                double runtime = ((double) (endTime - startTime) / 1000);
+//                runtime = (runtime * 1000.0);
+//                log.info("[Service] Runtime: " + runtime + " Millisecond(s).");
+//                String algorithm = request.getAlgorithm();
+//
+//                MatchingSolution matchingSolution = formatSolution(algorithm, results, runtime);
+//                matchingSolution.setSetSatisfactions(problem.getAllSatisfactions((Matches) results
+//                        .get(0)
+//                        .getAttribute("matches")));
+//
+//                return ResponseEntity.ok(Response
+//                        .builder()
+//                        .status(200)
+//                        .message(
+//                                "[Service] Stable Matching: Solve stable matching problem successfully!")
+//                        .data(matchingSolution)
+//                        .build());
+//            }
         } catch (Exception e) {
             log.error("[Service] Stable Matching: Error solving stable matching problem: {}",
                     e.getMessage(),
@@ -167,7 +174,7 @@ public class StableMatchingSolver {
     }
 
 
-    private NondominatedPopulation solveProblem(Problem problem,
+    private NondominatedPopulation solveProblem(StableMatching problem,
                                                 String algorithm,
                                                 int populationSize,
                                                 int generation,

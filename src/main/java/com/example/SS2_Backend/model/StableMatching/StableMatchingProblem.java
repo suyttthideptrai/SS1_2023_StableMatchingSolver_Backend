@@ -1,6 +1,7 @@
 package com.example.SS2_Backend.model.StableMatching;
 
 import com.example.SS2_Backend.model.StableMatching.Matches.Matches;
+import com.example.SS2_Backend.model.StableMatching.Matches.MatchesOTO;
 import lombok.Data;
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
@@ -48,7 +49,7 @@ import static com.example.SS2_Backend.util.StringExpressionEvaluator.*;
  **/
 @Slf4j
 @Data
-public class StableMatchingProblem implements Problem {
+public class StableMatchingProblem implements StableMatching {
 
     private IndividualList individuals;
 
@@ -78,6 +79,11 @@ public class StableMatchingProblem implements Problem {
     public void setPopulation(ArrayList<Individual> individuals, String[] propertiesNames) {
         this.individuals = new IndividualList(individuals, propertiesNames);
         initializeFields();
+    }
+
+    @Override
+    public double[] getAllSatisfactions(MatchesOTO res) {
+        return new double[0];
     }
 
     private void initializeFields() {

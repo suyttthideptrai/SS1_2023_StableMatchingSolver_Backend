@@ -1,14 +1,11 @@
 package com.example.SS2_Backend.model.StableMatching.MatchingAlgorithms;
 
-import com.example.SS2_Backend.model.StableMatching.Individual;
-import com.example.SS2_Backend.model.StableMatching.IndividualList;
+import com.example.SS2_Backend.model.StableMatching.*;
+import com.example.SS2_Backend.model.StableMatching.Matches.Matches;
 import com.example.SS2_Backend.model.StableMatching.Matches.MatchesOTO;
-import com.example.SS2_Backend.model.StableMatching.PreferenceList;
-import com.example.SS2_Backend.model.StableMatching.PreferencesProvider;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.moeaframework.core.Problem;
 import org.moeaframework.core.Solution;
 import org.moeaframework.core.variable.Permutation;
 import java.util.*;
@@ -17,7 +14,7 @@ import static com.example.SS2_Backend.util.StringExpressionEvaluator.convertToSt
 
 @Slf4j
 @Getter@Setter
-public class OneToOne implements Problem {
+public class OneToOne implements StableMatching {
     private PreferencesProvider preferencesProvider;
     private IndividualList individuals;
     private static final List<String> VALID_EVALUATE_FUNCTION_KEYWORDS = Arrays.asList("P", "W", "R");
@@ -116,7 +113,7 @@ public class OneToOne implements Problem {
         log.info("Evaluating ... ");
         int[] order = ((Permutation) solution.getVariable(0)).toArray();
         MatchesOTO matches = StableMatchingAlgorithm(order);
-        double[] satisfaction = calculateSatisfaction(matches);
+        double[] satisfaction = getAllSatisfactions(matches);
         solution.setAttribute("matches", matches);
         if (satisfaction.length == 0) {
             solution.setObjective(0, 1);
@@ -160,7 +157,7 @@ public class OneToOne implements Problem {
         }
         return matches;
     }
-    public double[] calculateSatisfaction(MatchesOTO matches) {
+    public double[] getAllSatisfactions(MatchesOTO matches) {
         if (matches.isEmpty()) return new double[0];
         List<Integer> list = matches.getList();
         double[] totalSatisfaction = new double[n];
@@ -175,18 +172,24 @@ public class OneToOne implements Problem {
         }
         return totalSatisfaction;
     }
+
+    @Override
+    public double[] getAllSatisfactions(Matches res) {
+        return new double[0];
+    }
+
     public boolean bLikeAMore(int a, int b, int c) {
         for (int individual : preferences[b]) {
             if (individual == a) return true;
             if (individual == c) return false;
         }
-        throw new RuntimeException("The input (preference) have some problem: " + Arrays.toString(preferences[b]));
+        throw new RuntimeException("The input (preference) have problem.");
     }
     public int findRank(int target, int from) {
         for (int i = 0; i < preferences[from].length; i++) {
             if (preferences[from][i] == target) return i;
         }
-        throw new RuntimeException("This should not happen");
+        throw new RuntimeException("The input (preference) have problem");
     }
     @Override
     public Solution newSolution() {

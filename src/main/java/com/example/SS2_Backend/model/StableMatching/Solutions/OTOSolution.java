@@ -1,6 +1,7 @@
-package com.example.SS2_Backend.model.StableMatching.Matches;
+package com.example.SS2_Backend.model.StableMatching.Solutions;
 
 import com.example.SS2_Backend.dto.response.ComputerSpecs;
+import com.example.SS2_Backend.model.StableMatching.Matches.MatchesOTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,15 +11,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MatchingSolution {
-
-    private Matches matches;
+public class OTOSolution {
+    private MatchesOTO matches;
     private double fitnessValue;
     private double runtime;
     private ComputerSpecs computerSpecs;
     private String algorithm;
-    //private List<PreferenceList> Preferences;
-    //private List<Individual> individuals;
     private double[] setSatisfactions;
-
 }

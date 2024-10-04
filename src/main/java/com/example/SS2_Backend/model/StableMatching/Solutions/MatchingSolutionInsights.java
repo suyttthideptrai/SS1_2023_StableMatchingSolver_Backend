@@ -1,7 +1,6 @@
-package com.example.SS2_Backend.model;
+package com.example.SS2_Backend.model.StableMatching.Solutions;
 
 import com.example.SS2_Backend.dto.response.ComputerSpecs;
-import com.example.SS2_Backend.util.ComputerSpecsUtil;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,12 +13,8 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class GameSolutionInsights {
+public class MatchingSolutionInsights {
     Map<String, List<Double>> fitnessValues;
     Map<String, List<Double>> runtimes;
     private ComputerSpecs computerSpecs;
-
-    public ComputerSpecs getComputerSpecs() {
-        return ComputerSpecsUtil.getComputerSpecs();
-    }
 }

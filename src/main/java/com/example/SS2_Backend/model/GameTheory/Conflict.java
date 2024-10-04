@@ -1,4 +1,4 @@
-package com.example.SS2_Backend.model;
+package com.example.SS2_Backend.model.GameTheory;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

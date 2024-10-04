@@ -1,4 +1,4 @@
-package com.example.SS2_Backend.model;
+package com.example.SS2_Backend.model.GameTheory;
 
 import com.example.SS2_Backend.dto.response.ComputerSpecs;
 import com.example.SS2_Backend.util.ComputerSpecsUtil;

@@ -42,8 +42,7 @@ public class OneToOne implements StableMatching {
             if (i >= padding) {
                 preferences[i] = individualPref.getPositions();
             } else {
-                int[] pos = addPadding(individualPref.getPositions(), this.padding);
-                preferences[i] = pos;
+                preferences[i] = addPadding(individualPref.getPositions(), this.padding);
             }
         }
     }
@@ -127,39 +126,48 @@ public class OneToOne implements StableMatching {
     public MatchesOTO StableMatchingAlgorithm(int[] order) {
         Queue<Integer> singleQueue = new LinkedList<>();
         for(int node : order) singleQueue.add(node);
-        MatchesOTO matches = new MatchesOTO(n);
+        int[] matches = new int[n];
+        for (int i = 0; i < n; i++) matches[i] = -1;
+        Set<Integer> matched = new HashSet<>();
+        Set<Integer> leftOver = new HashSet<>();
         int loop = 0;
         while(!singleQueue.isEmpty()){
             int a = singleQueue.poll();
-            if (matches.isLinked(a)) continue;
+            if (matched.contains(a)) continue;
             // Prevent infinite loop
-            if (loop > 2 * n) return new MatchesOTO(0);
+            if (loop > 2 * n) return MatchesOTO.getEmptyObject();
             int[] aPreference = preferences[a];
             int prefLen = aPreference.length;
             for (int i = 0; i < prefLen; i++) {
                 int b = aPreference[i];
-                if (matches.isLinkedWith(a, b)) break;
-                if (!matches.isLinked(b)) {
-                    matches.link(a, b);
+                if (matches[a] == b && matches[b] == a) break;
+                if (!matched.contains(b)) {
+                    matched.add(a);
+                    matched.add(b);
+                    matches[a] = b;
+                    matches[b] = a;
                     break;
                 } else {
-                    int bPartner = matches.getPartner(b);
+                    int bPartner = matches[b];
                     if (bLikeAMore(a, b, bPartner)) {
                         singleQueue.add(bPartner);
-                        matches.relinkWith(b, bPartner, a);
+                        matched.remove(bPartner);
+                        matched.add(a);
+                        matches[a] = b;
+                        matches[b] = a;
                         break;
                     } else if (i == prefLen - 1) {
-                        matches.addLeftover(a);
+                        leftOver.add(a);
                     }
                 }
             }
             loop++;
         }
-        return matches;
+        return new MatchesOTO(matches, leftOver);
     }
     public double[] getAllSatisfactions(MatchesOTO matches) {
         if (matches.isEmpty()) return new double[0];
-        List<Integer> list = matches.getList();
+        List<Integer> list = matches.getMatches();
         double[] totalSatisfaction = new double[n];
         for (int a = 0; a < n; a++) {
             int b = list.get(a);

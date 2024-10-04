@@ -17,8 +17,6 @@ public class Progress {
     private Integer percentage;
 
     public int getMinuteLeft() {
-
-
         if (minuteLeft == 0) {
             return 1; // return 1 if the minuteLeft is less than 60 seconds
         }

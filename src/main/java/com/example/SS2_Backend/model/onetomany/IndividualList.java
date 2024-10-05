@@ -42,20 +42,16 @@ public class IndividualList {
         }
 
         this.propertiesNames = propertiesNames;
-        initProviderCount();
-        this.providerCapacities = new int[providerCount];
-        initProviderCapacities();
+        this.providerCapacities = new int[getProviderCountAndInitCapacities()];
     }
 
-    private void initProviderCount() {
-        int count = 0;
-        for (int i = 0; i < this.totalIndividuals; i++) {
-            if (individuals.get(i).getBelongToSet() == 0) count++;
-        }
-        this.providerCount = count;
-    }
-
-    private void initProviderCapacities() {
+    /**
+     * Initializes both the provider count and capacities in a single loop.
+     * ------------------------------------------
+     * This method counts how many providers belong to set 0, and simultaneously
+     * initializes the capacities for those providers.
+     */
+    private int getProviderCountAndInitCapacities() {
         int count = 0;
         for (int i = 0; i < this.totalIndividuals; i++) {
             if (individuals.get(i).getBelongToSet() == 0) {
@@ -63,10 +59,8 @@ public class IndividualList {
                 count++;
             }
         }
-    }
-
-    public boolean isProvider(int index) {
-        return this.individuals.get(index).getBelongToSet() == 0;
+        this.providerCount = count;
+        return count;
     }
 
     public int getRoleOfParticipant(int index) {

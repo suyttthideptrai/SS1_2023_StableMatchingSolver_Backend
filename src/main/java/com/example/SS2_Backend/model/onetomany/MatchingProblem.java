@@ -286,7 +286,7 @@ public class MatchingProblem implements Problem {
 
     private double[] getSatisfactoryOfASetByDefault(double[] Satisfactions, int set) {
         int numberOfIndividual = individuals.getTotalIndividuals();
-        int numberOfIndividualOfSet0 = individuals.getTotalIndividuals();
+        int numberOfIndividualOfSet0 = individuals.getProviderCount();
         double[] setSatisfactions;
         if (set == 0) {
             setSatisfactions = new double[numberOfIndividualOfSet0];
@@ -310,7 +310,7 @@ public class MatchingProblem implements Problem {
         for (int i = 0; i < individuals.getTotalIndividuals(); i++) {
             double score = 0.0;
             PreferenceList prefList = preferenceLists.get(i);
-            if (individuals.isProvider(i)) {
+            if (individuals.getRoleOfParticipant(i) == 0) {
                 // The individual is a provider
                 Set<Integer> providerMatches = match.getConsumersOfProvider(i);
                 for (int consumer : providerMatches)

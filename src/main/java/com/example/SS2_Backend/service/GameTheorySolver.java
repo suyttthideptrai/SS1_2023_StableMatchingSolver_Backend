@@ -37,6 +37,12 @@ public class GameTheorySolver {
 
     public ResponseEntity<Response> solveGameTheory(GameTheoryProblemDTO request) {
 
+
+
+
+
+
+
         log.info("Received request: " + request);
         GameTheoryProblem problem = new GameTheoryProblem();
         problem.setDefaultPayoffFunction(request.getDefaultPayoffFunction());

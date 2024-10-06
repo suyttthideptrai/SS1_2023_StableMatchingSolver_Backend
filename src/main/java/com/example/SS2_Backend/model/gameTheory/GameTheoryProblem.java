@@ -1,4 +1,4 @@
-package com.example.SS2_Backend.model;
+package com.example.SS2_Backend.model.gameTheory;
 
 import org.moeaframework.core.Problem;
 import org.moeaframework.core.Solution;

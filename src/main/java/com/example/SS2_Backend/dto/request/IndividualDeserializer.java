@@ -1,6 +1,6 @@
 package com.example.SS2_Backend.dto.request;
 
-import com.example.SS2_Backend.model.StableMatching.Individual;
+import com.example.SS2_Backend.model.stableMatching.Individual;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;

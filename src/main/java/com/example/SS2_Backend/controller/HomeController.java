@@ -33,6 +33,7 @@ public class HomeController {
 	}
 
 	@Async("taskExecutor")
+	// @PostMapping("/stable-matching-solver")
 	public CompletableFuture<ResponseEntity<Response>> solveStableMatching(@RequestBody StableMatchingProblemDTO object) {
 		return CompletableFuture.completedFuture(stableMatchingSolver.solveStableMatching(object));
 	}
@@ -70,6 +71,7 @@ public class HomeController {
 		return CompletableFuture.completedFuture(gameTheorySolver.getProblemResultInsights(gameTheoryProblem, sessionCode));
 	}
 	@Async("taskExecutor")
+	// @PostMapping("/matching-problem-result-insights/{sessionCode}")
 	public CompletableFuture<ResponseEntity<Response>> getMatchingResultInsights(@RequestBody StableMatchingProblemDTO object, @PathVariable String sessionCode) {
 		return CompletableFuture.completedFuture(stableMatchingSolver.getProblemResultInsights(object, sessionCode));
 	}

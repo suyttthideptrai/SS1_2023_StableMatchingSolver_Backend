@@ -1,4 +1,4 @@
-package com.example.SS2_Backend.model.StableMatching.Matches;
+package com.example.SS2_Backend.model.stableMatching.Matches;
 
 import com.example.SS2_Backend.dto.response.ComputerSpecs;
 import lombok.AllArgsConstructor;

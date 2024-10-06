@@ -1,8 +1,8 @@
 package com.example.SS2_Backend.util;
 
 
-import com.example.SS2_Backend.model.NormalPlayer;
-import com.example.SS2_Backend.model.Strategy;
+import com.example.SS2_Backend.model.gameTheory.NormalPlayer;
+import com.example.SS2_Backend.model.gameTheory.Strategy;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

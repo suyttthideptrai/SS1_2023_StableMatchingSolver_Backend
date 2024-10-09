@@ -15,6 +15,16 @@ public class MatchesOTO implements Serializable {
         for (int match : matches) this.matches.add(match);
         this.leftOver = leftOver;
     }
+    public Matches toMatches() {
+        Matches obj = new Matches(matches.size());
+        for (int match : matches) {
+            obj.addMatch(match, matches.get(match));
+            obj.addMatch(matches.get(match), match);
+        }
+        for(int individual: leftOver) obj.addLeftOver(individual);
+        return obj;
+    }
+
     public static MatchesOTO getEmptyObject() {
         return new MatchesOTO(new int[0], new HashSet<>());
     }

@@ -108,7 +108,7 @@ public class StableMatchingSolver {
         Solution solution = result.get(0);
         OTOSolution matchingSolution = new OTOSolution();
         double fitnessValue = solution.getObjective(0);
-        matchingSolution.setMatches((MatchesOTO) solution.getAttribute("matches"));
+        matchingSolution.setMatches(((MatchesOTO) solution.getAttribute("matches")).toMatches());
         matchingSolution.setFitnessValue(-fitnessValue);
         matchingSolution.setAlgorithm(algorithm);
         matchingSolution.setRuntime(Runtime);

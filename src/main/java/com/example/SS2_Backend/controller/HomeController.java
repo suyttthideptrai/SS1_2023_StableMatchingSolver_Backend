@@ -35,13 +35,13 @@ public class HomeController {
     @Async("taskExecutor")
     @PostMapping("/stable-matching-solver")
     public CompletableFuture<ResponseEntity<Response>> solveStableMatching(@RequestBody StableMatchingProblemDTO object) {
-        return CompletableFuture.completedFuture(stableMatchingSolver.solveStableMatchingOTO(object));
+        return CompletableFuture.completedFuture(stableMatchingSolver.solveStableMatching(object));
     }
 
     @Async("taskExecutor")
     @PostMapping("/stable-matching-oto-solver")
     public CompletableFuture<ResponseEntity<Response>> solveStableMatchingOTO(@RequestBody StableMatchingProblemDTO object) {
-        return CompletableFuture.completedFuture(stableMatchingSolver.solveStableMatching(object));
+        return CompletableFuture.completedFuture(stableMatchingSolver.solveStableMatchingOTO(object));
     }
 
     @Async("taskExecutor")

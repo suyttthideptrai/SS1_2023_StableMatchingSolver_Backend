@@ -11,37 +11,38 @@ public class PreferencesProvider {
 
     private final IndividualList individuals;
     private final int numberOfIndividuals;
-    private final int sizeOf1;
-    private final int sizeOf2;
+
+    private final Map<Integer, Integer> setSizes;
+
     @Getter
-    private Expression expressionOfSet1;
-    @Getter
-    private Expression expressionOfSet2;
-    private Map<String, Set<Integer>> variablesOfSet1;
-    private Map<String, Set<Integer>> variablesOfSet2;
+    private final Map<Integer, Expression> expressions;
+    private final Map<Integer, Map<String, Set<Integer>>> variables;
+
 
     public PreferencesProvider(IndividualList individuals) {
         this.individuals = individuals;
         this.numberOfIndividuals = individuals.getNumberOfIndividual();
-        this.sizeOf1 = individuals.getNumberOfIndividualForSet0();
-        this.sizeOf2 = numberOfIndividuals - sizeOf1;
+        this.setSizes = new HashMap<>();
+        this.expressions = new HashMap<>();
+        this.variables = new HashMap<>();
+
+        // Initialize set sizes
+        for (int i = 0; i < numberOfIndividuals; i++) {
+            int set = individuals.getSetOf(i);
+            setSizes.put(set, setSizes.getOrDefault(set, 0) + 1);
+        }
+
     }
 
-    public void setEvaluateFunctionForSet1(String EvaluateFunction1) {
-        if (expressionOfSet1 != null) return;
-        this.variablesOfSet1 = filterVariable(EvaluateFunction1);
-        this.expressionOfSet1 = new ExpressionBuilder(EvaluateFunction1)
-                .variables(convertMapToSet(variablesOfSet1))
-                .build();
+    public void setEvaluateFunction(int set, String evaluateFunction) {
+        if (expressions.containsKey(set)) return;
+        Map<String, Set<Integer>> vars = filterVariable(evaluateFunction);
+        variables.put(set, vars);
+        expressions.put(set, new ExpressionBuilder(evaluateFunction)
+                .variables(convertMapToSet(vars))
+                .build());
     }
 
-    public void setEvaluateFunctionForSet2(String EvaluateFunction2) {
-        if (expressionOfSet2 != null) return;
-        this.variablesOfSet2 = filterVariable(EvaluateFunction2);
-        this.expressionOfSet2 = new ExpressionBuilder(EvaluateFunction2)
-                .variables(convertMapToSet(variablesOfSet2))
-                .build();
-    }
 
     public Set<String> convertMapToSet(Map<String, Set<Integer>> varMap) {
         Set<String> resultSet = new HashSet<>();
@@ -98,14 +99,9 @@ public class PreferencesProvider {
         return Optional.of(idx);
     }
 
-    public Map<String, Double> getVariableValuesForSet1(int indexOfEvaluator,
+    public Map<String, Double> getVariableValuesForSet(int set,int indexOfEvaluator,
                                                         int indexOfBeEvaluated) {
-        return getVariableValues(this.variablesOfSet1, indexOfEvaluator, indexOfBeEvaluated);
-    }
-
-    public Map<String, Double> getVariableValuesForSet2(int indexOfEvaluator,
-                                                        int indexOfBeEvaluated) {
-        return getVariableValues(this.variablesOfSet2, indexOfEvaluator, indexOfBeEvaluated);
+        return getVariableValues(this.variables.get(set), indexOfEvaluator, indexOfBeEvaluated);
     }
 
     private Map<String, Double> getVariableValues(Map<String, Set<Integer>> variables,
@@ -149,24 +145,24 @@ public class PreferencesProvider {
         PreferenceList a;
         Expression e;
         if (set == 0) {
-            a = new PreferenceList(this.sizeOf2, this.sizeOf1);
-            if (this.expressionOfSet1 == null) {
+            a = new PreferenceList(this.setSizes.get(set + 1), this.setSizes.get(set));
+            if (this.expressions.get(set) == null) {
                 return this.getPreferenceListByDefault(index);
             }
-            e = this.expressionOfSet1;
-            for (int i = this.sizeOf1; i < numberOfIndividuals; i++) {
-                e.setVariables(this.getVariableValuesForSet1(index, i));
+            e = this.expressions.get(set);
+            for (int i = this.setSizes.get(set); i < numberOfIndividuals; i++) {
+                e.setVariables(this.getVariableValuesForSet(set, index, i));
                 double totalScore = e.evaluate();
                 a.add(totalScore);
             }
         } else {
-            a = new PreferenceList(this.sizeOf1, 0);
-            if (this.expressionOfSet2 == null) {
+            a = new PreferenceList(this.setSizes.get(set), 0);
+            if (this.expressions.get(set + 1) == null) {
                 return this.getPreferenceListByDefault(index);
             }
-            e = this.expressionOfSet2;
-            for (int i = 0; i < sizeOf1; i++) {
-                e.setVariables(this.getVariableValuesForSet2(index, i));
+            e = this.expressions.get(set + 1);
+            for (int i = 0; i < this.setSizes.get(set); i++) {
+                e.setVariables(this.getVariableValuesForSet(set + 1, index, i));
                 double totalScore = e.evaluate();
                 a.add(totalScore);
             }
@@ -180,8 +176,8 @@ public class PreferencesProvider {
         int numberOfProperties = individuals.getNumberOfProperties();
         PreferenceList a;
         if (set == 0) {
-            a = new PreferenceList(this.sizeOf2, this.sizeOf1);
-            for (int i = sizeOf1; i < numberOfIndividuals; i++) {
+            a = new PreferenceList(this.setSizes.get(set + 1), this.setSizes.get(set));
+            for (int i = this.setSizes.get(0); i < numberOfIndividuals; i++) {
                 double totalScore = 0;
                 for (int j = 0; j < numberOfProperties; j++) {
                     double PropertyValue = individuals.getPropertyValueOf(i, j);
@@ -189,12 +185,11 @@ public class PreferencesProvider {
                     double PropertyWeight = individuals.getPropertyWeightOf(index, j);
                     totalScore += getDefaultScaling(requirement, PropertyValue) * PropertyWeight;
                 }
-                // Add
                 a.add(totalScore);
             }
         } else {
-            a = new PreferenceList(this.sizeOf1, 0);
-            for (int i = 0; i < sizeOf1; i++) {
+            a = new PreferenceList(this.setSizes.get(set - 1), 0);
+            for (int i = 0; i < this.setSizes.get(set - 1); i++) {
                 double totalScore = 0;
                 for (int j = 0; j < numberOfProperties; j++) {
                     double PropertyValue = individuals.getPropertyValueOf(i, j);
@@ -202,7 +197,6 @@ public class PreferencesProvider {
                     double PropertyWeight = individuals.getPropertyWeightOf(index, j);
                     totalScore += getDefaultScaling(requirement, PropertyValue) * PropertyWeight;
                 }
-                // Add
                 a.add(totalScore);
             }
         }

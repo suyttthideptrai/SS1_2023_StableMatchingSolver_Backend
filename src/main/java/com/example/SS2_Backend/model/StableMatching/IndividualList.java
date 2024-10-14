@@ -4,7 +4,9 @@ import com.example.SS2_Backend.model.StableMatching.Requirement.Requirement;
 import lombok.Getter;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.example.SS2_Backend.util.Utils.fillWithChar;
 import static com.example.SS2_Backend.util.Utils.formatDouble;
@@ -18,6 +20,9 @@ public class IndividualList {
     private final int numberOfProperties;
     private final int[] capacities;
     private final String[] propertyNames;
+
+    private final Map<Integer, Integer> setCounts;  // Map to store the count of individuals per set
+    private int numberOfSets;  // Total number of unique sets
 
     /**
      * Initializes fields related to the population data.
@@ -41,6 +46,9 @@ public class IndividualList {
         }
         this.capacities = new int[individuals.size()];
         this.propertyNames = propertyNames;
+
+        this.setCounts = new HashMap<>();
+
         initialize();
     }
 
@@ -51,11 +59,14 @@ public class IndividualList {
             tmpCapacity = individuals.get(i).getCapacity();
             this.capacities[i] = tmpCapacity;
             this.capacities[count] = tmpCapacity;
-            if (individuals.get(i).getIndividualSet() == 0) {
+            int individualSet = individuals.get(i).getIndividualSet();
+            this.setCounts.put(individualSet, this.setCounts.getOrDefault(individualSet, 0) + 1);
+            if (individualSet == 0) {
                 count++;
             }
         }
         this.numberOfIndividualForSet0 = count;
+        this.numberOfSets = this.setCounts.size();
     }
     //public Individual getIndividual(int index) {
     //    return this.individuals.get(index);

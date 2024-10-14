@@ -42,8 +42,7 @@ public class StableMatchingSolver {
             problem.setEvaluateFunctionForSet1(request.getEvaluateFunction()[0]);
             problem.setEvaluateFunctionForSet2(request.getEvaluateFunction()[1]);
             problem.setFitnessFunction(request.getFitnessFunction());
-            problem.setPopulation(request.getIndividuals(), request.getAllPropertyNames());
-
+            problem.setPopulation(request);
 
             log.info("[Service] Stable Matching: Problem: " + problem.getProblemName() +
                     " loaded successfully!");
@@ -176,7 +175,7 @@ public class StableMatchingSolver {
         StableMatchingProblem problem = new StableMatchingProblem();
         problem.setEvaluateFunctionForSet1(request.getEvaluateFunction()[0]);
         problem.setEvaluateFunctionForSet2(request.getEvaluateFunction()[1]);
-        problem.setPopulation(request.getIndividuals(), request.getAllPropertyNames());
+        problem.setPopulation(request);
         problem.setFitnessFunction(request.getFitnessFunction());
 
         MatchingSolutionInsights matchingSolutionInsights = initMatchingSolutionInsights(algorithms);

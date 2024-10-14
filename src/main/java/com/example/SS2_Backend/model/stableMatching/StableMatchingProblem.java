@@ -1,5 +1,6 @@
 package com.example.SS2_Backend.model.stableMatching;
 
+import com.example.SS2_Backend.dto.request.StableMatchingProblemDTO;
 import com.example.SS2_Backend.model.stableMatching.Matches.Matches;
 import lombok.Data;
 import net.objecthunter.exp4j.Expression;
@@ -73,9 +74,41 @@ public class StableMatchingProblem implements Problem {
 
     /**
      * first setter for the class
-     * @param individuals array of individual Objects
+     * TODO Update according to the new DTO CLASS
+     *                    Don't have to change all of those things below,
      */
-    public void setPopulation(ArrayList<Individual> individuals, String[] propertiesNames) {
+    public void setPopulation(StableMatchingProblemDTO request) {
+        // TODO INIT DATA (DONE)
+        int[] individualSetIndices = request.getIndividualSetIndices();
+        int[] individualCapacities = request.getIndividualCapacities();
+        String[][] individualRequirements = request.getIndividualRequirements();
+        double[][] individualWeights = request.getIndividualWeights();
+        double[][] individualProperties = request.getIndividualProperties();
+        String[] propertiesNames = request.getAllPropertyNames();
+
+        ArrayList<Individual> individuals = new ArrayList<>();
+        int currentIndex = 0;
+        for (String name: propertiesNames) {
+            Individual currentIndividual = new Individual();
+            int currentIndividualSetIndex = individualSetIndices[currentIndex];
+            int currentIndividualCapacities = individualCapacities[currentIndex];
+
+            for (int i = 0; i < individualProperties[currentIndex].length; i++) {
+                // TODO UPDATE THE REQUIRED DATA ACCORDINGLY
+                String currentRequirement = individualRequirements[currentIndex][i];
+                double currentWeight = individualWeights[currentIndex][i];
+                double currentValue = individualProperties[currentIndex][i];
+                currentIndividual.setProperty(
+                        currentValue,
+                        currentWeight,
+                        Individual.decodeInputRequirement(currentRequirement));
+            }
+            currentIndividual.setIndividualSet(currentIndividualSetIndex);
+            currentIndividual.setCapacity(currentIndividualCapacities);
+            individuals.add(currentIndividual);
+            currentIndex += 1;
+        }
+
         this.individuals = new IndividualList(individuals, propertiesNames);
         initializeFields();
     }

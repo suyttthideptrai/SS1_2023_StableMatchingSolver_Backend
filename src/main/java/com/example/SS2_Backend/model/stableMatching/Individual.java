@@ -1,10 +1,7 @@
 package com.example.SS2_Backend.model.stableMatching;
 
-import com.example.SS2_Backend.dto.request.IndividualDeserializer;
-
 import com.example.SS2_Backend.model.stableMatching.Requirement.Requirement;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,10 +13,9 @@ import static com.example.SS2_Backend.util.Utils.isDouble;
 import static com.example.SS2_Backend.util.Utils.isInteger;
 
 @Getter
-@JsonDeserialize(using = IndividualDeserializer.class)
+// TODO NO NEED TO USE DESERIALIZER CLASS
 public class Individual {
-
-    private String IndividualName;
+    @Setter
     private int IndividualSet;
     @Setter
     private int Capacity;
@@ -29,13 +25,7 @@ public class Individual {
 
     }
 
-    @JsonProperty("Properties")
-    public void setProperty(double propertyValue, double propertyWeight, String inputRequirement) {
-        String[] decodedRequirement = decodeInputRequirement(inputRequirement);
-        Property property = new Property(propertyValue, propertyWeight, decodedRequirement);
-        this.Properties.add(property);
-    }
-
+    @JsonProperty("individualProperties")
     public void setProperty(double propertyValue,
                             double propertyWeight,
                             String[] inputRequirement) {
@@ -110,16 +100,6 @@ public class Individual {
         }
     }
 
-    @JsonProperty("IndividualName")
-    public void setIndividualName(String individualName) {
-        IndividualName = individualName;
-    }
-
-    @JsonProperty("IndividualSet")
-    public void setIndividualSet(int individualSet) {
-        IndividualSet = individualSet;
-    }
-
     public int getNumberOfProperties() {
         return Properties.size();
     }
@@ -151,7 +131,6 @@ public class Individual {
     }
 
     public String toString() {
-        System.out.println("Name: " + IndividualName);
         System.out.println("Belong to set: " + IndividualSet);
         System.out.println("Capacity: " + Capacity);
         System.out.println("Properties:");

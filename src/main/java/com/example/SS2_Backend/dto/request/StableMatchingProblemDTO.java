@@ -1,24 +1,31 @@
 package com.example.SS2_Backend.dto.request;
 
-import com.example.SS2_Backend.model.stableMatching.Individual;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+// TODO Reconstruct the DTO Class based on the new JSON FILE STRUCT (DONE)
 public class StableMatchingProblemDTO {
     private String problemName;
     private int numberOfSets;
     private int numberOfIndividuals;
-    @JsonDeserialize(contentUsing = IndividualDeserializer.class)
-    private ArrayList<Individual> Individuals;
     private String[] allPropertyNames;
+    private int[] individualSetIndices;
+    private int[] individualCapacities;
+
+    @JsonDeserialize(using = Custom2DStringArrayDeserializer.class)
+    private String[][] individualRequirements;
+    @JsonDeserialize(using = CustomDouble2DArrayDeserializer.class)
+    private double[][] individualWeights;
+    @JsonDeserialize(using = CustomDouble2DArrayDeserializer.class)
+    private double[][] individualProperties;
+
     private String[] evaluateFunction;
     private String fitnessFunction;
     private int populationSize;
@@ -27,26 +34,15 @@ public class StableMatchingProblemDTO {
     private String algorithm;
     private String distributedCores;
 
-    @JsonProperty("Individuals")
-    public void setIndividuals(ArrayList<Individual> individuals) {
-        this.Individuals = individuals;
-    }
-
-    public Individual getIndividual(int index) {
-        return Individuals.get(index);
-    }
-
-    public int getNumberOfIndividuals(){
-        return Individuals.size();
-    }
 
     public String toString() {
         return "Matching_Theory_Problem {" + "\n" +
                 " ProblemName = " + problemName + "\n" +
                 ", NumberOfSets = " + numberOfSets + "\n" +
                 ", NumberOfIndividuals = " + numberOfIndividuals + "\n" +
-                ", Individuals = " + Individuals.toString() + "\n" +
-                ", AllPropertyName = " + java.util.Arrays.toString(allPropertyNames) +
+                ", IndividualSetIndices = " + Arrays.toString(individualSetIndices) + "\n" +
+                ", IndividualCapacities = " + Arrays.toString(individualCapacities) + "\n" +
+                ", AllPropertyName = " + Arrays.toString(allPropertyNames) +
                 ", fitnessFunction = '" + fitnessFunction + "\n" +
                 ", PopulationSize = " + populationSize + "\n" +
                 ", Generation = " +generation + "\n" +

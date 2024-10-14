@@ -1,5 +1,6 @@
 package com.example.SS2_Backend.util;
 
+import com.example.SS2_Backend.dto.request.StableMatchingProblemDTO;
 import com.example.SS2_Backend.model.stableMatching.Individual;
 import com.example.SS2_Backend.model.stableMatching.Matches.Matches;
 import com.example.SS2_Backend.model.stableMatching.StableMatchingProblem;
@@ -42,7 +43,9 @@ public class SampleDataGenerator {
         problem.setEvaluateFunctionForSet1(f1);
         problem.setEvaluateFunctionForSet2(f2);
         problem.setFitnessFunction(fnf);
-        problem.setPopulation(individuals, propNames);
+        // TODO HAVEN'T IMPLEMENTED YET, THIS WON'T RUN UNDER ANY CIRCUMSTANCES!
+//        StableMatchingProblemDTO request = new StableMatchingProblemDTO();
+//        problem.setPopulation(request);
 
         // Print the whole Populations
         System.out.println(
@@ -106,7 +109,6 @@ public class SampleDataGenerator {
                 individualCapacity = set1PeakCap;
             }
             Individual individual = new Individual();
-            individual.setIndividualName(individualName);
             individual.setIndividualSet(individualSet);
             individual.setCapacity(individualCapacity);
 
@@ -144,7 +146,6 @@ public class SampleDataGenerator {
                 individualCapacity = set2PeakCap;
             }
             Individual individual = new Individual();
-            individual.setIndividualName(individualName);
             individual.setIndividualSet(individualSet);
             individual.setCapacity(individualCapacity);
 

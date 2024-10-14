@@ -102,7 +102,7 @@ public class IndividualList {
             //name / set
             sb.append(String.format("%-3d| ", i));
             sb.append(String.format("%-4d| ", individuals.get(i).getIndividualSet()));
-            sb.append(String.format("%-20s| ", individuals.get(i).getIndividualName()));
+//            sb.append(String.format("%-20s| ", individuals.get(i).getIndividualName()));
             // prop value
             StringBuilder ss = new StringBuilder();
             for (int j = 0; j < this.numberOfProperties; j++) {

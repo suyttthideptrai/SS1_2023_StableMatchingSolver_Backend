@@ -52,9 +52,7 @@ import static com.example.SS2_Backend.util.StringExpressionEvaluator.*;
 public class StableMatchingProblem implements Problem {
 
     private IndividualList individuals;
-
     private String evaluateFunctionForSet1;
-
     private String evaluateFunctionForSet2;
     /**
      * Preference List of each individual/object inside this whole population
@@ -80,9 +78,7 @@ public class StableMatchingProblem implements Problem {
     public void setPopulation(StableMatchingProblemDTO request) {
         int[] individualSetIndices = request.getIndividualSetIndices();
         int[] individualCapacities = request.getIndividualCapacities();
-        String[][] individualRequirements = request.getIndividualRequirements().stream()
-                .map(List::toArray)
-                .toArray(String[][]::new);
+        String[][] individualRequirements = StableMatchingProblemDTO.fromListToStringArray(request.getIndividualRequirements());
         double[][] individualWeights = StableMatchingProblemDTO.fromListToDoubleArray(request.getIndividualWeights());
         double[][] individualProperties = StableMatchingProblemDTO.fromListToDoubleArray(request.getIndividualProperties());
 
@@ -90,12 +86,12 @@ public class StableMatchingProblem implements Problem {
 
         ArrayList<Individual> individuals = new ArrayList<>();
         int currentIndex = 0;
-        for (String name: propertiesNames) {
+        for (int i = 0; i < request.getNumberOfIndividuals(); i++) {
             Individual currentIndividual = new Individual();
             int currentIndividualSetIndex = individualSetIndices[currentIndex];
             int currentIndividualCapacities = individualCapacities[currentIndex];
 
-            for (int i = 0; i < individualProperties[currentIndex].length; i++) {
+            for (int index = 0; index < individualProperties[currentIndex].length; index++) {
                 // TODO UPDATE THE REQUIRED DATA ACCORDINGLY
                 String currentRequirement = individualRequirements[currentIndex][i];
                 double currentWeight = individualWeights[currentIndex][i];
@@ -109,8 +105,9 @@ public class StableMatchingProblem implements Problem {
             currentIndividual.setCapacity(currentIndividualCapacities);
             individuals.add(currentIndividual);
             currentIndex += 1;
-        }
+            System.out.println(currentIndividual.getProperties());
 
+        }
         this.individuals = new IndividualList(individuals, propertiesNames);
         initializeFields();
     }

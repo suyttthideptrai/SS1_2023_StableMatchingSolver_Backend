@@ -78,12 +78,14 @@ public class StableMatchingProblem implements Problem {
      *                    Don't have to change all of those things below,
      */
     public void setPopulation(StableMatchingProblemDTO request) {
-        // TODO INIT DATA (DONE)
         int[] individualSetIndices = request.getIndividualSetIndices();
         int[] individualCapacities = request.getIndividualCapacities();
-        String[][] individualRequirements = request.getIndividualRequirements();
-        double[][] individualWeights = request.getIndividualWeights();
-        double[][] individualProperties = request.getIndividualProperties();
+        String[][] individualRequirements = request.getIndividualRequirements().stream()
+                .map(List::toArray)
+                .toArray(String[][]::new);
+        double[][] individualWeights = StableMatchingProblemDTO.fromListToDoubleArray(request.getIndividualWeights());
+        double[][] individualProperties = StableMatchingProblemDTO.fromListToDoubleArray(request.getIndividualProperties());
+
         String[] propertiesNames = request.getAllPropertyNames();
 
         ArrayList<Individual> individuals = new ArrayList<>();

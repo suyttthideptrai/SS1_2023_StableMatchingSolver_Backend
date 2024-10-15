@@ -36,6 +36,7 @@ public class StableMatchingSolver {
         try {
             log.info("[Service] Stable Matching: Load problem...");
             log.info("[Service] Stable Matching: Building preference list...");
+            log.info(request.toString());
             StableMatchingProblem problem = new StableMatchingProblem();
 
             problem.setProblemName(request.getProblemName());
@@ -43,6 +44,7 @@ public class StableMatchingSolver {
             problem.setEvaluateFunctionForSet2(request.getEvaluateFunction()[1]);
             problem.setFitnessFunction(request.getFitnessFunction());
             problem.setPopulation(request);
+
 
             log.info("[Service] Stable Matching: Problem: " + problem.getProblemName() +
                     " loaded successfully!");

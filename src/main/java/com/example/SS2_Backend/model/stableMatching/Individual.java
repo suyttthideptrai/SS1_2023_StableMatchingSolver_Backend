@@ -1,7 +1,6 @@
 package com.example.SS2_Backend.model.stableMatching;
 
 import com.example.SS2_Backend.model.stableMatching.Requirement.Requirement;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -25,7 +24,6 @@ public class Individual {
 
     }
 
-    @JsonProperty("individualProperties")
     public void setProperty(double propertyValue,
                             double propertyWeight,
                             String[] inputRequirement) {

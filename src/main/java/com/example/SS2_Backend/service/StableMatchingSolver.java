@@ -5,6 +5,7 @@ import com.example.SS2_Backend.dto.response.Progress;
 import com.example.SS2_Backend.dto.response.Response;
 import com.example.SS2_Backend.model.stableMatching.*;
 import com.example.SS2_Backend.model.stableMatching.Matches.Matches;
+import com.example.SS2_Backend.model.stableMatching.Matches.MatchesOTO;
 import com.example.SS2_Backend.model.stableMatching.Matches.MatchingSolution;
 import com.example.SS2_Backend.model.stableMatching.Matches.MatchingSolutionInsights;
 import lombok.RequiredArgsConstructor;
@@ -118,7 +119,7 @@ public class StableMatchingSolver {
     }
 
 
-    private NondominatedPopulation solveProblem(StableMatchingProblem problem,
+    private NondominatedPopulation solveProblem(Problem problem,
                                                 String algorithm,
                                                 int populationSize,
                                                 int generation,
@@ -203,7 +204,7 @@ public class StableMatchingSolver {
                         request.getDistributedCores());
 
                 long end = System.currentTimeMillis();
-
+                assert results != null;
                 double runtime = (double) (end - start) / 1000;
                 double fitnessValue = getFitnessValue(results);
 
@@ -284,7 +285,7 @@ public class StableMatchingSolver {
     public ResponseEntity<Response> solveStableMatchingOTO(StableMatchingProblemDTO request) {
         try {
             log.info("[Service] Stable Matching OTO: Load problem...");
-            OneToOne problem = new OneToOne();
+            StableMatchingOTOProblem problem = new StableMatchingOTOProblem();
             log.info("[Service] Stable Matching OTO: Building preference list...");
 
             // Init problem
@@ -313,7 +314,9 @@ public class StableMatchingSolver {
             // Send result to frontend
             String algorithm = request.getAlgorithm();
             MatchingSolution matchingSolution = formatSolutionOTO(algorithm, results, runtime);
-            matchingSolution.setSetSatisfactions(problem.getAllSatisfactions((MatchesOTO) results.get(0).getAttribute("matches")));
+            matchingSolution.setSetSatisfactions(problem.getAllSatisfactions((MatchesOTO) results
+                    .get(0)
+                    .getAttribute("matches")));
             return ResponseEntity.ok(Response.builder().status(200).message("[Service] Stable Matching: Solve stable matching problem successfully!").data(matchingSolution).build());
         } catch (Exception e) {
             log.error("[Service] Stable Matching: Error solving stable matching problem: {}", e.getMessage(), e);
@@ -322,7 +325,7 @@ public class StableMatchingSolver {
     }
     private MatchingSolution formatSolutionOTO(String algorithm, NondominatedPopulation result, double Runtime) {
         Solution solution = result.get(0);
-        MatchingSolution matchingSolution = new Solution();
+        MatchingSolution matchingSolution = new MatchingSolution();
         double fitnessValue = solution.getObjective(0);
         matchingSolution.setMatches(((MatchesOTO) solution.getAttribute("matches")).toMatches());
         matchingSolution.setFitnessValue(-fitnessValue);

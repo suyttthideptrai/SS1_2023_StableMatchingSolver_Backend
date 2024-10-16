@@ -18,6 +18,7 @@ public class MatchesOTO implements Serializable {
     public Matches toMatches() {
         Matches obj = new Matches(matches.size());
         for (int match : matches) {
+            if (match == -1) continue;
             obj.addMatch(match, matches.get(match));
             obj.addMatch(matches.get(match), match);
         }

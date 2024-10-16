@@ -153,6 +153,7 @@ public class StableMatchingOTOProblem implements Problem {
                     if (bLikeAMore(a, b, bPartner)) {
                         singleQueue.add(bPartner);
                         matched.remove(bPartner);
+                        matches[bPartner] = -1;
                         matched.add(a);
                         matches[a] = b;
                         matches[b] = a;
@@ -172,7 +173,7 @@ public class StableMatchingOTOProblem implements Problem {
         double[] totalSatisfaction = new double[n];
         for (int a = 0; a < n; a++) {
             int b = list.get(a);
-            if (b == -1 ) totalSatisfaction[a] = 0;
+            if (b == -1) totalSatisfaction[a] = 0;
             else {
                 int rankA = findRank(a, b);
                 int rankB = findRank(b, a);

@@ -75,6 +75,7 @@ public class StableMatchingProblem implements Problem {
      * TODO Update according to the new DTO CLASS
      *                    Don't have to change all of those things below,
      */
+
     public void setPopulation(StableMatchingProblemDTO request) {
         int[] individualSetIndices = request.getIndividualSetIndices();
         int[] individualCapacities = request.getIndividualCapacities();

@@ -12,22 +12,16 @@ import static com.example.SS2_Backend.util.Utils.isDouble;
 import static com.example.SS2_Backend.util.Utils.isInteger;
 
 @Getter
-public class Property {
-
+public class PropertyRequirement {
     private static final boolean INCREMENT = true;
     private static final boolean DECREMENT = false;
-    private final double value;
-    private final double weight;
-    @Getter
     private final Requirement requirement;
 
-    public Property(double value, double weight, String[] inputRequirement) {
-        this.value = value;
-        this.weight = weight;
+    public PropertyRequirement(String[] inputRequirement) {
         this.requirement = setRequirement(inputRequirement);
     }
 
-    public Requirement setRequirement(String[] array) {
+    public static Requirement setRequirement(String[] array) {
         try {
             if (Objects.equals(array[1], "++")) {
                 return new OneBoundRequirement(Double.parseDouble(array[0]), INCREMENT);
@@ -53,13 +47,6 @@ public class Property {
 
     @Override
     public String toString() {
-        return "Value: " + value + " , Requirement " + requirement + " , Weight: " + weight;
+        return "Requirement: " + requirement;
     }
-
-    public static void main(String[] args) {
-        String[] strings = {"103.44", "++"};
-        Property p = new Property(16.5, 6, strings);
-        System.out.println(p);
-    }
-
 }

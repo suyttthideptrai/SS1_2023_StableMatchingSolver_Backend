@@ -50,8 +50,6 @@ import static com.example.SS2_Backend.util.StringExpressionEvaluator.*;
 @Slf4j
 @Data
 public class StableMatchingProblem implements Problem {
-
-    private IndividualList individuals;
     private String evaluateFunctionForSet1;
     private String evaluateFunctionForSet2;
     /**
@@ -66,6 +64,14 @@ public class StableMatchingProblem implements Problem {
     private boolean f2Status = false;
     private boolean fnfStatus = false;
 
+    // NEW ==============================================
+    private String[][] individualRequirements;
+    private double[][] individualWeights;
+    private double[][] individualProperties;
+    private int numberOfIndividuals;
+    private int[] individualSetIndices;
+    private int[] individualCapacities;
+     // ==================================================
     private String problemName;
 
     private static final List<String> VALID_EVALUATE_FUNCTION_KEYWORDS = Arrays.asList("P", "W", "R");
@@ -77,44 +83,23 @@ public class StableMatchingProblem implements Problem {
      */
 
     public void setPopulation(StableMatchingProblemDTO request) {
-        int[] individualSetIndices = request.getIndividualSetIndices();
-        int[] individualCapacities = request.getIndividualCapacities();
-        String[][] individualRequirements = StableMatchingProblemDTO.fromListToStringArray(request.getIndividualRequirements());
-        double[][] individualWeights = StableMatchingProblemDTO.fromListToDoubleArray(request.getIndividualWeights());
-        double[][] individualProperties = StableMatchingProblemDTO.fromListToDoubleArray(request.getIndividualProperties());
-
-        String[] propertiesNames = request.getAllPropertyNames();
-
-        ArrayList<Individual> individuals = new ArrayList<>();
-        int currentIndex = 0;
-        for (int i = 0; i < request.getNumberOfIndividuals(); i++) {
-            Individual currentIndividual = new Individual();
-            int currentIndividualSetIndex = individualSetIndices[currentIndex];
-            int currentIndividualCapacities = individualCapacities[currentIndex];
-
-            for (int index = 0; index < individualProperties[currentIndex].length; index++) {
-                // TODO UPDATE THE REQUIRED DATA ACCORDINGLY
-                String currentRequirement = individualRequirements[currentIndex][i];
-                double currentWeight = individualWeights[currentIndex][i];
-                double currentValue = individualProperties[currentIndex][i];
-                currentIndividual.setProperty(
-                        currentValue,
-                        currentWeight,
-                        Individual.decodeInputRequirement(currentRequirement));
-            }
-            currentIndividual.setIndividualSet(currentIndividualSetIndex);
-            currentIndividual.setCapacity(currentIndividualCapacities);
-            individuals.add(currentIndividual);
-            currentIndex += 1;
-            System.out.println(currentIndividual.getProperties());
-
-        }
-        this.individuals = new IndividualList(individuals, propertiesNames);
+        this.individualRequirements = StableMatchingProblemDTO.fromListToStringArray(request.getIndividualRequirements());
+        this.individualWeights = StableMatchingProblemDTO.fromListToDoubleArray(request.getIndividualWeights());
+        this.individualProperties = StableMatchingProblemDTO.fromListToDoubleArray(request.getIndividualProperties());
+        this.individualSetIndices = request.getIndividualSetIndices();
+        this.numberOfIndividuals = request.getNumberOfIndividuals();
+        this.individualCapacities = request.getIndividualCapacities();
         initializeFields();
     }
 
     private void initializeFields() {
-        this.preferencesProvider = new PreferencesProvider(individuals);
+        this.preferencesProvider = new PreferencesProvider(
+                individualRequirements,
+                individualWeights,
+                individualProperties,
+                numberOfIndividuals,
+                individualSetIndices
+        );
         initializePrefProvider();
         preferenceLists = getPreferences();
     }
@@ -191,7 +176,7 @@ public class StableMatchingProblem implements Problem {
     public Solution newSolution() {
         Solution solution = new Solution(1, 1);
         // Randomize the order (from 0 to this.NumberOfIndividual)
-        Permutation permutationVar = new Permutation(individuals.getNumberOfIndividual());
+        Permutation permutationVar = new Permutation(numberOfIndividuals);
         solution.setVariable(0, permutationVar);
         return solution;
     }
@@ -251,7 +236,7 @@ public class StableMatchingProblem implements Problem {
     // Add to a complete List
     private List<PreferenceList> getPreferences() {
         List<PreferenceList> fullList = new ArrayList<>();
-        for (int i = 0; i < individuals.getNumberOfIndividual(); i++) {
+        for (int i = 0; i < numberOfIndividuals; i++) {
             PreferenceList a = getPreferenceOfIndividual(i);
             fullList.add(a);
         }
@@ -262,7 +247,7 @@ public class StableMatchingProblem implements Problem {
     private Matches StableMatchingExtra(Variable var) {
         //Parse Variable
         //System.out.println("parsing");
-        Matches matches = new Matches(individuals.getNumberOfIndividual());
+        Matches matches = new Matches(numberOfIndividuals);
         Set<Integer> MatchedNode = new HashSet<>();
         Permutation castVar = (Permutation) var;
         int[] decodeVar = castVar.toArray();
@@ -295,7 +280,7 @@ public class StableMatchingProblem implements Problem {
                     break;
                 }
                 //If the RightNode Capacity is not full -> create connection between LeftNode - RightNode
-                if (!matches.isFull(preferNode, this.individuals.getCapacityOf(preferNode))) {
+                if (!matches.isFull(preferNode, this.individualCapacities[preferNode])) {
                     //System.out.println(preferNode + " is not full.");
                     //AddMatch (Node, NodeToConnect)
                     matches.addMatch(preferNode, newNode);
@@ -356,7 +341,7 @@ public class StableMatchingProblem implements Problem {
 
     private int getLeastScoreNode(int selectorNode, int newNode, Integer[] occupiedNodes) {
         PreferenceList prefOfSelectorNode = preferenceLists.get(selectorNode);
-        if (individuals.getCapacityOf(selectorNode) == 1) {
+        if (individualCapacities[selectorNode] == 1) {
             int currentNode = occupiedNodes[0];
             if (isPreferredOver(newNode, currentNode, selectorNode)) {
                 return currentNode;
@@ -432,7 +417,7 @@ public class StableMatchingProblem implements Problem {
                 int ssLength = AfterTokenLength(fitnessFunction, c);
                 int positionOfM = Integer.parseInt(fitnessFunction.substring(c + 1,
                         c + 1 + ssLength));
-                if (positionOfM < 0 || positionOfM > individuals.getNumberOfIndividual()) {
+                if (positionOfM < 0 || positionOfM > numberOfIndividuals) {
                     throw new IllegalArgumentException(
                             "invalid position after variable M: " + positionOfM);
                 }
@@ -520,7 +505,7 @@ public class StableMatchingProblem implements Problem {
     }
 
     public double[] getAllSatisfactions(Matches matches) {
-        double[] satisfactions = new double[individuals.getNumberOfIndividual()];
+        double[] satisfactions = new double[numberOfIndividuals];
         int numSet0 = individuals.getNumberOfIndividualForSet0();
         for (int i = 0; i < numSet0; i++) {
             double setScore = 0.0;
@@ -531,7 +516,7 @@ public class StableMatchingProblem implements Problem {
             }
             satisfactions[i] = setScore;
         }
-        for (int i = numSet0; i < individuals.getNumberOfIndividual(); i++) {
+        for (int i = numSet0; i < numberOfIndividuals; i++) {
             double setScore = 0.0;
             PreferenceList ofInd = preferenceLists.get(i);
             Set<Integer> SetMatches = matches.getSet(i);
@@ -544,7 +529,7 @@ public class StableMatchingProblem implements Problem {
     }
 
     private double[] getSatisfactoryOfASetByDefault(double[] Satisfactions, int set) {
-        int numberOfIndividual = individuals.getNumberOfIndividual();
+        int numberOfIndividual = numberOfIndividuals;
         int numberOfIndividualOfSet0 = individuals.getNumberOfIndividualForSet0();
         double[] setSatisfactions;
         if (set == 0) {
@@ -564,17 +549,17 @@ public class StableMatchingProblem implements Problem {
     }
 
     public void printIndividuals() {
-        this.individuals.print();
+        // TODO
+        System.out.print("[TODO] Being implemented.");
     }
 
     @Override
     public String toString() {
         return "Problem: " + "\n" + "Num of Individuals: " +
-                this.individuals.getNumberOfIndividual() + "\nNumber Of Properties: " +
-                individuals.getNumberOfProperties() + "\nFitness Function: " + fitnessFunction +
+                this.numberOfIndividuals + "\nNumber Of Properties: " +
+                numberOfIndividuals + "\nFitness Function: " + fitnessFunction +
                 "\nEvaluate Function For Set 1: " + this.evaluateFunctionForSet1 +
-                "\nEvaluate Function For Set 2: " + this.evaluateFunctionForSet2 + "\n" +
-                individuals;
+                "\nEvaluate Function For Set 2: " + this.evaluateFunctionForSet2 + "\n" ;
     }
 
     public String getPreferenceListsString() {

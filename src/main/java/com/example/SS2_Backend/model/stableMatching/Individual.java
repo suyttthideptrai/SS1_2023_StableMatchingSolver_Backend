@@ -1,36 +1,10 @@
 package com.example.SS2_Backend.model.stableMatching;
 
-import com.example.SS2_Backend.model.stableMatching.Requirement.Requirement;
-import lombok.Getter;
-import lombok.Setter;
-
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-
 import static com.example.SS2_Backend.util.Utils.isDouble;
 import static com.example.SS2_Backend.util.Utils.isInteger;
 
-@Getter
-// TODO NO NEED TO USE DESERIALIZER CLASS
 public class Individual {
-    @Setter
-    private int IndividualSet;
-    @Setter
-    private int Capacity;
-    private final List<Property> Properties = new ArrayList<>();
-
-    public Individual() {
-
-    }
-
-    public void setProperty(double propertyValue,
-                            double propertyWeight,
-                            String[] inputRequirement) {
-        Property property = new Property(propertyValue, propertyWeight, inputRequirement);
-        this.Properties.add(property);
-    }
-
     public static String[] decodeInputRequirement(String item) {
         item = item.trim();
         String[] result = new String[2];
@@ -97,46 +71,4 @@ public class Individual {
             return -1;
         }
     }
-
-    public int getNumberOfProperties() {
-        return Properties.size();
-    }
-
-    public Double getPropertyValue(int index) {
-        if (index >= 0 && index < this.Properties.size()) {
-            return Properties
-                    .get(index)
-                    .getValue();
-        } else {
-            return null;
-        }
-    }
-
-    public double getPropertyWeight(int index) {
-        if (index >= 0 && index < this.Properties.size()) {
-            return Properties
-                    .get(index)
-                    .getWeight();
-        } else {
-            return 0;
-        }
-    }
-
-    public Requirement getRequirement(int index) {
-        return Properties
-                .get(index)
-                .getRequirement();
-    }
-
-    public String toString() {
-        System.out.println("Belong to set: " + IndividualSet);
-        System.out.println("Capacity: " + Capacity);
-        System.out.println("Properties:");
-        System.out.println("---------------------------------");
-        for (Property property : Properties) {
-            System.out.println(property.toString());
-        }
-        return "\n";
-    }
-
 }

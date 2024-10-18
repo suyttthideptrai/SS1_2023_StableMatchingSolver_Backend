@@ -8,8 +8,10 @@ import net.objecthunter.exp4j.ExpressionBuilder;
 import java.util.*;
 
 public class PreferencesProvider {
-
-    private final IndividualList individuals;
+    private final String[][] individualRequirements;
+    private final double[][] individualWeights;
+    private final double[][] individualProperties;
+    private final int[] individualSetIndices;
     private final int numberOfIndividuals;
     private final int sizeOf1;
     private final int sizeOf2;
@@ -20,10 +22,23 @@ public class PreferencesProvider {
     private Map<String, Set<Integer>> variablesOfSet1;
     private Map<String, Set<Integer>> variablesOfSet2;
 
-    public PreferencesProvider(IndividualList individuals) {
-        this.individuals = individuals;
-        this.numberOfIndividuals = individuals.getNumberOfIndividual();
-        this.sizeOf1 = individuals.getNumberOfIndividualForSet0();
+    public PreferencesProvider(
+        String[][] individualRequirements,
+        double[][] individualWeights,
+        double[][] individualProperties,
+        int numberOfIndividuals,
+        int[] individualSetIndices
+    ) {
+        this.individualRequirements = individualRequirements;
+        this.individualWeights = individualWeights;
+        this.individualProperties = individualProperties;
+
+        this.individualSetIndices = individualSetIndices;
+
+        this.numberOfIndividuals = numberOfIndividuals;
+
+        // UPDATE Individualist's initialize()
+        this.sizeOf1 = 0;
         this.sizeOf2 = numberOfIndividuals - sizeOf1;
     }
 
@@ -116,23 +131,24 @@ public class PreferencesProvider {
             String key = entry.getKey();
             Set<Integer> values = entry.getValue();
             switch (key) {
+                // TODO
                 case "P":
                     for (Integer value : values) {
-                        double val = individuals.getPropertyValueOf(idx2, value - 1);
+                        double val = individualProperties[idx2][value - 1];
                         variablesValues.put(key + value, val);
                     }
                     break;
                 case "W":
                     for (Integer value : values) {
-                        double val = individuals.getPropertyWeightOf(idx1, value - 1);
+                        double val = individualWeights[idx1][value - 1];
                         variablesValues.put(key + value, val);
                     }
                     break;
                 case "R":
                     for (Integer value : values) {
-                        double val = individuals
-                                .getRequirementOf(idx1, value - 1)
-                                .getValueForFunction();
+                        double val = PropertyRequirement.setRequirement(
+                                Individual.decodeInputRequirement(individualRequirements[idx1][value - 1])
+                        ).getValueForFunction();
                         variablesValues.put(key + value, val);
                     }
                     break;
@@ -145,7 +161,7 @@ public class PreferencesProvider {
     }
 
     public PreferenceList getPreferenceListByFunction(int index) {
-        int set = individuals.getSetOf(index);
+        int set = individualSetIndices[index];
         PreferenceList a;
         Expression e;
         if (set == 0) {
@@ -176,20 +192,21 @@ public class PreferencesProvider {
     }
 
     public PreferenceList getPreferenceListByDefault(int index) {
-        int set = individuals.getSetOf(index);
-        int numberOfProperties = individuals.getNumberOfProperties();
+        int set = individualSetIndices[index];
+        int numberOfProperties = individualProperties.length;
         PreferenceList a;
         if (set == 0) {
             a = new PreferenceList(this.sizeOf2, this.sizeOf1);
             for (int i = sizeOf1; i < numberOfIndividuals; i++) {
                 double totalScore = 0;
                 for (int j = 0; j < numberOfProperties; j++) {
-                    double PropertyValue = individuals.getPropertyValueOf(i, j);
-                    Requirement requirement = individuals.getRequirementOf(index, j);
-                    double PropertyWeight = individuals.getPropertyWeightOf(index, j);
+                    double PropertyValue = individualProperties[i][j];
+                    Requirement requirement = PropertyRequirement.setRequirement(
+                            Individual.decodeInputRequirement(individualRequirements[index][j])
+                    );
+                    double PropertyWeight = individualWeights[i][j];
                     totalScore += getDefaultScaling(requirement, PropertyValue) * PropertyWeight;
                 }
-                // Add
                 a.add(totalScore);
             }
         } else {
@@ -197,9 +214,12 @@ public class PreferencesProvider {
             for (int i = 0; i < sizeOf1; i++) {
                 double totalScore = 0;
                 for (int j = 0; j < numberOfProperties; j++) {
-                    double PropertyValue = individuals.getPropertyValueOf(i, j);
-                    Requirement requirement = individuals.getRequirementOf(index, j);
-                    double PropertyWeight = individuals.getPropertyWeightOf(index, j);
+                    double PropertyValue = individualProperties[i][j];
+                    // TODO
+                    Requirement requirement = PropertyRequirement.setRequirement(
+                            Individual.decodeInputRequirement(individualRequirements[index][j])
+                    );
+                    double PropertyWeight = individualWeights[i][j];
                     totalScore += getDefaultScaling(requirement, PropertyValue) * PropertyWeight;
                 }
                 // Add

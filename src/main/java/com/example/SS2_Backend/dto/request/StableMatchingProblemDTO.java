@@ -19,6 +19,7 @@ public class StableMatchingProblemDTO {
     private int[] individualSetIndices;
     private int[] individualCapacities;
 
+    // XU LY REQUIREMENT instead of String??
     private List<List<String>> individualRequirements;
     private List<List<Double>> individualWeights;
     private List<List<Double>> individualProperties;

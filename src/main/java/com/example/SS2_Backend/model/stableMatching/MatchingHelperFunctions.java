@@ -4,7 +4,7 @@ import java.util.Arrays;
 import static com.example.SS2_Backend.util.Utils.isDouble;
 import static com.example.SS2_Backend.util.Utils.isInteger;
 
-public class Individual {
+public class MatchingHelperFunctions {
     public static String[] decodeInputRequirement(String item) {
         item = item.trim();
         String[] result = new String[2];
@@ -71,4 +71,6 @@ public class Individual {
             return -1;
         }
     }
+
+
 }

@@ -23,21 +23,18 @@ public class PreferencesProvider {
     private Map<String, Set<Integer>> variablesOfSet2;
 
     public PreferencesProvider(
-        String[][] individualRequirements,
-        double[][] individualWeights,
-        double[][] individualProperties,
-        int numberOfIndividuals,
-        int[] individualSetIndices
+            String[][] individualRequirements,
+            double[][] individualWeights,
+            double[][] individualProperties,
+            int numberOfIndividuals,
+            int[] individualSetIndices
     ) {
         this.individualRequirements = individualRequirements;
         this.individualWeights = individualWeights;
         this.individualProperties = individualProperties;
-
         this.individualSetIndices = individualSetIndices;
-
         this.numberOfIndividuals = numberOfIndividuals;
 
-        // UPDATE Individualist's initialize()
         this.sizeOf1 = 0;
         this.sizeOf2 = numberOfIndividuals - sizeOf1;
     }
@@ -49,6 +46,8 @@ public class PreferencesProvider {
                 .variables(convertMapToSet(variablesOfSet1))
                 .build();
     }
+
+
 
     public void setEvaluateFunctionForSet2(String EvaluateFunction2) {
         if (expressionOfSet2 != null) return;
@@ -131,7 +130,6 @@ public class PreferencesProvider {
             String key = entry.getKey();
             Set<Integer> values = entry.getValue();
             switch (key) {
-                // TODO
                 case "P":
                     for (Integer value : values) {
                         double val = individualProperties[idx2][value - 1];
@@ -147,7 +145,7 @@ public class PreferencesProvider {
                 case "R":
                     for (Integer value : values) {
                         double val = PropertyRequirement.setRequirement(
-                                Individual.decodeInputRequirement(individualRequirements[idx1][value - 1])
+                                MatchingHelperFunctions.decodeInputRequirement(individualRequirements[idx1][value - 1])
                         ).getValueForFunction();
                         variablesValues.put(key + value, val);
                     }
@@ -202,7 +200,7 @@ public class PreferencesProvider {
                 for (int j = 0; j < numberOfProperties; j++) {
                     double PropertyValue = individualProperties[i][j];
                     Requirement requirement = PropertyRequirement.setRequirement(
-                            Individual.decodeInputRequirement(individualRequirements[index][j])
+                            MatchingHelperFunctions.decodeInputRequirement(individualRequirements[index][j])
                     );
                     double PropertyWeight = individualWeights[i][j];
                     totalScore += getDefaultScaling(requirement, PropertyValue) * PropertyWeight;
@@ -217,7 +215,7 @@ public class PreferencesProvider {
                     double PropertyValue = individualProperties[i][j];
                     // TODO
                     Requirement requirement = PropertyRequirement.setRequirement(
-                            Individual.decodeInputRequirement(individualRequirements[index][j])
+                            MatchingHelperFunctions.decodeInputRequirement(individualRequirements[index][j])
                     );
                     double PropertyWeight = individualWeights[i][j];
                     totalScore += getDefaultScaling(requirement, PropertyValue) * PropertyWeight;

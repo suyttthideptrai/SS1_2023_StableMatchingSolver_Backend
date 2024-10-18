@@ -113,6 +113,16 @@ public class StableMatchingProblem implements Problem {
         }
     }
 
+    public int getNumberOfIndividualForSet0() {
+        int count = 0;
+        for (int i = 0; i < this.numberOfIndividuals; i++) {
+            if (individualSetIndices[i] == 0) {
+                count++;
+            }
+        }
+        return count;
+    }
+
     //No Args/Default Constructor
     public StableMatchingProblem() {
     }
@@ -269,7 +279,7 @@ public class StableMatchingProblem implements Problem {
             //System.out.println("working on Node:" + Node);
             //Get pref List of LeftNode
             PreferenceList nodePreference = preferenceLists.get(newNode);
-//			int padding = individuals.getPaddingOf(Node);
+//			int padding = getPaddingOf(Node);
             //Loop through LeftNode's preference list to find a Match
             for (int i = 0; i < nodePreference.size(); i++) {
                 //Next Match (RightNode) is found on the list
@@ -506,7 +516,7 @@ public class StableMatchingProblem implements Problem {
 
     public double[] getAllSatisfactions(Matches matches) {
         double[] satisfactions = new double[numberOfIndividuals];
-        int numSet0 = individuals.getNumberOfIndividualForSet0();
+        int numSet0 = getNumberOfIndividualForSet0();
         for (int i = 0; i < numSet0; i++) {
             double setScore = 0.0;
             PreferenceList ofInd = preferenceLists.get(i);
@@ -530,7 +540,7 @@ public class StableMatchingProblem implements Problem {
 
     private double[] getSatisfactoryOfASetByDefault(double[] Satisfactions, int set) {
         int numberOfIndividual = numberOfIndividuals;
-        int numberOfIndividualOfSet0 = individuals.getNumberOfIndividualForSet0();
+        int numberOfIndividualOfSet0 = getNumberOfIndividualForSet0();
         double[] setSatisfactions;
         if (set == 0) {
             setSatisfactions = new double[numberOfIndividualOfSet0];

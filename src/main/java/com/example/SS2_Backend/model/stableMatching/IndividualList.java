@@ -11,12 +11,15 @@ import static com.example.SS2_Backend.util.Utils.formatDouble;
 
 @Getter
 public class IndividualList {
-
-    private final List<Individual> individuals;
-    private final int numberOfIndividual;
-    private int numberOfIndividualForSet0;
+    // Change from private to protected
+    protected final List<Individual> individuals;
+    // Change from private to protected
+    protected final int numberOfIndividual;
+    // Change from private to protected
+    protected int numberOfIndividualForSet0;
     private final int numberOfProperties;
-    private final int[] capacities;
+    // Change from private to protected
+    protected final int[] capacities;
     private final String[] propertyNames;
 
     /**

@@ -9,8 +9,10 @@ import java.util.*;
 
 public class PreferencesProvider {
 
-    private final IndividualList individuals;
-    private final int numberOfIndividuals;
+    // Change from private to protected
+    protected final IndividualList individuals;
+    // Change from private to protected
+    protected final int numberOfIndividuals;
     private final int sizeOf1;
     private final int sizeOf2;
     @Getter
@@ -108,7 +110,8 @@ public class PreferencesProvider {
         return getVariableValues(this.variablesOfSet2, indexOfEvaluator, indexOfBeEvaluated);
     }
 
-    private Map<String, Double> getVariableValues(Map<String, Set<Integer>> variables,
+    // Change from private to protected
+    protected Map<String, Double> getVariableValues(Map<String, Set<Integer>> variables,
                                                   int idx1,
                                                   int idx2) {
         Map<String, Double> variablesValues = new HashMap<>();

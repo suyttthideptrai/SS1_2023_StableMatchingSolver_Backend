@@ -26,6 +26,7 @@ public class MatchingProblem implements Problem {
 
     IndividualList individuals;
     List<PreferenceList> preferenceLists;
+    int [][] excludedPairs;
     PreferenceProvider preferencesProvider;
     String evaluateFunctionForProviders;
     String evaluateFunctionForConsumers;
@@ -34,8 +35,9 @@ public class MatchingProblem implements Problem {
     boolean consumerFunctionStatus = false;
     boolean fitnessFunctionStatus = false;
 
-    public void setPopulation(ArrayList<Individual> individuals, String[] propertiesNames) {
+    public void setPopulation(ArrayList<Individual> individuals, String[] propertiesNames, int [][] excludedPairs) {
         this.individuals = new IndividualList(individuals, propertiesNames);
+        this.excludedPairs = excludedPairs;
         initializeFields();
     }
 
@@ -101,9 +103,10 @@ public class MatchingProblem implements Problem {
 
     @Override
     public Solution newSolution() {
-        Solution solution = new Solution(1, 1);
+        Solution solution = new Solution(1, 1, 1);
         Permutation permutationVar = new Permutation(individuals.getTotalIndividuals());
         solution.setVariable(0, permutationVar);
+        //solution.setConstraints(excludedPairs);
         return solution;
     }
 
@@ -343,7 +346,7 @@ public class MatchingProblem implements Problem {
 
     @Override
     public int getNumberOfConstraints() {
-        return 0;
+        return 1;
     }
 
     @Override

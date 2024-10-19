@@ -15,7 +15,7 @@ import java.util.*;
 @Data
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
 public class Match implements Serializable {
-
+    // check excluded pairs with the output map
     @Serial
     private static final long serialVersionUID = 1L;
     // The matches for each provider (provider -> set of consumers)

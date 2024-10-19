@@ -17,6 +17,9 @@ public class Matches implements Serializable {
     private final Vector<Set<Integer>> matches;
     private final Set<Integer> leftOvers = new HashSet<>();
 
+    // số lượng các phần tử mà 1 phần tử có thể match
+    // với bài toán one to many thì phần tử consumer chỉ có thể match với 1 producer, nên capacity = 1
+    // phần tử producer có thể match với nhiều consumer, nên capacity = n
     public Matches(int cap) {
         this.matches = new Vector<>(cap);
         for (int i = 0; i < cap; i++) {

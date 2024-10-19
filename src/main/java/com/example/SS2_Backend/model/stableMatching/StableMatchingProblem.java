@@ -65,7 +65,6 @@ public class StableMatchingProblem implements Problem {
     private PreferencesProvider preferencesProvider;
     private boolean f1Status = false;
     private boolean f2Status = false;
-    private boolean f3Status = false; // new
     private boolean fnfStatus = false;
 
     private String problemName;
@@ -87,14 +86,12 @@ public class StableMatchingProblem implements Problem {
         preferenceLists = getPreferences();
     }
 
-
-    //Modify for 3 set matching
     private void initializePrefProvider() {
         if (this.evaluateFunctionForSet1 != null) {
-            this.preferencesProvider.setEvaluateFunction(0, evaluateFunctionForSet1);
+            this.preferencesProvider.setEvaluateFunctionForSet1(evaluateFunctionForSet1);
         }
         if (this.evaluateFunctionForSet2 != null) {
-            this.preferencesProvider.setEvaluateFunction(1, evaluateFunctionForSet2);
+            this.preferencesProvider.setEvaluateFunctionForSet2(evaluateFunctionForSet2);
         }
     }
 

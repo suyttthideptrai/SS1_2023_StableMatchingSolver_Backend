@@ -19,10 +19,10 @@ public class SampleDataGenerator {
     public static void main(String[] args) {
         // Generate Individuals data Randomly
         ArrayList<Individual> individuals = generateSampleIndividualsWithCapacity(
-                20,
                 2,
+                1,
                 false,
-                4,
+                2,
                 1,
                 false,
                 2
@@ -37,12 +37,19 @@ public class SampleDataGenerator {
 		String f2 = "none";
 		String fnf = "none";
 
+        int [][] excludedPairs = new int[][]{
+                {0, 3},
+                {1, 2},
+                {0, 2},
+                {1, 3}
+        };
+
         // Create an Instance of StableMatchingProblem class with randomly generated data
         StableMatchingProblem problem = new StableMatchingProblem();
         problem.setEvaluateFunctionForSet1(f1);
         problem.setEvaluateFunctionForSet2(f2);
         problem.setFitnessFunction(fnf);
-        problem.setPopulation(individuals, propNames);
+        problem.setPopulation(individuals, propNames, excludedPairs);
 
         // Print the whole Populations
         System.out.println(

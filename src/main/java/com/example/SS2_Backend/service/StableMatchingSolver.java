@@ -317,10 +317,18 @@ public class StableMatchingSolver {
             matchingSolution.setSetSatisfactions(problem.getAllSatisfactions((MatchesOTO) results
                     .get(0)
                     .getAttribute("matches")));
-            return ResponseEntity.ok(Response.builder().status(200).message("[Service] Stable Matching: Solve stable matching problem successfully!").data(matchingSolution).build());
+            return ResponseEntity.ok(Response.builder()
+                    .status(200)
+                    .message("[Service] Stable Matching: Solve stable matching problem successfully!")
+                    .data(matchingSolution)
+                    .build());
         } catch (Exception e) {
             log.error("[Service] Stable Matching: Error solving stable matching problem: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Response.builder().status(HttpStatus.INTERNAL_SERVER_ERROR.value()).message("[Service] Stable Matching: Error solving stable matching problem.").data(null).build());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Response.builder()
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                    .message("[Service] Stable Matching: Error solving stable matching problem.")
+                    .data(null)
+                    .build());
         }
     }
     private MatchingSolution formatSolutionOTO(String algorithm, NondominatedPopulation result, double Runtime) {

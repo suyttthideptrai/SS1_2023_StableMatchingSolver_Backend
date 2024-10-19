@@ -1,7 +1,5 @@
 package com.example.SS2_Backend.model.stableMatching;
 
-import com.example.SS2_Backend.model.stableMatching.*;
-import com.example.SS2_Backend.model.stableMatching.Matches.Matches;
 import com.example.SS2_Backend.model.stableMatching.Matches.MatchesOTO;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,9 +8,13 @@ import org.moeaframework.core.Problem;
 import org.moeaframework.core.Solution;
 import org.moeaframework.core.variable.Permutation;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.example.SS2_Backend.util.StringExpressionEvaluator.convertToStringWithoutScientificNotation;
 
+/*
+* An extended version of StableMatchingProblem model that designed for one-to-one problem (problem where every individual has capacity = 0).
+* */
 @Slf4j
 @Getter@Setter
 public class StableMatchingOTOProblem implements Problem {
@@ -21,8 +23,8 @@ public class StableMatchingOTOProblem implements Problem {
     private static final List<String> VALID_EVALUATE_FUNCTION_KEYWORDS = Arrays.asList("P", "W", "R");
     private String evaluateFunctionForSet1, evaluateFunctionForSet2, fitnessFunction;
     private boolean func1 = false, func2 = false, fitfunc = false;
-    private int n, padding;
-    private int[][] preferences;
+    private int problemSize, padding;
+    private List<PreferenceList> preferences;
     private String problemName;
     public StableMatchingOTOProblem() {
         super();
@@ -35,30 +37,21 @@ public class StableMatchingOTOProblem implements Problem {
     private void initializeFields() {
         this.preferencesProvider = new PreferencesProvider(individuals);
         initializePrefProvider();
-        n = individuals.getNumberOfIndividual();
-        preferences = new int[n][];
+        problemSize = individuals.getNumberOfIndividual();
+        this.preferences = new ArrayList<>();
         this.padding = individuals.getNumberOfIndividualForSet0();
-        for (int i = 0; i < n; i++) {
+        for (int i = 0; i < problemSize; i++) {
             PreferenceList individualPref = getPreferenceOfIndividual(i);
-            if (i >= padding) {
-                preferences[i] = individualPref.getPositions();
-            } else {
-                preferences[i] = addPadding(individualPref.getPositions(), this.padding);
-            }
+            this.preferences.add(individualPref);
         }
     }
-    static int[] addPadding(int[] array, int padding) {
-        for (int i = 0; i < array.length; i++) {
-            array[i] += padding;
-        }
-        return array;
-    }
+
     public PreferenceList getPreferenceOfIndividual(int index) {
         PreferenceList a;
         if (!func1 && !func2) {
-            a = preferencesProvider.getPreferenceListByDefault(index);
+            a = this.preferencesProvider.getPreferenceListByDefault(index);
         } else {
-            a = preferencesProvider.getPreferenceListByFunction(index);
+            a = this.preferencesProvider.getPreferenceListByFunction(index);
         }
         return a;
     }
@@ -125,22 +118,18 @@ public class StableMatchingOTOProblem implements Problem {
         }
     }
     public MatchesOTO StableMatchingAlgorithm(int[] order) {
-        Queue<Integer> singleQueue = new LinkedList<>();
-        for(int node : order) singleQueue.add(node);
-        int[] matches = new int[n];
-        for (int i = 0; i < n; i++) matches[i] = -1;
+        Queue<Integer> singleQueue = Arrays.stream(order).boxed().collect(Collectors.toCollection(LinkedList::new));
+        int[] matches = new int[problemSize];
+        for (int i = 0; i < problemSize; i++) matches[i] = -1;
         Set<Integer> matched = new HashSet<>();
         Set<Integer> leftOver = new HashSet<>();
-        int loop = 0;
         while(!singleQueue.isEmpty()){
             int a = singleQueue.poll();
             if (matched.contains(a)) continue;
-            // Prevent infinite loop
-            if (loop > 2 * n) return MatchesOTO.getEmptyObject();
-            int[] aPreference = preferences[a];
-            int prefLen = aPreference.length;
+            PreferenceList aPreference = preferences.get(a);
+            int prefLen = aPreference.size();
             for (int i = 0; i < prefLen; i++) {
-                int b = aPreference[i];
+                int b = aPreference.getIndexByPosition(i);
                 if (matches[a] == b && matches[b] == a) break;
                 if (!matched.contains(b)) {
                     matched.add(a);
@@ -163,43 +152,31 @@ public class StableMatchingOTOProblem implements Problem {
                     }
                 }
             }
-            loop++;
         }
         return new MatchesOTO(matches, leftOver);
     }
     public double[] getAllSatisfactions(MatchesOTO matches) {
-        if (matches.isEmpty()) return new double[0];
         List<Integer> list = matches.getMatches();
-        double[] totalSatisfaction = new double[n];
-        for (int a = 0; a < n; a++) {
+        double[] totalSatisfaction = new double[problemSize];
+        for (int a = 0; a < problemSize; a++) {
             int b = list.get(a);
             if (b == -1) totalSatisfaction[a] = 0;
             else {
-                int rankA = findRank(a, b);
-                int rankB = findRank(b, a);
-                totalSatisfaction[a] = preferences[b].length - rankA + preferences[a].length - rankB;
+                double aSatis = getPreferenceOfIndividual(a).getScoreByIndex(b);
+                double bSatis = getPreferenceOfIndividual(b).getScoreByIndex(a);
+                totalSatisfaction[a] = aSatis + bSatis;
             }
         }
         return totalSatisfaction;
     }
 
     public boolean bLikeAMore(int a, int b, int c) {
-        for (int individual : preferences[b]) {
-            if (individual == a) return true;
-            if (individual == c) return false;
-        }
-        throw new RuntimeException("The input (preference) have problem.");
-    }
-    public int findRank(int target, int from) {
-        for (int i = 0; i < preferences[from].length; i++) {
-            if (preferences[from][i] == target) return i;
-        }
-        throw new RuntimeException("The input (preference) have problem");
+        return preferences.get(b).isScoreGreater(a, c);
     }
     @Override
     public Solution newSolution() {
         Solution solution = new Solution(this.getNumberOfVariables(), this.getNumberOfObjectives());
-        solution.setVariable(0, new Permutation(n));
+        solution.setVariable(0, new Permutation(problemSize));
         return solution;
     }
 

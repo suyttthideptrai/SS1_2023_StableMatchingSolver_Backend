@@ -72,6 +72,7 @@ public class StableMatchingProblem implements Problem {
     private int[] individualSetIndices;
     private int[] individualCapacities;
      // ==================================================
+
     private String problemName;
 
     private static final List<String> VALID_EVALUATE_FUNCTION_KEYWORDS = Arrays.asList("P", "W", "R");
@@ -100,6 +101,15 @@ public class StableMatchingProblem implements Problem {
                 numberOfIndividuals,
                 individualSetIndices
         );
+
+        int count = 0;
+        for (int i = 0; i < this.numberOfIndividuals; i++) {
+            if (individualSetIndices[i] == 0) {
+                count++;
+            }
+        }
+        this.preferencesProvider.numberOfIndividualForSet0 = count;
+        
         initializePrefProvider();
         preferenceLists = getPreferences();
     }
@@ -111,16 +121,6 @@ public class StableMatchingProblem implements Problem {
         if (this.evaluateFunctionForSet2 != null) {
             this.preferencesProvider.setEvaluateFunctionForSet2(evaluateFunctionForSet2);
         }
-    }
-
-    public int getNumberOfIndividualForSet0() {
-        int count = 0;
-        for (int i = 0; i < this.numberOfIndividuals; i++) {
-            if (individualSetIndices[i] == 0) {
-                count++;
-            }
-        }
-        return count;
     }
 
     //No Args/Default Constructor
@@ -516,7 +516,7 @@ public class StableMatchingProblem implements Problem {
 
     public double[] getAllSatisfactions(Matches matches) {
         double[] satisfactions = new double[numberOfIndividuals];
-        int numSet0 = getNumberOfIndividualForSet0();
+        int numSet0 = this.preferencesProvider.numberOfIndividualForSet0;
         for (int i = 0; i < numSet0; i++) {
             double setScore = 0.0;
             PreferenceList ofInd = preferenceLists.get(i);
@@ -540,7 +540,7 @@ public class StableMatchingProblem implements Problem {
 
     private double[] getSatisfactoryOfASetByDefault(double[] Satisfactions, int set) {
         int numberOfIndividual = numberOfIndividuals;
-        int numberOfIndividualOfSet0 = getNumberOfIndividualForSet0();
+        int numberOfIndividualOfSet0 = this.preferencesProvider.numberOfIndividualForSet0;
         double[] setSatisfactions;
         if (set == 0) {
             setSatisfactions = new double[numberOfIndividualOfSet0];

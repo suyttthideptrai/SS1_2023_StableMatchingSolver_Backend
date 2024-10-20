@@ -15,6 +15,7 @@ public class PreferencesProvider {
     private final int numberOfIndividuals;
     private final int sizeOf1;
     private final int sizeOf2;
+    public int numberOfIndividualForSet0;
     @Getter
     private Expression expressionOfSet1;
     @Getter
@@ -38,6 +39,7 @@ public class PreferencesProvider {
         this.sizeOf1 = 0;
         this.sizeOf2 = numberOfIndividuals - sizeOf1;
     }
+
 
     public void setEvaluateFunctionForSet1(String EvaluateFunction1) {
         if (expressionOfSet1 != null) return;

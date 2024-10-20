@@ -36,7 +36,7 @@ public class StableMatchingSolver {
         try {
             log.info("[Service] Stable Matching: Load problem...");
             log.info("[Service] Stable Matching: Building preference list...");
-            log.info(request.toString());
+
             StableMatchingProblem problem = new StableMatchingProblem();
 
             problem.setProblemName(request.getProblemName());

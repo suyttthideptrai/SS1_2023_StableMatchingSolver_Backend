@@ -1,6 +1,6 @@
-package com.example.SS2_Backend.model.StableMatching;
+package com.example.SS2_Backend.model.stableMatching;
 
-import com.example.SS2_Backend.model.StableMatching.Requirement.Requirement;
+import com.example.SS2_Backend.model.stableMatching.Requirement.Requirement;
 import lombok.Getter;
 
 import java.util.Arrays;

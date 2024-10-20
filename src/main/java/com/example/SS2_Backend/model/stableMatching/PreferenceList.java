@@ -1,4 +1,4 @@
-package com.example.SS2_Backend.model.StableMatching;
+package com.example.SS2_Backend.model.stableMatching;
 
 import lombok.Getter;
 

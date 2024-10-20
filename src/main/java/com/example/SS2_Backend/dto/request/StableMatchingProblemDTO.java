@@ -1,15 +1,13 @@
 package com.example.SS2_Backend.dto.request;
 
-import com.example.SS2_Backend.model.StableMatching.Individual;
+import com.example.SS2_Backend.model.stableMatching.Individual;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Map;
 
 @Data
 @NoArgsConstructor

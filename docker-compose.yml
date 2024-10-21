@@ -1,0 +1,13 @@
+version: "3.8"
+services:
+  ss1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: "16g"

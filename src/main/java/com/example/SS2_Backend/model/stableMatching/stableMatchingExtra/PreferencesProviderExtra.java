@@ -33,6 +33,8 @@ public class PreferencesProviderExtra extends PreferencesProvider {
     }
 
 
+
+
     public void setEvaluateFunction(int set, String evaluateFunction) {
         if (expressions.containsKey(set)) return;
         Map<String, Set<Integer>> vars = filterVariable(evaluateFunction);
@@ -78,6 +80,7 @@ public class PreferencesProviderExtra extends PreferencesProvider {
         a.sort();
         return a;
     }
+
 
     @Override
     public PreferenceList getPreferenceListByDefault(int index) {

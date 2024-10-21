@@ -73,4 +73,9 @@ public class Matches implements Serializable {
         return "Left Overs: " + leftOvers + "\n";
     }
 
+    public void disMatch(int target, Collection<Integer> nodeToRemove) {
+        matches
+                .get(target)
+                .removeAll(nodeToRemove);
+    }
 }

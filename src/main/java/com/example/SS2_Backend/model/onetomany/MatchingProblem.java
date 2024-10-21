@@ -103,10 +103,9 @@ public class MatchingProblem implements Problem {
 
     @Override
     public Solution newSolution() {
-        Solution solution = new Solution(1, 1, 1);
+        Solution solution = new Solution(1, 1);
         Permutation permutationVar = new Permutation(individuals.getTotalIndividuals());
         solution.setVariable(0, permutationVar);
-        //solution.setConstraints(excludedPairs);
         return solution;
     }
 
@@ -114,6 +113,12 @@ public class MatchingProblem implements Problem {
     public void evaluate(Solution solution) {
         log.info("Evaluating...");
         Matches result = oneToManyMatching(solution.getVariable(0));
+        for (int[] excludedPair : excludedPairs) {
+            if (result.hasPairExcluded(excludedPair[0], excludedPair[1])) {
+                solution.setObjective(0, -Double.MAX_VALUE);
+                return;
+            }
+        }
         double[] satisfactions = getAllSatisfactions(result);
         double fitnessScore;
         if (!this.fitnessFunctionStatus) {
@@ -127,7 +132,7 @@ public class MatchingProblem implements Problem {
     }
 
     private Matches oneToManyMatching(Variable var) {
-        Matches match = new Matches(individuals.getTotalIndividuals());
+        Matches match = new Matches(individuals.getProviderCount());
         Set<Integer> matchedConsumers = new HashSet<>();
         Permutation castVar = (Permutation) var;
         int[] decodeVar = castVar.toArray();

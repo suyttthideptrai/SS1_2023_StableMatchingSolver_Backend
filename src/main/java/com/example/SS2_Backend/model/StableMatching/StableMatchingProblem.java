@@ -57,6 +57,7 @@ public class StableMatchingProblem implements Problem {
     private String evaluateFunctionForSet1;
 
     private String evaluateFunctionForSet2;
+    int [][] excludedPairs;
     /**
      * Preference List of each individual/object inside this whole population
      */
@@ -77,8 +78,9 @@ public class StableMatchingProblem implements Problem {
      * first setter for the class
      * @param individuals array of individual Objects
      */
-    public void setPopulation(ArrayList<Individual> individuals, String[] propertiesNames) {
+    public void setPopulation(ArrayList<Individual> individuals, String[] propertiesNames, int[][] excludedPairs) {
         this.individuals = new IndividualList(individuals, propertiesNames);
+        this.excludedPairs = excludedPairs;
         initializeFields();
     }
 
@@ -169,6 +171,17 @@ public class StableMatchingProblem implements Problem {
     public void evaluate(Solution solution) {
         log.info("Evaluating ... "); // Start matching & collect result
         Matches result = StableMatchingExtra(solution.getVariable(0));
+        // check excluded pairs here
+        // first check the first pair of the 2d array, the first element is the index of the individual, the second element is the index of the individual that the first individual is matched with
+        // if result.getSet(firstIndividualIndex).contains(secondIndividualIndex) == true [0,1], result.getSet(0) = [1,2,3] .contains(1) == true, return, stop the evaluation
+        // then the pair is excluded from the result
+        // the below case work best for 1,1 matching
+        for (int[] excludedPair : excludedPairs) {
+            if (result.getSet(excludedPair[0]).contains(excludedPair[1])) {
+                solution.setObjective(0, -Double.MAX_VALUE);
+                return;
+            }
+        }
         double[] Satisfactions = getAllSatisfactions(result); // Get all satisfactions
         double fitnessScore;
         if (!this.fnfStatus) {

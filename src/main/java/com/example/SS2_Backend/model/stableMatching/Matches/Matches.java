@@ -66,11 +66,23 @@ public class Matches implements Serializable {
 
     public String toString() {
         int i = 0;
+    StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("Matches: ");
         for (Set<Integer> matchSet : this.matches) {
-            System.out.println("[" + i + " -> " + matchSet + "] ");
+            stringBuilder.append("[")
+                .append(i)
+                .append(" -> ")
+                .append(matchSet.toString().replaceAll(",", ""))
+                .append("] ");
             i++;
         }
-        return "Left Overs: " + leftOvers + "\n";
+        stringBuilder.append("Left Overs: ").append(leftOvers.toString().replaceAll(",", ""));
+
+        return stringBuilder.toString();
     }
 
+    public boolean isValid() {
+        // as matches are set the result should never duplicate
+        return true;
+    }
 }

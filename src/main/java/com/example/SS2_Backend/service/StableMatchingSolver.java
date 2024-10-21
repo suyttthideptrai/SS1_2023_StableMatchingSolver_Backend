@@ -13,12 +13,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.moeaframework.Executor;
 import org.moeaframework.core.*;
 import org.moeaframework.core.termination.MaxFunctionEvaluations;
+import org.moeaframework.core.variable.EncodingUtils;
 import org.moeaframework.util.TypedProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+import java.io.PrintWriter;
 import java.util.*;
 
 @Service
@@ -37,7 +40,12 @@ public class StableMatchingSolver {
         try {
             log.info("[Service] Stable Matching: Load problem...");
             log.info("[Service] Stable Matching: Building preference list...");
-            StableMatchingProblem problem = new StableMatchingProblem();
+
+            // pass the csv file
+            List<String> content = new ArrayList<>();
+            content.add("Chromosome,Is Duplicated,Matches,Is Valid");
+
+            StableMatchingProblem problem = new StableMatchingProblem(content);
 
             problem.setProblemName(request.getProblemName());
             problem.setEvaluateFunctionForSet1(request.getEvaluateFunction()[0]);
@@ -58,8 +66,19 @@ public class StableMatchingSolver {
                     request.getMaxTime(),
                     request.getDistributedCores());
 
-
             assert results != null;
+
+            // validate solution result
+
+            File csv = new File("validate-solution.csv");
+
+            try (PrintWriter pw = new PrintWriter(csv)) {
+                content
+                    .forEach(pw::println);
+
+            }
+
+
             //	Testing tester = new Testing((Matches) results.get(0).getAttribute("matches"), problem.getNumberOfIndividual(), problem.getCapacities());
             //	System.out.println("[Testing] Solution has duplicate: " + tester.hasDuplicate());
             long endTime = System.currentTimeMillis();
@@ -174,7 +193,7 @@ public class StableMatchingSolver {
         simpMessagingTemplate.convertAndSendToUser(sessionCode,
                 "/progress",
                 createProgressMessage("Initializing the problem..."));
-        StableMatchingProblem problem = new StableMatchingProblem();
+        StableMatchingProblem problem = new StableMatchingProblem(new ArrayList<>());
         problem.setEvaluateFunctionForSet1(request.getEvaluateFunction()[0]);
         problem.setEvaluateFunctionForSet2(request.getEvaluateFunction()[1]);
         problem.setPopulation(request.getIndividuals(), request.getAllPropertyNames());

@@ -38,7 +38,7 @@ public class SampleDataGenerator {
 		String fnf = "none";
 
         // Create an Instance of StableMatchingProblem class with randomly generated data
-        StableMatchingProblem problem = new StableMatchingProblem();
+        StableMatchingProblem problem = new StableMatchingProblem(new ArrayList<>());
         problem.setEvaluateFunctionForSet1(f1);
         problem.setEvaluateFunctionForSet2(f2);
         problem.setFitnessFunction(fnf);

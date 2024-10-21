@@ -7,8 +7,10 @@ import net.objecthunter.exp4j.ExpressionBuilder;
 import org.moeaframework.core.Problem;
 import org.moeaframework.core.Solution;
 import org.moeaframework.core.Variable;
+import org.moeaframework.core.variable.EncodingUtils;
 import org.moeaframework.core.variable.Permutation;
 
+import java.io.File;
 import java.util.*;
 import java.util.function.DoubleUnaryOperator;
 import java.util.stream.DoubleStream;
@@ -71,6 +73,9 @@ public class StableMatchingProblem implements Problem {
 
     private static final List<String> VALID_EVALUATE_FUNCTION_KEYWORDS = Arrays.asList("P", "W", "R");
 
+    // validate output
+    private List<String> content;
+
     /**
      * first setter for the class
      * @param individuals array of individual Objects
@@ -96,7 +101,8 @@ public class StableMatchingProblem implements Problem {
     }
 
     //No Args/Default Constructor
-    public StableMatchingProblem() {
+    public StableMatchingProblem(List<String> content) {
+        this.content = content;
     }
 
     private boolean isValidEvaluateFunction(String function) {
@@ -167,6 +173,39 @@ public class StableMatchingProblem implements Problem {
     public void evaluate(Solution solution) {
         log.info("Evaluating ... "); // Start matching & collect result
         Matches result = StableMatchingExtra(solution.getVariable(0));
+
+        // format for csv
+        int[] permutation = EncodingUtils.getPermutation(solution.getVariable(0));
+        StringBuilder str = new StringBuilder();
+        for (int index : permutation) {
+            str.append(index);
+            str.append(" ");
+        }
+
+        Set<Integer> set = new HashSet<>();
+        for (int index: permutation) {
+            set.add(index);
+        }
+
+        str.append(",");
+
+        if ( set.size() != permutation.length) {
+            str.append("true");
+        } else {
+            str.append("false");
+        }
+
+        str.append(",");
+
+        // TODO add match result
+        str.append(result);
+
+        str.append(",");
+
+        str.append(result.isValid());
+
+        content.add(str.toString());
+
         double[] Satisfactions = getAllSatisfactions(result); // Get all satisfactions
         double fitnessScore;
         if (!this.fnfStatus) {

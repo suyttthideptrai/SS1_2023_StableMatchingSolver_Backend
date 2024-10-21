@@ -1,10 +1,12 @@
 package com.example.SS2_Backend.controller;
 
 import com.example.SS2_Backend.dto.request.GameTheoryProblemDTO;
+import com.example.SS2_Backend.dto.request.NewStableMatchingProblemDTO;
 import com.example.SS2_Backend.dto.request.StableMatchingProblemDTO;
 import com.example.SS2_Backend.dto.response.Response;
 import com.example.SS2_Backend.service.GameTheorySolver;
 import com.example.SS2_Backend.service.StableMatchingSolver;
+import com.example.SS2_Backend.service.StableMatchingSolverRBO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +27,8 @@ public class HomeController {
     private GameTheorySolver gameTheorySolver;
     @Autowired
     private StableMatchingSolver stableMatchingSolver;
+    @Autowired
+    private StableMatchingSolverRBO stableMatchingSolverRBO;
 
 
     @GetMapping("/")
@@ -36,6 +40,15 @@ public class HomeController {
     @PostMapping("/stable-matching-solver")
     public CompletableFuture<ResponseEntity<Response>> solveStableMatching(@RequestBody StableMatchingProblemDTO object) {
         return CompletableFuture.completedFuture(stableMatchingSolver.solveStableMatching(object));
+    }
+
+    /*
+    * Đây là phần chạy RBO (Request Body Optimization) để giải Stable Matching Problem
+    * */
+    @Async("taskExecutor")
+    @PostMapping("/stable-matching-rbo-solver")
+    public CompletableFuture<ResponseEntity<Response>> solveStableMatching(@RequestBody NewStableMatchingProblemDTO object) {
+        return CompletableFuture.completedFuture(stableMatchingSolverRBO.solveStableMatching(object));
     }
 
     @Async("taskExecutor")

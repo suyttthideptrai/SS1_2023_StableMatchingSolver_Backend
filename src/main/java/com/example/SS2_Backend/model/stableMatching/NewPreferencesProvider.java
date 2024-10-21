@@ -7,7 +7,7 @@ import net.objecthunter.exp4j.ExpressionBuilder;
 
 import java.util.*;
 
-public class PreferencesProvider {
+public class NewPreferencesProvider {
     private final String[][] individualRequirements;
     private final double[][] individualWeights;
     private final double[][] individualProperties;
@@ -23,7 +23,7 @@ public class PreferencesProvider {
     private Map<String, Set<Integer>> variablesOfSet1;
     private Map<String, Set<Integer>> variablesOfSet2;
 
-    public PreferencesProvider(
+    public NewPreferencesProvider(
             String[][] individualRequirements,
             double[][] individualWeights,
             double[][] individualProperties,

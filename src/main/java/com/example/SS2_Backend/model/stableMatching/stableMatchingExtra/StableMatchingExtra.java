@@ -1,8 +1,6 @@
 package com.example.SS2_Backend.model.stableMatching.stableMatchingExtra;
 
 import com.example.SS2_Backend.model.stableMatching.PreferenceList;
-import com.example.SS2_Backend.model.stableMatching.PreferencesProvider;
-import com.example.SS2_Backend.model.stableMatching.stableMatchingExtra.StableMatchingProblem;
 
 import java.util.HashMap;
 import java.util.Map;

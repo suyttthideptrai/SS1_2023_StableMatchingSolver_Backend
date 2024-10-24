@@ -52,12 +52,6 @@ public class MatchingHelperFunctions {
         return result;
     }
 
-    public static void main(String[] args) {
-        String inputReq = "200.011--";
-        String[] requirement = decodeInputRequirement(inputReq);
-        System.out.println(Arrays.toString(requirement));
-    }
-
     private static int findFirstNonNumericIndex(String s) {
         s = s.trim();
         int index = 0;

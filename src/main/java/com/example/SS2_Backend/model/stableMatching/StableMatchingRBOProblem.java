@@ -255,8 +255,6 @@ public class StableMatchingRBOProblem implements Problem {
 
 
     private Matches StableMatchingExtra(Variable var) {
-        //Parse Variable
-        //System.out.println("parsing");
         Matches matches = new Matches(numberOfIndividuals);
         Set<Integer> MatchedNode = new HashSet<>();
         Permutation castVar = (Permutation) var;
@@ -267,32 +265,23 @@ public class StableMatchingRBOProblem implements Problem {
         }
 
         while (!UnMatchedNode.isEmpty()) {
-            //printPreferenceLists();
-            //System.out.println(matches);
-            //System.out.println(UnMatchedNode);
             int newNode;
             newNode = UnMatchedNode.poll();
 
             if (MatchedNode.contains(newNode)) {
                 continue;
             }
-            //System.out.println("working on Node:" + Node);
-            //Get pref List of LeftNode
             PreferenceList nodePreference = preferenceLists.get(newNode);
 //			int padding = getPaddingOf(Node);
             //Loop through LeftNode's preference list to find a Match
             for (int i = 0; i < nodePreference.size(); i++) {
                 //Next Match (RightNode) is found on the list
                 int preferNode = nodePreference.getIndexByPosition(i);
-                //System.out.println(Node + " Prefer : " + preferNode);
                 if (matches.isAlreadyMatch(preferNode, newNode)) {
-                    //System.out.println(Node + " is already match with " + preferNode);
                     break;
                 }
                 //If the RightNode Capacity is not full -> create connection between LeftNode - RightNode
                 if (!matches.isFull(preferNode, this.individualCapacities[preferNode])) {
-                    //System.out.println(preferNode + " is not full.");
-                    //AddMatch (Node, NodeToConnect)
                     matches.addMatch(preferNode, newNode);
                     matches.addMatch(newNode, preferNode);
                     MatchedNode.add(preferNode);

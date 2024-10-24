@@ -1,4 +1,4 @@
-package com.example.SS2_Backend.model.onetomany;
+package com.example.SS2_Backend.model.stableMatching.oneToMany;
 
 import lombok.Data;
 import lombok.experimental.FieldDefaults;

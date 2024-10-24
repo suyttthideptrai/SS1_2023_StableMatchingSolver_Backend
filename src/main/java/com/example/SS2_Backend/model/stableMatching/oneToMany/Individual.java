@@ -1,6 +1,7 @@
-package com.example.SS2_Backend.model.onetomany;
+package com.example.SS2_Backend.model.stableMatching.oneToMany;
 
-import com.example.SS2_Backend.model.onetomany.Requirement.Requirement;
+import com.example.SS2_Backend.model.stableMatching.Property;
+import com.example.SS2_Backend.model.stableMatching.Requirement.Requirement;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,7 +9,7 @@ import lombok.experimental.FieldDefaults;
 
 import java.util.List;
 
-import static com.example.SS2_Backend.model.StableMatching.Individual.decodeInputRequirement;
+import static com.example.SS2_Backend.model.stableMatching.Individual.decodeInputRequirement;
 
 @Data
 @AllArgsConstructor

@@ -1,6 +1,6 @@
-package com.example.SS2_Backend.model.onetomany;
+package com.example.SS2_Backend.model.stableMatching.oneToMany;
 
-import com.example.SS2_Backend.model.onetomany.Requirement.Requirement;
+import com.example.SS2_Backend.model.stableMatching.Requirement.Requirement;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
 import net.objecthunter.exp4j.Expression;

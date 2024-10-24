@@ -1,5 +1,10 @@
-package com.example.SS2_Backend.model.onetomany;
+package com.example.SS2_Backend.model.stableMatching;
 
+import com.example.SS2_Backend.model.stableMatching.oneToMany.Individual;
+import com.example.SS2_Backend.model.stableMatching.oneToMany.IndividualList;
+import com.example.SS2_Backend.model.stableMatching.oneToMany.Matches;
+import com.example.SS2_Backend.model.stableMatching.oneToMany.PreferenceList;
+import com.example.SS2_Backend.model.stableMatching.oneToMany.PreferenceProvider;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -22,11 +27,11 @@ import static com.example.SS2_Backend.util.StringExpressionEvaluator.*;
 @Data
 @NoArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
-public class MatchingProblem implements Problem {
+public class StableMatchingOTMProblem implements Problem {
 
     IndividualList individuals;
     List<PreferenceList> preferenceLists;
-    int [][] excludedPairs;
+    int[][] excludedPairs;
     PreferenceProvider preferencesProvider;
     String evaluateFunctionForProviders;
     String evaluateFunctionForConsumers;
@@ -35,7 +40,7 @@ public class MatchingProblem implements Problem {
     boolean consumerFunctionStatus = false;
     boolean fitnessFunctionStatus = false;
 
-    public void setPopulation(ArrayList<Individual> individuals, String[] propertiesNames, int [][] excludedPairs) {
+    public void setPopulation(ArrayList<Individual> individuals, String[] propertiesNames, int[][] excludedPairs) {
         this.individuals = new IndividualList(individuals, propertiesNames);
         this.excludedPairs = excludedPairs;
         initializeFields();

@@ -1,8 +1,8 @@
-package com.example.SS2_Backend.model.StableMatching;
+package com.example.SS2_Backend.model.stableMatching;
 
 import com.example.SS2_Backend.dto.request.IndividualDeserializer;
 
-import com.example.SS2_Backend.model.StableMatching.Requirement.Requirement;
+import com.example.SS2_Backend.model.stableMatching.Requirement.Requirement;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.Getter;

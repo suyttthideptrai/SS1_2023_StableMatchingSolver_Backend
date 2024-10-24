@@ -1,8 +1,8 @@
 package com.example.SS2_Backend.dto.request;
 
-import com.example.SS2_Backend.model.Conflict;
-import com.example.SS2_Backend.model.NormalPlayer;
-import com.example.SS2_Backend.model.SpecialPlayer;
+import com.example.SS2_Backend.model.gameTheory.Conflict;
+import com.example.SS2_Backend.model.gameTheory.NormalPlayer;
+import com.example.SS2_Backend.model.gameTheory.SpecialPlayer;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

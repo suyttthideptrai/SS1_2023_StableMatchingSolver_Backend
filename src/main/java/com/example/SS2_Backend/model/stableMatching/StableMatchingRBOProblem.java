@@ -64,14 +64,16 @@ public class StableMatchingRBOProblem implements Problem {
     private boolean f2Status = false;
     private boolean fnfStatus = false;
 
-    // NEW ==============================================
+    /* Phần được thay thế từ phần Code cũ
+    * Thay từ Individual từ Code cũ thành các Array khác nhau với độ dài bằng nhau
+    * */
+
     private String[][] individualRequirements;
     private double[][] individualWeights;
     private double[][] individualProperties;
     private int numberOfIndividuals;
     private int[] individualSetIndices;
     private int[] individualCapacities;
-     // ==================================================
 
     private String problemName;
 

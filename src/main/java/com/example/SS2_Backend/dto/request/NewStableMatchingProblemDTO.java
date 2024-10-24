@@ -15,9 +15,34 @@ public class NewStableMatchingProblemDTO {
     private int numberOfSets;
     private int numberOfIndividuals;
     private String[] allPropertyNames;
+
+    /* Các phần Array mới có độ dài bằng nhau được tách ra từ Individual gốc
+     * LƯU Ý: Nếu bạn không phải là Maintainer cũ thì không cần đọc Documentation này. Phần này
+     * sẽ để giải thích cách hoạt động của phần mới và thực hiện những thay đổi khác
+     *
+     * Thay vì sử dụng IndividualList và Deserializer Class như StableMatchingProblemDTO
+     * thì trong NewStableMatchingProblemDTO sẽ thay bằng
+     * Mỗi một Individual bao gồm những phần sẽ được xử lý ở Backend:
+     * - SetIndex
+     * - Capacity
+     *
+     * Những thành phần sau đây được chuyển đổi từ List<Property>, mỗi một Property bao gồm:
+     * - Requirement -> individualRequirements
+     * - Weight -> individualWeights
+     * - Value -> individualProperties
+     *
+     * Ở đây sử dụng 2D Array cho 3 phần này vì:
+     * Trong mỗi một Individual sẽ có ít nhất 1 Property trở lên.
+     *
+     * Ví dụ: individualProperties (Cấu trúc của các 2D Array khác cũng tương tự)
+     * [ (3 số trong một Array nhỏ ([0, 0, 0]) ở đây đại diện cho 3 Property cho mỗi Individual, độ dài bằng nhau cho từng Individual)
+     *  [0, 0, 0], -> Số các Property Value thuộc Individual 1 gốc
+     *  [0, 0, 0], -> Số các Property Value thuộc Individual 2 gốc
+     *  [0, 0, 0] -> Số các Property Value thuộc Individual 3 gốc
+     * ] -> Danh sách này chứa toàn bộ cho cả IndividualList
+     * */
     private int[] individualSetIndices;
     private int[] individualCapacities;
-
     private List<List<String>> individualRequirements;
     private List<List<Double>> individualWeights;
     private List<List<Double>> individualProperties;

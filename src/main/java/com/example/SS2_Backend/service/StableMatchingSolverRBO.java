@@ -24,12 +24,8 @@ import java.util.*;
 @Slf4j
 @RequiredArgsConstructor
 public class StableMatchingSolverRBO {
-
     private final SimpMessagingTemplate simpMessagingTemplate;
-
-    private static final Integer RUN_COUNT_PER_ALGORITHM = 10; // for insight running, each algorithm will be run for 10 times
-    //private static final Integer MATCHING_RUN_COUNT_PER_ALGORITHM = 10;
-
+    private static final Integer RUN_COUNT_PER_ALGORITHM = 10;
 
     public ResponseEntity<Response> solveStableMatching(NewStableMatchingProblemDTO request) {
 
@@ -45,7 +41,6 @@ public class StableMatchingSolverRBO {
             problem.setFitnessFunction(request.getFitnessFunction());
             problem.setPopulation(request);
 
-
             log.info("[Service] Stable Matching: Problem: " + problem.getProblemName() +
                     " loaded successfully!");
 
@@ -60,23 +55,18 @@ public class StableMatchingSolverRBO {
 
 
             assert results != null;
-            //	Testing tester = new Testing((Matches) results.get(0).getAttribute("matches"), problem.getNumberOfIndividual(), problem.getCapacities());
-            //	System.out.println("[Testing] Solution has duplicate: " + tester.hasDuplicate());
             long endTime = System.currentTimeMillis();
 
             double runtime = ((double) (endTime - startTime) / 1000);
             runtime = (runtime * 1000.0);
             log.info("[Service] Runtime: " + runtime + " Millisecond(s).");
-            //problem.printIndividuals();
-            //System.out.println(problem.printPreferenceLists());
+
             String algorithm = request.getAlgorithm();
 
             MatchingSolution matchingSolution = formatSolution(algorithm, results, runtime);
             matchingSolution.setSetSatisfactions(problem.getAllSatisfactions((Matches) results
                     .get(0)
                     .getAttribute("matches")));
-            //matchingSolution.setPreferences(problem.getPreferenceLists());
-            //matchingSolution.setIndividuals(problem.getIndividuals().getIndividuals());
 
             return ResponseEntity.ok(Response
                     .builder()
@@ -157,7 +147,7 @@ public class StableMatchingSolverRBO {
                         .distributeOn(numberOfCores)
                         .run();
             }
-            //log.info("[Service] Stable Matching: Problem solved successfully!");
+            log.info("[Service] Stable Matching: Problem solved successfully!");
             return result;
         } catch (Exception e) {
             log.error("[Service] Stable Matching: Error solving the problem {}", e.getMessage(), e);
@@ -167,7 +157,6 @@ public class StableMatchingSolverRBO {
 
     public ResponseEntity<Response> getProblemResultInsights(NewStableMatchingProblemDTO request,
                                                              String sessionCode) {
-//        log.info("Received request: " + request);
 //		String[] algorithms = {"NSGAII", "NSGAIII", "eMOEA", "PESA2", "VEGA", "MOEAD"};
         String[] algorithms = {"NSGAII", "NSGAIII", "eMOEA", "PESA2", "VEGA"};
 
@@ -184,8 +173,6 @@ public class StableMatchingSolverRBO {
 
         int runCount = 1;
         int maxRunCount = algorithms.length * RUN_COUNT_PER_ALGORITHM;
-        // solve the problem with different algorithms and then evaluate the performance of the algorithms
-//        log.info("Start benchmarking the algorithms...");
         simpMessagingTemplate.convertAndSendToUser(sessionCode,
                 "/progress",
                 createProgressMessage("Start benchmarking the algorithms..."));

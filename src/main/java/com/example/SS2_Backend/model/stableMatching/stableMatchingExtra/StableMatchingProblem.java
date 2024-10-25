@@ -51,7 +51,7 @@ import static com.example.SS2_Backend.util.StringExpressionEvaluator.*;
  **/
 @Slf4j
 @Data
-public class StableMatchingProblem implements Problem {
+public abstract class StableMatchingProblem implements Problem {
 
     protected IndividualList individuals;
 
@@ -82,6 +82,8 @@ public class StableMatchingProblem implements Problem {
         this.individuals = new IndividualList(individuals, propertiesNames);
         initializeFields();
     }
+
+    public abstract void setPopulation(ArrayList<Individual> individuals, String[] propertiesNames, int numberOfSets);
 
     public void initializeFields() {
         this.preferencesProvider = new PreferencesProvider(individuals);

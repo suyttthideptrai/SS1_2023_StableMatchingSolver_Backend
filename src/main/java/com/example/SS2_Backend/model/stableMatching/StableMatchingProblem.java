@@ -68,7 +68,6 @@ public class StableMatchingProblem implements Problem {
     private boolean fnfStatus = false;
 
     private String problemName;
-
     private static final List<String> VALID_EVALUATE_FUNCTION_KEYWORDS = Arrays.asList("P", "W", "R");
 
     /**
@@ -86,7 +85,7 @@ public class StableMatchingProblem implements Problem {
         preferenceLists = getPreferences();
     }
 
-    protected void initializePrefProvider() {
+    public void initializePrefProvider() {
         if (this.evaluateFunctionForSet1 != null) {
             this.preferencesProvider.setEvaluateFunctionForSet1(evaluateFunctionForSet1);
         }

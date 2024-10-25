@@ -1,4 +1,4 @@
-package com.example.SS2_Backend.model.stableMatching;
+package com.example.SS2_Backend.model.stableMatching.stableMatchingExtra;
 
 import lombok.Getter;
 
@@ -14,7 +14,7 @@ public class PreferenceList {
     protected final double[] scores;
     protected final int[] positions;
     protected int current;
-    private final int padding;
+    private int padding;  // remove final to create setter
 
     public PreferenceList(int size, int padding) {
         scores = new double[size];
@@ -27,7 +27,9 @@ public class PreferenceList {
         return positions.length;
     }
 
-
+    public void setPadding(final int padding) {
+        this.padding = padding;
+    }    // new
     //public boolean isEmpty() {return this.preferenceList.isEmpty();}
 
 
@@ -75,6 +77,7 @@ public class PreferenceList {
     public void sort() {
         sortDescendingByScores();
     }
+
 
     public void sortDescendingByScores() {
         double[] cloneScores = scores.clone(); //copy to new array

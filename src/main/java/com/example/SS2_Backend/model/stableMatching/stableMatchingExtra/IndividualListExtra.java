@@ -12,10 +12,10 @@ public class IndividualListExtra extends IndividualList {
     private final Map<Integer, Integer> setCounts;  // Map to store the count of individuals per set
     private int numberOfSets;  // Total number of unique sets
 
-    public IndividualListExtra(List<Individual> individuals, String[] propertyNames) {
+    public IndividualListExtra(List<Individual> individuals, String[] propertyNames, int numberOfSets) {
         super(individuals,propertyNames);
         this.setCounts = new HashMap<>();
-
+        this.numberOfSets = numberOfSets;     // new
         initializeExtra();
     }
 

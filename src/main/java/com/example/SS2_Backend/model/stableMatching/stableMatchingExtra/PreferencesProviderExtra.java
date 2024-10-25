@@ -18,12 +18,14 @@ public class PreferencesProviderExtra extends PreferencesProvider {
     @Getter
     private final Map<Integer, Expression> expressions;
     private final Map<Integer, Map<String, Set<Integer>>> variables;
+    private int numberOfSets ;      // new
 
-    public PreferencesProviderExtra(IndividualList individuals) {
+    public PreferencesProviderExtra(IndividualList individuals, int numberOfSets) {
         super(individuals);
         this.setSizes = new HashMap<>();
         this.expressions = new HashMap<>();
         this.variables = new HashMap<>();
+        this.numberOfSets = numberOfSets;  // new
 
         // Initialize set sizes
         for (int i = 0; i < numberOfIndividuals; i++) {
@@ -31,8 +33,6 @@ public class PreferencesProviderExtra extends PreferencesProvider {
             setSizes.put(set, setSizes.getOrDefault(set, 0) + 1);
         }
     }
-
-
 
 
     public void setEvaluateFunction(int set, String evaluateFunction) {
@@ -44,40 +44,46 @@ public class PreferencesProviderExtra extends PreferencesProvider {
                 .build());
     }
 
-    public Map<String, Double> getVariableValuesForSet(int set,int indexOfEvaluator,
+    public Map<String, Double> getVariableValuesForSet(int set, int indexOfEvaluator,
                                                        int indexOfBeEvaluated) {
         return getVariableValues(this.variables.get(set), indexOfEvaluator, indexOfBeEvaluated);
     }
 
+
     @Override
     public PreferenceList getPreferenceListByFunction(int index) {
         int set = individuals.getSetOf(index);
-        PreferenceList a;
+        PreferenceList a = new PreferenceList(0, 0);
         Expression e;
-        if (set == 0) {
-            a = new PreferenceList(this.setSizes.get(set + 1), this.setSizes.get(set));
+        int size = 0;
+        if (setSizes.containsKey(set)) {          // 1 2 3 4 5   6 7 8 9 10
+            for (int setNumber : setSizes.keySet()) {
+                if (setNumber != set) {
+                    size += setSizes.get(set);
+                }
+            }
+            if(set == 1) {
+                a = new PreferenceList(size, setSizes.get(1));    // khởi tạo preferlist với size = 2 set còn lại + vào
+            } else {
+                a = new PreferenceList(size, 0);
+            }
             if (this.expressions.get(set) == null) {
                 return this.getPreferenceListByDefault(index);
             }
             e = this.expressions.get(set);
-            for (int i = this.setSizes.get(set); i < numberOfIndividuals; i++) {
-                e.setVariables(this.getVariableValuesForSet(set, index, i));
-                double totalScore = e.evaluate();
-                a.add(totalScore);
-            }
-        } else {
-            a = new PreferenceList(this.setSizes.get(set), 0);
-            if (this.expressions.get(set + 1) == null) {
-                return this.getPreferenceListByDefault(index);
-            }
-            e = this.expressions.get(set + 1);
-            for (int i = 0; i < this.setSizes.get(set); i++) {
-                e.setVariables(this.getVariableValuesForSet(set + 1, index, i));
-                double totalScore = e.evaluate();
-                a.add(totalScore);
+
+            for (int i = 0; i < numberOfIndividuals; i++) {
+                if (individuals.getSetOf(i) != set) {
+                    e.setVariables(this.getVariableValuesForSet(set, index, i));
+                    double totalScore = e.evaluate();
+                    a.add(totalScore);       // chưa hoàn thiện vì sort sẽ chạy qua tất cả các set chứa trong ds của set đang xét
+                }
             }
         }
         a.sort();
+
+
+
         return a;
     }
 
@@ -86,30 +92,31 @@ public class PreferencesProviderExtra extends PreferencesProvider {
     public PreferenceList getPreferenceListByDefault(int index) {
         int set = individuals.getSetOf(index);
         int numberOfProperties = individuals.getNumberOfProperties();
-        PreferenceList a;
-        if (set == 0) {
-            a = new PreferenceList(this.setSizes.get(set + 1), this.setSizes.get(set));
-            for (int i = this.setSizes.get(0); i < numberOfIndividuals; i++) {
-                double totalScore = 0;
-                for (int j = 0; j < numberOfProperties; j++) {
-                    double PropertyValue = individuals.getPropertyValueOf(i, j);
-                    Requirement requirement = individuals.getRequirementOf(index, j);
-                    double PropertyWeight = individuals.getPropertyWeightOf(index, j);
-                    totalScore += getDefaultScaling(requirement, PropertyValue) * PropertyWeight;
+        PreferenceList a = new PreferenceList(0, 0);
+        int size = 0;
+
+        if (setSizes.containsKey(set)) {
+            for (int setNumber : setSizes.keySet()) {
+                if (setNumber != set) {
+                    size += setSizes.get(set);
                 }
-                a.add(totalScore);
             }
-        } else {
-            a = new PreferenceList(this.setSizes.get(set - 1), 0);
-            for (int i = 0; i < this.setSizes.get(set - 1); i++) {
+            if(set == 1) {
+                a = new PreferenceList(size, setSizes.get(1));    // khởi tạo preferlist với size = 2 set còn lại + vào
+            } else {
+                a = new PreferenceList(size, 0);
+            }
+            for (int i = 0; i < numberOfIndividuals; i++) {
                 double totalScore = 0;
-                for (int j = 0; j < numberOfProperties; j++) {
-                    double PropertyValue = individuals.getPropertyValueOf(i, j);
-                    Requirement requirement = individuals.getRequirementOf(index, j);
-                    double PropertyWeight = individuals.getPropertyWeightOf(index, j);
-                    totalScore += getDefaultScaling(requirement, PropertyValue) * PropertyWeight;
+                if (individuals.getSetOf(i) != set) {
+                    for (int j = 0; j < numberOfProperties; j++) {
+                        double PropertyValue = individuals.getPropertyValueOf(i, j);
+                        Requirement requirement = individuals.getRequirementOf(index, j);
+                        double PropertyWeight = individuals.getPropertyWeightOf(index, j);
+                        totalScore += getDefaultScaling(requirement, PropertyValue) * PropertyWeight;
+                    }
+                    a.add(totalScore);
                 }
-                a.add(totalScore);
             }
         }
         a.sort();

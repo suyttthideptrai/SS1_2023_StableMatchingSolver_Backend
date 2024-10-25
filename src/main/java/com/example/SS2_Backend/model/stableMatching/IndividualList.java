@@ -3,10 +3,7 @@ package com.example.SS2_Backend.model.stableMatching;
 import com.example.SS2_Backend.model.stableMatching.Requirement.Requirement;
 import lombok.Getter;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.example.SS2_Backend.util.Utils.fillWithChar;
 import static com.example.SS2_Backend.util.Utils.formatDouble;
@@ -151,6 +148,57 @@ public class IndividualList {
 
     public Requirement getRequirementOf(int idx1, int i) {
         return this.individuals.get(idx1).getRequirement(i);
+    }
+
+
+    public static void main(String[] args) {
+        // Tạo danh sách các đối tượng Individual
+        List<Individual> individuals = new ArrayList<>();
+
+        // Tạo một vài cá nhân mẫu
+        Individual individual1 = new Individual();
+        individual1.setIndividualName("John Doe");
+        individual1.setIndividualSet(0);
+        individual1.setCapacity(5);
+        individual1.setProperty(10.5, 2.0, new String[]{"100", "++"});
+
+        Individual individual2 = new Individual();
+        individual2.setIndividualName("Jane Smith");
+        individual2.setIndividualSet(1);
+        individual2.setCapacity(3);
+        individual2.setProperty(51.0, 1.5, new String[]{"10", "--"});
+
+        Individual individual3 = new Individual();
+        individual3.setIndividualName("Tom Johnson");
+        individual3.setIndividualSet(1);
+        individual3.setCapacity(2);
+        individual3.setProperty(20.0, 1.2, new String[]{"50", "++"});
+
+        // Thêm các cá nhân vào danh sách
+        individuals.add(individual1);
+        individuals.add(individual2);
+        individuals.add(individual3);
+
+        // Tạo một mảng tên thuộc tính (property names)
+        String[] propertyNames = {"Property 1", "Property 2"};
+
+        // Khởi tạo đối tượng IndividualList
+        IndividualList individualList = new IndividualList(individuals, propertyNames);
+
+        // In thông tin danh sách các cá nhân
+        System.out.println("Danh sách các cá nhân và thuộc tính:");
+        individualList.print();
+
+        // Kiểm tra một vài phương thức khác
+        System.out.println("\nThông tin bổ sung:");
+        System.out.println("Set của cá nhân 0: " + individualList.getSetOf(0));
+        System.out.println("Capacity của cá nhân 1: " + individualList.getCapacityOf(1));
+        System.out.println("Giá trị thuộc tính của cá nhân 1, thuộc tính 1: " +
+                individualList.getPropertyValueOf(1, 0));
+        System.out.println("Trọng số thuộc tính của cá nhân 2, thuộc tính 1: " +
+                individualList.getPropertyWeightOf(2, 0));
+        System.out.println("Yêu cầu của cá nhân 0, thuộc tính 1: " +
+                individualList.getRequirementOf(0, 0));
     }
 
 }

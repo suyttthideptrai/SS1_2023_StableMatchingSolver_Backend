@@ -44,7 +44,7 @@ public class StableMatchingSolver {
             problem.setEvaluateFunctionForSet2(request.getEvaluateFunction()[1]);
             problem.setFitnessFunction(request.getFitnessFunction());
             problem.setPopulation(request.getIndividuals(), request.getAllPropertyNames());
-
+//            problem.setNumberOfSets(request.getNumberOfSets());  // new
 
             log.info("[Service] Stable Matching: Problem: " + problem.getProblemName() +
                     " loaded successfully!");

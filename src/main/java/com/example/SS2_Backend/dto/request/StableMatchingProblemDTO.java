@@ -26,6 +26,7 @@ public class StableMatchingProblemDTO {
     private int maxTime;
     private String algorithm;
     private String distributedCores;
+    private int [][] excludedPairs;
 
     @JsonProperty("Individuals")
     public void setIndividuals(ArrayList<Individual> individuals) {

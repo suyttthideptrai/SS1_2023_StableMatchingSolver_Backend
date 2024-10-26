@@ -28,6 +28,7 @@ import static com.example.SS2_Backend.util.StringExpressionEvaluator.*;
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
 public class StableMatchingOTMProblem implements Problem {
 
+    String problemName;
     IndividualList individuals;
     List<PreferenceList> preferenceLists;
     int[][] excludedPairs;
@@ -317,7 +318,7 @@ public class StableMatchingOTMProblem implements Problem {
         return setSatisfactions;
     }
 
-    private double[] getAllSatisfactions(Matches match) {
+    public double[] getAllSatisfactions(Matches match) {
         double[] satisfactions = new double[individuals.getTotalIndividuals()];
 
         for (int i = 0; i < individuals.getTotalIndividuals(); i++) {

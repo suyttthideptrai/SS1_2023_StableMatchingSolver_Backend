@@ -26,7 +26,7 @@ public class StableMatchingExtra extends StableMatchingProblem {
         this.preferencesProviderExtra = new PreferencesProviderExtra(individuals, numberOfSets);
         initializePrefProvider();
         preferenceLists = getPreferences();
-        matches = new Matches(individuals.size());
+        matches = new Matches(individuals.size()); //khởi tạo
     }
 
     @Override
@@ -61,7 +61,7 @@ public class StableMatchingExtra extends StableMatchingProblem {
             }
             return a ;
     }
-
+//phần sửa 
     public void performMatching() {
         int nodeC = 3; 
         int[] currentPair = {1, 2}; 

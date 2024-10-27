@@ -26,6 +26,7 @@ public class StableMatchingExtra extends StableMatchingProblem {
         this.preferencesProviderExtra = new PreferencesProviderExtra(individuals, numberOfSets);
         initializePrefProvider();
         preferenceLists = getPreferences();
+        matches = new Matches(individuals.size());
     }
 
     @Override
@@ -44,7 +45,7 @@ public class StableMatchingExtra extends StableMatchingProblem {
             this.evaluateFunctionForSetN.put(setN, evaluateFunction);
         }
     }
-
+    
     /**
      * Extra Methods for  Stable Matching Problem
      */
@@ -61,6 +62,26 @@ public class StableMatchingExtra extends StableMatchingProblem {
             return a ;
     }
 
+    public void performMatching() {
+        int nodeC = 3; 
+        int[] currentPair = {1, 2}; 
+        int[] newPair = {4,5};
+
+        if (shouldSwitch(currentPair, newPair){
+            ArrayList<Integer> collectionA = new ArrayList<>(Arrays.asList(currentPair[0], currentPair[1], nodeC));
+            matches.disMatch(nodeC, collectionA);
+            matches.disMatch(currentPair[0], collectionA);
+            matches.disMatch(currentPair[1], collectionA);
+
+            matches.addMatch(newPair[0], nodeC);
+            matches.addMatch(newPair[1], nodeC);
+        }
+    }
+
+    private boolean shouldSwitch(int[] currentPair, int[] newPair){
+        return true;
+    }
+                
     // Add to a complete List by getPreferences()
 
 }

@@ -174,10 +174,12 @@ public class StableMatchingProblem implements Problem {
         // if result.getSet(firstIndividualIndex).contains(secondIndividualIndex) == true [0,1], result.getSet(0) = [1,2,3] .contains(1) == true, return, stop the evaluation
         // then the pair is excluded from the result
         // the below case work best for 1,1 matching
-        for (int[] excludedPair : excludedPairs) {
-            if (result.getSet(excludedPair[0]).contains(excludedPair[1])) {
-                solution.setObjective(0, -Double.MAX_VALUE);
-                return;
+        if (Objects.nonNull(excludedPairs)) {
+            for (int[] excludedPair : excludedPairs) {
+                if (result.getSet(excludedPair[0]).contains(excludedPair[1])) {
+                    solution.setObjective(0, -Double.MAX_VALUE);
+                    return;
+                }
             }
         }
         double[] Satisfactions = getAllSatisfactions(result); // Get all satisfactions

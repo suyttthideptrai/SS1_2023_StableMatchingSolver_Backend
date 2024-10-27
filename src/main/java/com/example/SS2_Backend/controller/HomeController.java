@@ -5,7 +5,6 @@ import com.example.SS2_Backend.dto.request.NewStableMatchingProblemDTO;
 import com.example.SS2_Backend.dto.request.StableMatchingProblemDTO;
 import com.example.SS2_Backend.dto.response.Response;
 import com.example.SS2_Backend.util.ErrorMapper;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import com.example.SS2_Backend.service.GameTheorySolver;
 import com.example.SS2_Backend.service.StableMatchingSolver;
@@ -15,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Set;
@@ -52,16 +50,8 @@ public class HomeController {
     * */
     @Async("taskExecutor")
     @PostMapping("/stable-matching-rbo-solver")
-    public CompletableFuture<ResponseEntity<Response>> solveStableMatching(@RequestBody @Valid NewStableMatchingProblemDTO object) {
-        try {
-            return CompletableFuture.completedFuture(stableMatchingSolverRBO.solveStableMatching(object));
-        } catch (Exception e) {
-            return CompletableFuture.completedFuture(
-                    new ResponseEntity<>(
-                            this.errorMapper.createErrorMap(e),
-                            HttpStatus.BAD_REQUEST
-                    ));
-        }
+    public CompletableFuture<ResponseEntity<Response>> solveStableMatching(@Valid @RequestBody NewStableMatchingProblemDTO object) {
+        return CompletableFuture.completedFuture(stableMatchingSolverRBO.solveStableMatching(object));
     }
 
     @Async("taskExecutor")

@@ -13,12 +13,17 @@ public class StableMatchingExtra extends StableMatchingProblem {
     private Map<Integer, String> evaluateFunctionForSetN = new HashMap<>();
     private PreferencesProviderExtra preferencesProviderExtra;
     private int numberOfSets;
+    private Matches matches;
 
 
     @Override
     public void setPopulation(ArrayList<Individual> individuals, String[] propertiesNames, int numberOfSets) {
         this.individuals = new IndividualListExtra(individuals, propertiesNames, numberOfSets);
         initializeFields();
+    }
+
+    public StableMatchingExtra(int capacity) { //new
+        this.matches = new Matches(capacity);
     }
 
     @Override
@@ -68,11 +73,15 @@ public class StableMatchingExtra extends StableMatchingProblem {
         int[] newPair = {4,5};
 
         if (shouldSwitch(currentPair, newPair){
-            ArrayList<Integer> collectionA = new ArrayList<>(Arrays.asList(currentPair[0], currentPair[1], nodeC));
+            ArrayList<Integer> collectionA = new ArrayList<>();
+            collectionA.add(currentPair[0]);
+            collectionA.add(currentPair[1]);
+            collectionA.add(nodeC);
+
             matches.disMatch(nodeC, collectionA);
             matches.disMatch(currentPair[0], collectionA);
             matches.disMatch(currentPair[1], collectionA);
-
+            
             matches.addMatch(newPair[0], nodeC);
             matches.addMatch(newPair[1], nodeC);
         }

@@ -66,30 +66,6 @@ public class StableMatchingExtra extends StableMatchingProblem {
             }
             return a ;
     }
-//phần sửa 
-    public void performMatching() {
-        int nodeC = 3; 
-        int[] currentPair = {1, 2}; 
-        int[] newPair = {4,5};
-
-        if (shouldSwitch(currentPair, newPair){
-            ArrayList<Integer> collectionA = new ArrayList<>();
-            collectionA.add(currentPair[0]);
-            collectionA.add(currentPair[1]);
-            collectionA.add(nodeC);
-
-            matches.disMatch(nodeC, collectionA);
-            matches.disMatch(currentPair[0], collectionA);
-            matches.disMatch(currentPair[1], collectionA);
-            
-            matches.addMatch(newPair[0], nodeC);
-            matches.addMatch(newPair[1], nodeC);
-        }
-    }
-
-    private boolean shouldSwitch(int[] currentPair, int[] newPair){
-        return true;
-    }
                 
     // Add to a complete List by getPreferences()
 

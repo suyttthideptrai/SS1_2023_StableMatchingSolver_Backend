@@ -1,4 +1,7 @@
 package com.example.SS2_Backend.dto.request;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,9 +14,14 @@ import java.util.List;
 @AllArgsConstructor
 
 public class NewStableMatchingProblemDTO {
+
     private String problemName;
+
     private int numberOfSets;
+    @Min(value = 3, message = "The number of individuals should be at least 3")
     private int numberOfIndividuals;
+
+    @NotEmpty
     private String[] allPropertyNames;
 
     /* Các phần Array mới có độ dài bằng nhau được tách ra từ Individual gốc
@@ -41,18 +49,33 @@ public class NewStableMatchingProblemDTO {
      *  [0, 0, 0] -> Số các Property Value thuộc Individual 3 gốc
      * ] -> Danh sách này chứa toàn bộ cho cả IndividualList
      * */
+
+    @Size(min = 0)
     private int[] individualSetIndices;
+    @Size(min = 0)
     private int[] individualCapacities;
+
+    @Size(min = 3)
     private List<List<String>> individualRequirements;
+    @Size(min = 3)
     private List<List<Double>> individualWeights;
+    @Size(min = 3)
     private List<List<Double>> individualProperties;
 
+    @NotEmpty
     private String[] evaluateFunction;
+
+    @NotEmpty
+//    @FitnessFuncInterface TODO
     private String fitnessFunction;
     private int populationSize;
+
     private int generation;
     private int maxTime;
+
+    @NotEmpty
     private String algorithm;
+
     private String distributedCores;
 
     public String toString() {

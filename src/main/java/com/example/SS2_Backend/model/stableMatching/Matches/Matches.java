@@ -73,6 +73,17 @@ public class Matches implements Serializable {
         return "Left Overs: " + leftOvers + "\n";
     }
 
+    //return về các cặp dưới dạng dsach cặp
+    public List<List<Integer>> getAllMatches() {
+        List<List<Integer>> allMatches = new ArrayList<>();
+        for (int i = 0; i < matches.size(); i++) {
+            for (Integer match : matches.get(i)) {
+                allMatches.add(Arrays.asList(i, match));
+            }
+        }
+        return allMatches;
+    }
+    
     public void disMatch(int target, Collection<Integer> nodeToRemove) {
         matches
                 .get(target)

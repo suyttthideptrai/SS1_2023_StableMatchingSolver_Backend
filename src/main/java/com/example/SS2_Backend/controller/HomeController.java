@@ -5,6 +5,8 @@ import com.example.SS2_Backend.dto.request.NewStableMatchingProblemDTO;
 import com.example.SS2_Backend.dto.request.StableMatchingProblemDTO;
 import com.example.SS2_Backend.dto.response.Response;
 import com.example.SS2_Backend.util.ErrorMapper;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import com.example.SS2_Backend.service.GameTheorySolver;
 import com.example.SS2_Backend.service.StableMatchingSolver;
@@ -12,18 +14,20 @@ import com.example.SS2_Backend.service.StableMatchingSolverRBO;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.validation.BindingResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api")
 @CrossOrigin(origins = "*", maxAge = 3600)
 public class HomeController {
-
     private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
     @Autowired
     private GameTheorySolver gameTheorySolver;
@@ -50,7 +54,21 @@ public class HomeController {
     * */
     @Async("taskExecutor")
     @PostMapping("/stable-matching-rbo-solver")
-    public CompletableFuture<ResponseEntity<Response>> solveStableMatching(@Valid @RequestBody NewStableMatchingProblemDTO object) {
+    public CompletableFuture<ResponseEntity<Response>> solveStableMatching(
+            @Valid @RequestBody NewStableMatchingProblemDTO object,
+            BindingResult bindingResult
+    ) {
+        if (bindingResult.hasErrors()) {
+            List<String> errors = bindingResult.
+                    getAllErrors().stream().map(DefaultMessageSourceResolvable::getDefaultMessage)
+                    .collect(Collectors.toList());
+
+            return CompletableFuture.completedFuture(new ResponseEntity<>(new Response(
+                    400,
+                    errors.toString(),
+                    null
+            ), HttpStatus.BAD_REQUEST));
+        }
         return CompletableFuture.completedFuture(stableMatchingSolverRBO.solveStableMatching(object));
     }
 

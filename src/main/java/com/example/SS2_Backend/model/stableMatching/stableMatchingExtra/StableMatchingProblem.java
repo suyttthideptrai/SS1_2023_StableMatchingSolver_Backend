@@ -294,8 +294,11 @@ public abstract class StableMatchingProblem implements Problem {
                         }
                         //Or else Loser go back to UnMatched Queue & Waiting for it's Matching Procedure
                     } else {
-                        matches.disMatch(preferNode, Loser);
-                        matches.disMatch(Loser, preferNode);
+                        ArrayList<Integer> collectionA = new ArrayList<>(Arrays.asList(loser, preferNode, newNode)); //collection chứa các cá thể đã ghép với prefNode trước đó
+                       
+                        matches.disMatch(preferNode, collectionA);//new
+                        matches.disMatch(Loser, collectionA);//new
+                        
                         UnMatchedNode.add(Loser);
                         MatchedNode.remove(Loser);
                         //System.out.println(Loser + " lost the game, waiting for another chance.");

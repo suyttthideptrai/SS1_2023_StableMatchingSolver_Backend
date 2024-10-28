@@ -17,6 +17,4 @@ public class GlobalExceptionHandler {
         logger.warning("Queue full!");
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body("Server is busy. Please try again later.");
     }
-
-
 }

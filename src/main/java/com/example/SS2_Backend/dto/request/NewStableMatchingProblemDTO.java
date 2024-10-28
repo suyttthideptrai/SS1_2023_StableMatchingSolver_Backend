@@ -1,4 +1,5 @@
 package com.example.SS2_Backend.dto.request;
+import com.example.SS2_Backend.dto.response.EvaluateFunctionConstraint;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
@@ -63,10 +64,10 @@ public class NewStableMatchingProblemDTO {
     private List<List<Double>> individualProperties;
 
     @NotEmpty
+    @EvaluateFunctionConstraint
     private String[] evaluateFunction;
 
     @NotEmpty
-//    @FitnessFuncInterface TODO
     private String fitnessFunction;
     private int populationSize;
 

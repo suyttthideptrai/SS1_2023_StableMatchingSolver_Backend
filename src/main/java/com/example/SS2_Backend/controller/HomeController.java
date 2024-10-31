@@ -17,6 +17,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.validation.BindingResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.validation.DataBinder;
+import org.springframework.validation.Validator;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -58,7 +61,8 @@ public class HomeController {
             @Valid @RequestBody NewStableMatchingProblemDTO object,
             BindingResult bindingResult
     ) {
-        if (bindingResult.hasErrors()) {
+
+        if (bindingResult.hasErrors() || object.isEvaluateFunctionValid()) {
             List<String> errors = bindingResult.
                     getAllErrors().stream().map(DefaultMessageSourceResolvable::getDefaultMessage)
                     .collect(Collectors.toList());
@@ -66,6 +70,14 @@ public class HomeController {
             return CompletableFuture.completedFuture(new ResponseEntity<>(new Response(
                     400,
                     errors.toString(),
+                    // "Invalidated Data. Please check your input data!",
+                    null
+            ), HttpStatus.BAD_REQUEST));
+        }
+        if (object.isEvaluateFunctionValid()) {
+            return CompletableFuture.completedFuture(new ResponseEntity<>(new Response(
+                    400,
+                    "Invalid evaluateFunctions, please retry.",
                     // "Invalidated Data. Please check your input data!",
                     null
             ), HttpStatus.BAD_REQUEST));

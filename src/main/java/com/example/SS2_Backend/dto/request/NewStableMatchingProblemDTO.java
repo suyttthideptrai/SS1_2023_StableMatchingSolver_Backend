@@ -1,11 +1,13 @@
 package com.example.SS2_Backend.dto.request;
-import com.example.SS2_Backend.dto.response.EvaluateFunctionConstraint;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import net.objecthunter.exp4j.Expression;
+import net.objecthunter.exp4j.ExpressionBuilder;
+import net.objecthunter.exp4j.ValidationResult;
 
 import java.util.Arrays;
 import java.util.List;
@@ -13,17 +15,15 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+//@EvaluateFunctionConstraint
 
 public class NewStableMatchingProblemDTO {
-
     private String problemName;
-
     private int numberOfSets;
     @Min(value = 3, message = "The number of individuals should be at least 3")
     private int numberOfIndividuals;
 
-    @NotEmpty
-    private String[] allPropertyNames;
+    private int numberOfProperty;
 
     /* Các phần Array mới có độ dài bằng nhau được tách ra từ Individual gốc
      * LƯU Ý: Nếu bạn không phải là Maintainer cũ thì không cần đọc Documentation này. Phần này
@@ -64,7 +64,6 @@ public class NewStableMatchingProblemDTO {
     private List<List<Double>> individualProperties;
 
     @NotEmpty
-    @EvaluateFunctionConstraint
     private String[] evaluateFunction;
 
     @NotEmpty
@@ -86,7 +85,6 @@ public class NewStableMatchingProblemDTO {
                 ", NumberOfIndividuals = " + numberOfIndividuals + "\n" +
                 ", IndividualSetIndices = " + Arrays.toString(individualSetIndices) + "\n" +
                 ", IndividualCapacities = " + Arrays.toString(individualCapacities) + "\n" +
-                ", AllPropertyName = " + Arrays.toString(allPropertyNames) +
                 ", fitnessFunction = '" + fitnessFunction + "\n" +
                 ", PopulationSize = " + populationSize + "\n" +
                 ", Generation = " +generation + "\n" +
@@ -94,6 +92,25 @@ public class NewStableMatchingProblemDTO {
                 ", individualWeights: " + Arrays.deepToString(individualWeights.toArray()) + "\n" +
                 ", individualProperties: " + Arrays.deepToString(individualProperties.toArray()) + "\n" +
                 "}";
+    }
+
+    public boolean isEvaluateFunctionValid() {
+        for (String evaluateFunction: this.getEvaluateFunction()) {
+            ExpressionBuilder e = new ExpressionBuilder(evaluateFunction);
+            for (int i = 1; i <= this.getNumberOfProperty(); i++) {
+                e.variable(String.format("P%d", i)).variable(String.format("W%d", i));
+            }
+
+            Expression expressionValidator = e.build();
+            ValidationResult res = expressionValidator.validate();
+
+            if (res.isValid()) {
+                // TODO
+            } else {
+                return false;
+            }
+        }
+        return true;
     }
 
     public static String[][] fromListToStringArray(List<List<String>> list) {

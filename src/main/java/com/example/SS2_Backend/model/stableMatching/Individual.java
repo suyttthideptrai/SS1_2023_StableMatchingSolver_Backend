@@ -15,19 +15,6 @@ import java.util.List;
 import static com.example.SS2_Backend.util.Utils.isDouble;
 import static com.example.SS2_Backend.util.Utils.isInteger;
 
-/**
- * A standard individual entity in a one-to-many matching problem model.
- * This class is used for defining the properties, set type, and capacity of an individual,
- * which can either be a provider (set 0) or a consumer (set 1) in a matching scenario.
- *
- * <p>The {@code Individual} class includes methods to manage properties and requirements,
- * allowing each instance to store values associated with specific matching needs.
- *
- * <p>For example, in a job matching scenario, providers might represent job positions
- * and consumers would represent applicants. Each provider has a certain capacity,
- * which signifies the number of matches it can accept.
- */
-
 @Getter
 @JsonDeserialize(using = IndividualDeserializer.class)
 public class Individual {

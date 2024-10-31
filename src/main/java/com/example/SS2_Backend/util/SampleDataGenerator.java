@@ -19,14 +19,21 @@ public class SampleDataGenerator {
     public static void main(String[] args) {
         // Generate Individuals data Randomly
         ArrayList<Individual> individuals = generateSampleIndividualsWithCapacity(
-                2000,
+                10,
                 1,
                 false,
                 10,
-                200,
+                1,
                 false,
-                5
+                2
         );
+
+        int [][] excludedPairs = new int[][]{
+                {0, 3},
+                {1, 2},
+                {0, 2},
+                {1, 3}
+        };
 
         String[] propNames = {"Prop1", "Prop2", "Prop3", "Prop4", "Prop1", "Prop2", "Prop3", "Prop4", "Prop1", "Prop2", "Prop3", "Prop4",};
 
@@ -42,7 +49,7 @@ public class SampleDataGenerator {
         problem.setEvaluateFunctionForSet1(f1);
         problem.setEvaluateFunctionForSet2(f2);
         problem.setFitnessFunction(fnf);
-        problem.setPopulation(individuals, propNames);
+        problem.setPopulation(individuals, propNames, excludedPairs);
 
         // Print the whole Populations
         System.out.println(

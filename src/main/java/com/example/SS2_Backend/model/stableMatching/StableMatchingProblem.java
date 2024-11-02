@@ -11,6 +11,7 @@ import org.moeaframework.core.variable.Permutation;
 
 import java.util.*;
 import java.util.function.DoubleUnaryOperator;
+import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 
 import lombok.extern.slf4j.Slf4j;
@@ -245,10 +246,11 @@ public class StableMatchingProblem implements Problem {
         //Parse Variable
         //System.out.println("parsing");
         Matches matches = new Matches(individuals.getNumberOfIndividual());
-        Set<Integer> MatchedNode = new HashSet<>();
+        Vector<Integer> MatchedNode = new Vector<>();
         Permutation castVar = (Permutation) var;
         int[] decodeVar = castVar.toArray();
-        Queue<Integer> UnMatchedNode = new LinkedList<>();
+        Vector<Integer> UnMatchedNode = new Vector<>();
+
         for (int val : decodeVar) {
             UnMatchedNode.add(val);
         }
@@ -258,11 +260,13 @@ public class StableMatchingProblem implements Problem {
             //System.out.println(matches);
             //System.out.println(UnMatchedNode);
             int newNode;
-            newNode = UnMatchedNode.poll();
+            newNode = UnMatchedNode.firstElement();
+            UnMatchedNode.removeElement(newNode);
 
             if (MatchedNode.contains(newNode)) {
                 continue;
             }
+
             //System.out.println("working on Node:" + Node);
             //Get pref List of LeftNode
             PreferenceList nodePreference = preferenceLists.get(newNode);
@@ -307,7 +311,7 @@ public class StableMatchingProblem implements Problem {
                         matches.disMatch(preferNode, Loser);
                         matches.disMatch(Loser, preferNode);
                         UnMatchedNode.add(Loser);
-                        MatchedNode.remove(Loser);
+                        MatchedNode.removeElement(Loser);
                         //System.out.println(Loser + " lost the game, waiting for another chance.");
                         matches.addMatch(preferNode, newNode);
                         matches.addMatch(newNode, preferNode);

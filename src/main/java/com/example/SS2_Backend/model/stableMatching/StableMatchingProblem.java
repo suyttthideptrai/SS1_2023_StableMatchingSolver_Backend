@@ -246,10 +246,10 @@ public class StableMatchingProblem implements Problem {
         //Parse Variable
         //System.out.println("parsing");
         Matches matches = new Matches(individuals.getNumberOfIndividual());
-        Vector<Integer> MatchedNode = new Vector<>();
+        TreeSet<Integer> MatchedNode = new TreeSet<>();
         Permutation castVar = (Permutation) var;
         int[] decodeVar = castVar.toArray();
-        Vector<Integer> UnMatchedNode = new Vector<>();
+        TreeSet<Integer> UnMatchedNode = new TreeSet<>();
 
         for (int val : decodeVar) {
             UnMatchedNode.add(val);
@@ -260,8 +260,8 @@ public class StableMatchingProblem implements Problem {
             //System.out.println(matches);
             //System.out.println(UnMatchedNode);
             int newNode;
-            newNode = UnMatchedNode.firstElement();
-            UnMatchedNode.removeElement(newNode);
+            newNode = UnMatchedNode.first();
+            UnMatchedNode.remove(newNode);
 
             if (MatchedNode.contains(newNode)) {
                 continue;
@@ -311,7 +311,7 @@ public class StableMatchingProblem implements Problem {
                         matches.disMatch(preferNode, Loser);
                         matches.disMatch(Loser, preferNode);
                         UnMatchedNode.add(Loser);
-                        MatchedNode.removeElement(Loser);
+                        MatchedNode.remove(Loser);
                         //System.out.println(Loser + " lost the game, waiting for another chance.");
                         matches.addMatch(preferNode, newNode);
                         matches.addMatch(newNode, preferNode);

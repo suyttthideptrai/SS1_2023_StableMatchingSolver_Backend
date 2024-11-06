@@ -7,6 +7,7 @@ import org.moeaframework.Executor;
 import org.moeaframework.core.NondominatedPopulation;
 import org.moeaframework.core.Solution;
 
+import lombok.Data;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -15,22 +16,46 @@ import java.util.Random;
  * Stable Matching Problem Testing Space:
  */
 
+@Data
 public class SampleDataGenerator {
+    private int numberOfSet1;
+    private int numberOfSet2;
+    private int set1Cap = 1;
+    private int set2Cap = 1;
+    private boolean randCapSet1 = false;
+    private boolean randCapSet2 = false;
+    private String f1 = "none";  // Default evaluation function for set 1
+    private String f2 = "none";  // Default evaluation function for set 2
+    private String fnf = "none"; // Default fitness function
     private static final Random RANDOM = new Random();
 
     public static void main(String[] args) {
+        SampleDataGenerator generator = new SampleDataGenerator(4, 4); // Example with 4 individuals in both sets
+        StableMatchingProblem problem = generator.generate();
+        runAlgorithm(problem);
+    }
+
+    public SampleDataGenerator(int numberOfSet1, int numberOfSet2) {
+        this.numberOfSet1 = numberOfSet1;
+        this.numberOfSet2 = numberOfSet2;
+        this.set1Cap = 10;
+        this.set2Cap = 10;
+        this.randCapSet1 = false;
+        this.randCapSet2 = false;
+    }
+    public StableMatchingProblem generate() {
         // Generate Individuals data Randomly
         ArrayList<Individual> individuals = generateSampleIndividualsWithCapacity(
-                10,
-                1,
-                false,
-                10,
-                1,
-                false,
+                numberOfSet1,
+                set1Cap,
+                randCapSet1,
+                numberOfSet2,
+                set2Cap,
+                randCapSet2,
                 2
         );
 
-        int [][] excludedPairs = new int[][]{
+        int[][] excludedPairs = new int[][]{
                 {0, 3},
                 {1, 2},
                 {0, 2},
@@ -42,9 +67,6 @@ public class SampleDataGenerator {
 //        String f1 = "(P1*W1)^2+P2*W2+P3*W3+P4*W4+sqrt(P1)";
 //        String f2 = "P1*W1+P2*W2+P3*W3+P4*W4/20";
 //        String fnf = "SIGMA{6+S1}/6 + SIGMA{S2/(S2+99)}* 3 + M1*2";
-        String f1 = "none";
-        String f2 = "none";
-        String fnf = "none";
 
         // Create an Instance of StableMatchingProblem class with randomly generated data
         StableMatchingProblem problem = new StableMatchingProblem();
@@ -61,7 +83,9 @@ public class SampleDataGenerator {
 
         // Number of Individuals inside this problem
         System.out.println("Number Of Individual: " + problem.getIndividuals().getNumberOfIndividual());
-
+        return problem;
+    }
+    private static void runAlgorithm(StableMatchingProblem problem) {
         System.out.println(
                 "\n[ Algorithm Output Solution ]\n"
         );

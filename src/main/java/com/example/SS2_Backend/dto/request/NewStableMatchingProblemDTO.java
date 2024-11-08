@@ -1,4 +1,5 @@
 package com.example.SS2_Backend.dto.request;
+import com.example.SS2_Backend.constants.MessageConst;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
@@ -20,10 +21,12 @@ import java.util.List;
 
 public class NewStableMatchingProblemDTO {
     private String problemName;
+    @Min(value = 2, message = MessageConst.MatchingValidate.MES_001)
     private int numberOfSets;
-    @Min(value = 3, message = "The number of individuals should be at least 3")
+    @Min(value = 3, message = MessageConst.MatchingValidate.MES_002)
     private int numberOfIndividuals;
 
+    @Min(value = 1, message = MessageConst.MatchingValidate.MES_003)
     private int numberOfProperty;
 
     /* Các phần Array mới có độ dài bằng nhau được tách ra từ Individual gốc
@@ -52,16 +55,19 @@ public class NewStableMatchingProblemDTO {
      * ] -> Danh sách này chứa toàn bộ cho cả IndividualList
      * */
 
-    @Size(min = 0)
+    @Size(min = 0, message = MessageConst.MatchingValidate.MES_GREATER_THAN_ZERO)
     private int[] individualSetIndices;
-    @Size(min = 0)
+    @Size(min = 0, message = MessageConst.MatchingValidate.MES_GREATER_THAN_ZERO)
     private int[] individualCapacities;
 
-    @Size(min = 3)
+    /*
+    * Cần có ít nhất ba để tương ứng với số lượng Individual ở numberOfIndividuals
+    * */
+    @Size(min = 3, message = MessageConst.MatchingValidate.MES_002)
     private List<List<String>> individualRequirements;
-    @Size(min = 3)
+    @Size(min = 3, message = MessageConst.MatchingValidate.MES_002)
     private List<List<Double>> individualWeights;
-    @Size(min = 3)
+    @Size(min = 3, message = MessageConst.MatchingValidate.MES_002)
     private List<List<Double>> individualProperties;
 
     @NotEmpty

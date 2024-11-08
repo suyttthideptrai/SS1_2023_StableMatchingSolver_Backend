@@ -9,6 +9,7 @@ import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
 import net.objecthunter.exp4j.ValidationResult;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -95,6 +96,7 @@ public class NewStableMatchingProblemDTO {
     }
 
     public boolean isEvaluateFunctionValid() {
+        ArrayList<Boolean> validEvalFunc = new ArrayList<>();
         for (String evaluateFunction: this.getEvaluateFunction()) {
             ExpressionBuilder e = new ExpressionBuilder(evaluateFunction);
             for (int i = 1; i <= this.getNumberOfProperty(); i++) {
@@ -103,14 +105,10 @@ public class NewStableMatchingProblemDTO {
 
             Expression expressionValidator = e.build();
             ValidationResult res = expressionValidator.validate();
-
-            if (res.isValid()) {
-                // TODO
-            } else {
-                return false;
-            }
+            validEvalFunc.add(res.isValid());
         }
-        return true;
+
+        return validEvalFunc.stream().allMatch(e -> e);
     }
 
     public static String[][] fromListToStringArray(List<List<String>> list) {

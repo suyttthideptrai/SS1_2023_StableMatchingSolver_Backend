@@ -1,60 +1,54 @@
 package com.example.SS2_Backend.service;
 
-import com.example.SS2_Backend.dto.request.StableMatchingProblemDTO;
+import com.example.SS2_Backend.dto.request.StableMatchingOTMProblemDTO;
 import com.example.SS2_Backend.dto.response.Progress;
 import com.example.SS2_Backend.dto.response.Response;
-import com.example.SS2_Backend.model.stableMatching.*;
-import com.example.SS2_Backend.model.stableMatching.Matches.Matches;
-import com.example.SS2_Backend.model.stableMatching.Matches.MatchesOTO;
-import com.example.SS2_Backend.model.stableMatching.Matches.MatchingSolution;
 import com.example.SS2_Backend.model.stableMatching.Matches.MatchingSolutionInsights;
-import com.example.SS2_Backend.util.ValidationUtils;
+import com.example.SS2_Backend.model.stableMatching.StableMatchingOTMProblem;
+import com.example.SS2_Backend.model.stableMatching.oneToMany.Matches;
+import com.example.SS2_Backend.model.stableMatching.oneToMany.MatchingSolution;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.moeaframework.Executor;
-import org.moeaframework.core.*;
+import org.moeaframework.core.NondominatedPopulation;
+import org.moeaframework.core.Problem;
+import org.moeaframework.core.Solution;
+import org.moeaframework.core.TerminationCondition;
 import org.moeaframework.core.termination.MaxFunctionEvaluations;
 import org.moeaframework.util.TypedProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.BindingResult;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class StableMatchingSolver {
-
+public class OTMStableMatchingSolver {
     private final SimpMessagingTemplate simpMessagingTemplate;
 
     private static final Integer RUN_COUNT_PER_ALGORITHM = 10; // for insight running, each algorithm will be run for 10 times
-    //private static final Integer MATCHING_RUN_COUNT_PER_ALGORITHM = 10;
 
-
-    public ResponseEntity<Response> solveStableMatching(StableMatchingProblemDTO request) {
+    public ResponseEntity<Response> solveStableMatching(StableMatchingOTMProblemDTO request) {
 
         try {
-            log.info("Validating StableMatchingProblemDTO Request ...");
-            BindingResult bindingResult = ValidationUtils.validate(request);
-            if (bindingResult.hasErrors()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(Response.builder()
-                                .data(ValidationUtils.getAllErrorDetails(bindingResult))
-                                .build());
-            }
             log.info("[Service] Stable Matching: Load problem...");
             log.info("[Service] Stable Matching: Building preference list...");
-            StableMatchingProblem problem = new StableMatchingProblem();
+            StableMatchingOTMProblem problem = new StableMatchingOTMProblem(
+                    request.getIndividuals(),
+                    request.getAllPropertyNames(),
+                    request.getExcludedPairs()
+            );
 
             problem.setProblemName(request.getProblemName());
-            problem.setEvaluateFunctionForSet1(request.getEvaluateFunction()[0]);
-            problem.setEvaluateFunctionForSet2(request.getEvaluateFunction()[1]);
+            problem.setEvaluateFunctionForProviders(request.getEvaluateFunction()[0]);
+            problem.setEvaluateFunctionForConsumers(request.getEvaluateFunction()[1]);
             problem.setFitnessFunction(request.getFitnessFunction());
-            problem.setPopulation(request.getIndividuals(), request.getAllPropertyNames(), request.getExcludedPairs());
-
 
             log.info("[Service] Stable Matching: Problem: " + problem.getProblemName() +
                     " loaded successfully!");
@@ -175,7 +169,7 @@ public class StableMatchingSolver {
         }
     }
 
-    public ResponseEntity<Response> getProblemResultInsights(StableMatchingProblemDTO request,
+    public ResponseEntity<Response> getProblemResultInsights(StableMatchingOTMProblemDTO request,
                                                              String sessionCode) {
 //        log.info("Received request: " + request);
 //		String[] algorithms = {"NSGAII", "NSGAIII", "eMOEA", "PESA2", "VEGA", "MOEAD"};
@@ -184,10 +178,12 @@ public class StableMatchingSolver {
         simpMessagingTemplate.convertAndSendToUser(sessionCode,
                 "/progress",
                 createProgressMessage("Initializing the problem..."));
-        StableMatchingProblem problem = new StableMatchingProblem();
-        problem.setEvaluateFunctionForSet1(request.getEvaluateFunction()[0]);
-        problem.setEvaluateFunctionForSet2(request.getEvaluateFunction()[1]);
-        problem.setPopulation(request.getIndividuals(), request.getAllPropertyNames(), request.getExcludedPairs());
+        StableMatchingOTMProblem problem = new StableMatchingOTMProblem(
+                request.getIndividuals(),
+                request.getAllPropertyNames(),
+                request.getExcludedPairs()
+        );
+
         problem.setFitnessFunction(request.getFitnessFunction());
 
         MatchingSolutionInsights matchingSolutionInsights = initMatchingSolutionInsights(algorithms);
@@ -290,65 +286,5 @@ public class StableMatchingSolver {
     private double getFitnessValue(NondominatedPopulation result) {
         Solution solution = result.get(0);
         return solution.getObjective(0);
-    }
-
-    public ResponseEntity<Response> solveStableMatchingOTO(StableMatchingProblemDTO request) {
-        try {
-            log.info("[Service] Stable Matching OTO: Load problem...");
-            StableMatchingOTOProblem problem = new StableMatchingOTOProblem();
-            log.info("[Service] Stable Matching OTO: Building preference list...");
-
-            // Init problem
-            problem.setProblemName(request.getProblemName());
-            problem.setEvaluateFunctionForSet1(request.getEvaluateFunction()[0]);
-            problem.setEvaluateFunctionForSet2(request.getEvaluateFunction()[1]);
-            problem.setFitnessFunction(request.getFitnessFunction());
-            problem.setPopulation(request.getIndividuals(), request.getAllPropertyNames());
-
-            log.info("[Service] Stable Matching OTO: Problem: {} loaded successfully!", problem.getProblemName());
-
-            // Start timer and run algorithm
-            long startTime = System.currentTimeMillis();
-            NondominatedPopulation results = solveProblem(problem,
-                    request.getAlgorithm(),
-                    request.getPopulationSize(),
-                    request.getGeneration(),
-                    request.getMaxTime(),
-                    request.getDistributedCores());
-            assert results != null;
-            long endTime = System.currentTimeMillis();
-            double runtime = ((double) (endTime - startTime) / 1000);
-            runtime = (runtime * 1000.0);
-            log.info("[Service] Runtime: " + runtime + " Millisecond(s).");
-
-            // Send result to frontend
-            String algorithm = request.getAlgorithm();
-            MatchingSolution matchingSolution = formatSolutionOTO(algorithm, results, runtime);
-            matchingSolution.setSetSatisfactions(problem.getAllSatisfactions((MatchesOTO) results
-                    .get(0)
-                    .getAttribute("matches")));
-            return ResponseEntity.ok(Response.builder()
-                    .status(200)
-                    .message("[Service] Stable Matching: Solve stable matching problem successfully!")
-                    .data(matchingSolution)
-                    .build());
-        } catch (Exception e) {
-            log.error("[Service] Stable Matching: Error solving stable matching problem: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Response.builder()
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                    .message("[Service] Stable Matching: Error solving stable matching problem.")
-                    .data(null)
-                    .build());
-        }
-    }
-    private MatchingSolution formatSolutionOTO(String algorithm, NondominatedPopulation result, double Runtime) {
-        Solution solution = result.get(0);
-        MatchingSolution matchingSolution = new MatchingSolution();
-        double fitnessValue = solution.getObjective(0);
-        matchingSolution.setMatches(((MatchesOTO) solution.getAttribute("matches")).toMatches());
-        matchingSolution.setFitnessValue(-fitnessValue);
-        matchingSolution.setAlgorithm(algorithm);
-        matchingSolution.setRuntime(Runtime);
-        return matchingSolution;
     }
 }

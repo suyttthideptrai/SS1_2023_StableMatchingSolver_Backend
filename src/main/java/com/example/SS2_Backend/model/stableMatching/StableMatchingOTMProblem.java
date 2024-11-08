@@ -25,10 +25,10 @@ import static com.example.SS2_Backend.util.StringExpressionEvaluator.*;
 
 @Slf4j
 @Data
-@NoArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
 public class StableMatchingOTMProblem implements Problem {
 
+    String problemName;
     IndividualList individuals;
     List<PreferenceList> preferenceLists;
     int[][] excludedPairs;
@@ -40,15 +40,16 @@ public class StableMatchingOTMProblem implements Problem {
     boolean consumerFunctionStatus = false;
     boolean fitnessFunctionStatus = false;
 
-    public void setPopulation(ArrayList<Individual> individuals, String[] propertiesNames, int[][] excludedPairs) {
+    public StableMatchingOTMProblem(ArrayList<Individual> individuals, String[] propertiesNames, int[][] excludedPairs) {
         this.individuals = new IndividualList(individuals, propertiesNames);
         this.excludedPairs = excludedPairs;
-        initializeFields();
-    }
+        this.preferencesProvider = new PreferenceProvider(this.individuals);
 
-    private void initializeFields() {
-        this.preferencesProvider = new PreferenceProvider(individuals);
-        initializePrefProvider();
+        if (this.evaluateFunctionForProviders != null)
+            this.preferencesProvider.setProviderEvaluateFunction(evaluateFunctionForProviders);
+        if (this.evaluateFunctionForConsumers != null)
+            this.preferencesProvider.setConsumerEvaluateFunction(evaluateFunctionForConsumers);
+
         preferenceLists = getPreferences();
     }
 
@@ -69,15 +70,6 @@ public class StableMatchingOTMProblem implements Problem {
             a = preferencesProvider.getPreferenceListByFunction(index);
         }
         return a;
-    }
-
-    private void initializePrefProvider() {
-        if (this.evaluateFunctionForProviders != null) {
-            this.preferencesProvider.setProviderEvaluateFunction(evaluateFunctionForProviders);
-        }
-        if (this.evaluateFunctionForConsumers != null) {
-            this.preferencesProvider.setConsumerEvaluateFunction(evaluateFunctionForConsumers);
-        }
     }
 
     public void setEvaluateFunctionForProviders(String evaluateFunction) {
@@ -142,24 +134,24 @@ public class StableMatchingOTMProblem implements Problem {
         Permutation castVar = (Permutation) var;
         int[] decodeVar = castVar.toArray();
         Queue<Integer> unmatchedConsumers = new LinkedList<>();
+        Queue<Integer> unmatchedProviders = new LinkedList<>();
         for (int val : decodeVar) {
-            if (individuals.getRoleOfParticipant(val) == 1) { // Consumer
+            if (individuals.getRoleOfIndividual(val) == 0)  // Provider
+                unmatchedProviders.add(val);
+            else
                 unmatchedConsumers.add(val);
-            }
         }
-
         while (!unmatchedConsumers.isEmpty()) {
             int consumer = unmatchedConsumers.poll();
-            if (matchedConsumers.contains(consumer)) {
-                continue;
-            }
-
+            if (matchedConsumers.contains(consumer)) continue;
             PreferenceList consumerPreference = preferenceLists.get(consumer);
+            boolean matched = false;
             for (int i = 0; i < consumerPreference.size(); i++) {
                 int provider = consumerPreference.getIndexByPosition(i);
                 if (!match.isProviderFull(provider, individuals.getProviderCapacity(provider))) {
                     match.addMatch(provider, consumer);
                     matchedConsumers.add(consumer);
+                    matched = true;
                     break;
                 } else {
                     int leastPreferredConsumer = getLeastPreferredConsumer(provider, consumer, match.getConsumerMatchesForProvider(provider));
@@ -169,14 +161,23 @@ public class StableMatchingOTMProblem implements Problem {
                         unmatchedConsumers.add(leastPreferredConsumer);
                         matchedConsumers.remove(leastPreferredConsumer);
                         matchedConsumers.add(consumer);
+                        matched = true;
                         break;
                     }
                 }
             }
-            if (!matchedConsumers.contains(consumer)) {
-                match.addLeftOverConsumer(consumer);
+            if (!matched) {
+                match.addLeftOverConsumers(consumer);
             }
         }
+
+        while (!unmatchedProviders.isEmpty()) {
+            int provider = unmatchedProviders.poll();
+            if (!match.hasAnyMatchForProvider(provider)) {
+                match.addLeftOverProvider(provider);
+            }
+        }
+
         return match;
     }
 
@@ -317,13 +318,13 @@ public class StableMatchingOTMProblem implements Problem {
         return setSatisfactions;
     }
 
-    private double[] getAllSatisfactions(Matches match) {
+    public double[] getAllSatisfactions(Matches match) {
         double[] satisfactions = new double[individuals.getTotalIndividuals()];
 
         for (int i = 0; i < individuals.getTotalIndividuals(); i++) {
             double score = 0.0;
             PreferenceList prefList = preferenceLists.get(i);
-            if (individuals.getRoleOfParticipant(i) == 0) {
+            if (individuals.getRoleOfIndividual(i) == 0) {
                 // The individual is a provider
                 Set<Integer> providerMatches = match.getConsumersOfProvider(i);
                 for (int consumer : providerMatches)

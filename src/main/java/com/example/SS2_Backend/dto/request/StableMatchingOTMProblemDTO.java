@@ -1,11 +1,8 @@
 package com.example.SS2_Backend.dto.request;
 
-import com.example.SS2_Backend.constants.MessageConst;
-import com.example.SS2_Backend.model.stableMatching.Individual;
+import com.example.SS2_Backend.model.stableMatching.oneToMany.Individual;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,9 +12,8 @@ import java.util.ArrayList;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class StableMatchingProblemDTO {
+public class StableMatchingOTMProblemDTO {
     private String problemName;
-    @Min(value = 2, message = MessageConst.MatchingValidate.MES_001)
     private int numberOfSets;
     private int numberOfIndividuals;
     @JsonDeserialize(contentUsing = IndividualDeserializer.class)

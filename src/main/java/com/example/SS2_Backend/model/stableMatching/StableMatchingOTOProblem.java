@@ -128,8 +128,7 @@ public class StableMatchingOTOProblem implements Problem {
             if (matched.contains(a)) continue;
             PreferenceList aPreference = preferences.get(a);
             int prefLen = aPreference.size();
-            for (int i = 0; i < prefLen; i++) {
-                int b = aPreference.getIndexByPosition(i);
+            for (int b : aPreference.keySet()) {
                 if (matches[a] == b && matches[b] == a) break;
                 if (!matched.contains(b)) {
                     matched.add(a);
@@ -147,7 +146,7 @@ public class StableMatchingOTOProblem implements Problem {
                         matches[a] = b;
                         matches[b] = a;
                         break;
-                    } else if (i == prefLen - 1) {
+                    } else if (1 == prefLen - 1) {
                         leftOver.add(a);
                     }
                 }
@@ -162,8 +161,8 @@ public class StableMatchingOTOProblem implements Problem {
             int b = list.get(a);
             if (b == -1) totalSatisfaction[a] = 0;
             else {
-                double aSatis = getPreferenceOfIndividual(a).getScoreByIndex(b);
-                double bSatis = getPreferenceOfIndividual(b).getScoreByIndex(a);
+                double aSatis = 12d;
+                double bSatis = 12d;
                 totalSatisfaction[a] = aSatis + bSatis;
             }
         }
@@ -171,7 +170,7 @@ public class StableMatchingOTOProblem implements Problem {
     }
 
     public boolean bLikeAMore(int a, int b, int c) {
-        return preferences.get(b).isScoreGreater(a, c);
+        return true;
     }
     @Override
     public Solution newSolution() {

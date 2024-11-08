@@ -276,9 +276,8 @@ public class StableMatchingRBOProblem implements Problem {
             PreferenceList nodePreference = preferenceLists.get(newNode);
 //			int padding = getPaddingOf(Node);
             //Loop through LeftNode's preference list to find a Match
-            for (int i = 0; i < nodePreference.size(); i++) {
+            for (int preferNode : nodePreference.keySet()) {
                 //Next Match (RightNode) is found on the list
-                int preferNode = nodePreference.getIndexByPosition(i);
                 if (matches.isAlreadyMatch(preferNode, newNode)) {
                     break;
                 }
@@ -301,7 +300,14 @@ public class StableMatchingRBOProblem implements Problem {
                     // Loser will be terminated and Saved in Matches.LeftOvers Container
                     //System.out.println("Found Loser: " + Loser);
                     if (Loser == newNode) {
-                        if (getLastChoiceOf(newNode) == preferNode) {
+                        PreferenceList leftNodePreference = preferenceLists.get(newNode);
+
+                        ArrayList<Integer> temp = new ArrayList<Integer>();
+                        temp.add(preferNode);
+                        temp.addAll(List.of(matches.getIndividualMatches(newNode)));
+
+                        int leftNodeWorstMatch = leftNodePreference.getLeastNode(temp.toArray(new Integer[0]));
+                        if (leftNodeWorstMatch == preferNode) {
                             //System.out.println(Node + " has nowhere to go. Go to LeftOvers!");
                             matches.addLeftOver(Loser);
                             break;
@@ -325,33 +331,13 @@ public class StableMatchingRBOProblem implements Problem {
         return matches;
     }
 
-    // Stable Matching Algorithm Component: isPreferredOver
-    private boolean isPreferredOver(int newNode, int currentNode, int SelectorNode) {
-        PreferenceList preferenceOfSelectorNode = preferenceLists.get(SelectorNode);
-        return preferenceOfSelectorNode.isScoreGreater(newNode, currentNode);
-    }
-
-    /**
-     * @param target - The index of the individual whose last choice is to be found
-     * @return The index of the last choice on the target preference list
-     */
-    private int getLastChoiceOf(int target) {
-        PreferenceList pref = preferenceLists.get(target);
-        return pref.getIndexByPosition(pref.size() - 1);
-    }
 
     private int getLeastScoreNode(int selectorNode, int newNode, Integer[] occupiedNodes) {
         PreferenceList prefOfSelectorNode = preferenceLists.get(selectorNode);
-        if (individualCapacities[selectorNode] == 1) {
-            int currentNode = occupiedNodes[0];
-            if (isPreferredOver(newNode, currentNode, selectorNode)) {
-                return currentNode;
-            } else {
-                return newNode;
-            }
-        } else {
-            return prefOfSelectorNode.getLeastNode(newNode, occupiedNodes);
-        }
+        ArrayList<Integer> nodes = new ArrayList<>();
+        nodes.add(newNode);
+        nodes.addAll(List.of(occupiedNodes));
+        return prefOfSelectorNode.getLeastNode(nodes.toArray(new Integer[0]));
     }
 
     private double defaultFitnessEvaluation(double[] Satisfactions) {
@@ -513,7 +499,7 @@ public class StableMatchingRBOProblem implements Problem {
             PreferenceList ofInd = preferenceLists.get(i);
             Set<Integer> SetMatches = matches.getSet(i);
             for (int x : SetMatches) {
-                setScore += ofInd.getScoreByIndex(x);
+                setScore += ofInd.get(x);
             }
             satisfactions[i] = setScore;
         }
@@ -522,7 +508,7 @@ public class StableMatchingRBOProblem implements Problem {
             PreferenceList ofInd = preferenceLists.get(i);
             Set<Integer> SetMatches = matches.getSet(i);
             for (int x : SetMatches) {
-                setScore += ofInd.getScoreByIndex(x);
+                setScore += ofInd.get(x);
             }
             satisfactions[i] = setScore;
         }

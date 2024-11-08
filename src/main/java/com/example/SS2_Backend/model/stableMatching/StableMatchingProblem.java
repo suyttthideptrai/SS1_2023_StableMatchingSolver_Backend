@@ -7,6 +7,7 @@ import net.objecthunter.exp4j.ExpressionBuilder;
 import org.moeaframework.core.Problem;
 import org.moeaframework.core.Solution;
 import org.moeaframework.core.Variable;
+import org.moeaframework.core.variable.EncodingUtils;
 import org.moeaframework.core.variable.Permutation;
 
 import java.util.*;
@@ -246,8 +247,7 @@ public class StableMatchingProblem implements Problem {
         //System.out.println("parsing");
         Matches matches = new Matches(individuals.getNumberOfIndividual());
         Set<Integer> MatchedNode = new HashSet<>();
-        Permutation castVar = (Permutation) var;
-        int[] decodeVar = castVar.toArray();
+        int[] decodeVar = EncodingUtils.getPermutation(var);
         Queue<Integer> UnMatchedNode = new LinkedList<>();
         for (int val : decodeVar) {
             UnMatchedNode.add(val);
@@ -257,61 +257,66 @@ public class StableMatchingProblem implements Problem {
             //printPreferenceLists();
             //System.out.println(matches);
             //System.out.println(UnMatchedNode);
-            int newNode;
-            newNode = UnMatchedNode.poll();
+            int leftNode;
+            leftNode = UnMatchedNode.poll();
 
-            if (MatchedNode.contains(newNode)) {
+            if (MatchedNode.contains(leftNode)) {
                 continue;
             }
             //System.out.println("working on Node:" + Node);
             //Get pref List of LeftNode
-            PreferenceList nodePreference = preferenceLists.get(newNode);
+            PreferenceList nodePreference = preferenceLists.get(leftNode);
 //			int padding = individuals.getPaddingOf(Node);
             //Loop through LeftNode's preference list to find a Match
-            for (int i = 0; i < nodePreference.size(); i++) {
-                //Next Match (RightNode) is found on the list
-                int preferNode = nodePreference.getIndexByPosition(i);
-                //System.out.println(Node + " Prefer : " + preferNode);
-                if (matches.isAlreadyMatch(preferNode, newNode)) {
-                    //System.out.println(Node + " is already match with " + preferNode);
+            for (int rightNode : nodePreference.keySet()) {
+                if (matches.isAlreadyMatch(rightNode, leftNode)) {
                     break;
                 }
                 //If the RightNode Capacity is not full -> create connection between LeftNode - RightNode
-                if (!matches.isFull(preferNode, this.individuals.getCapacityOf(preferNode))) {
-                    //System.out.println(preferNode + " is not full.");
+                if (!matches.isFull(rightNode, this.individuals.getCapacityOf(rightNode))) {
                     //AddMatch (Node, NodeToConnect)
-                    matches.addMatch(preferNode, newNode);
-                    matches.addMatch(newNode, preferNode);
-                    MatchedNode.add(preferNode);
+                    matches.addMatch(rightNode, leftNode);
+                    matches.addMatch(leftNode, rightNode);
+                    MatchedNode.add(rightNode);
                     break;
                 } else {
                     //If the RightNode's Capacity is Full then Left Node will Compete with Nodes that are inside RightNode
                     //Loser will be the return value
                     //System.out.println(preferNode + " is full! Begin making a Compete game involve: " + Node + " ..." );
+                    ArrayList<Integer> nodes = new ArrayList<Integer>();
+                    nodes.add(leftNode);
+                    nodes.addAll(List.of(matches.getIndividualMatches(rightNode)));
+                    PreferenceList prefOfSelectorNode = preferenceLists.get(rightNode);
 
-                    int Loser = getLeastScoreNode(preferNode,
-                            newNode,
-                            matches.getIndividualMatches(preferNode));
+                    int Loser = prefOfSelectorNode.getLeastNode(nodes.toArray(new Integer[0]));
 
                     //If RightNode is the LastChoice of Loser -> then
                     // Loser will be terminated and Saved in Matches.LeftOvers Container
                     //System.out.println("Found Loser: " + Loser);
-                    if (Loser == newNode) {
-                        if (getLastChoiceOf(newNode) == preferNode) {
+                    if (Loser == leftNode) {
+                        PreferenceList leftNodePreference = preferenceLists.get(leftNode);
+
+                        ArrayList<Integer> temp = new ArrayList<Integer>();
+                        temp.add(rightNode);
+                        temp.addAll(List.of(matches.getIndividualMatches(leftNode)));
+
+                        int leftNodeWorstMatch = leftNodePreference.getLeastNode(temp.toArray(new Integer[0]));
+
+                        if ( leftNodeWorstMatch == rightNode) {
                             //System.out.println(Node + " has nowhere to go. Go to LeftOvers!");
                             matches.addLeftOver(Loser);
                             break;
                         }
                         //Or else Loser go back to UnMatched Queue & Waiting for it's Matching Procedure
                     } else {
-                        matches.disMatch(preferNode, Loser);
-                        matches.disMatch(Loser, preferNode);
+                        matches.disMatch(rightNode, Loser);
+                        matches.disMatch(Loser, rightNode);
                         UnMatchedNode.add(Loser);
                         MatchedNode.remove(Loser);
                         //System.out.println(Loser + " lost the game, waiting for another chance.");
-                        matches.addMatch(preferNode, newNode);
-                        matches.addMatch(newNode, preferNode);
-                        MatchedNode.add(newNode);
+                        matches.addMatch(rightNode, leftNode);
+                        matches.addMatch(leftNode, rightNode);
+                        MatchedNode.add(leftNode);
                         //System.out.println(Node + " is more suitable than " + Loser + " matched with " + preferNode);
                         break;
                     }
@@ -319,35 +324,6 @@ public class StableMatchingProblem implements Problem {
             }
         }
         return matches;
-    }
-
-    // Stable Matching Algorithm Component: isPreferredOver
-    private boolean isPreferredOver(int newNode, int currentNode, int SelectorNode) {
-        PreferenceList preferenceOfSelectorNode = preferenceLists.get(SelectorNode);
-        return preferenceOfSelectorNode.isScoreGreater(newNode, currentNode);
-    }
-
-    /**
-     * @param target - The index of the individual whose last choice is to be found
-     * @return The index of the last choice on the target preference list
-     */
-    private int getLastChoiceOf(int target) {
-        PreferenceList pref = preferenceLists.get(target);
-        return pref.getIndexByPosition(pref.size() - 1);
-    }
-
-    private int getLeastScoreNode(int selectorNode, int newNode, Integer[] occupiedNodes) {
-        PreferenceList prefOfSelectorNode = preferenceLists.get(selectorNode);
-        if (individuals.getCapacityOf(selectorNode) == 1) {
-            int currentNode = occupiedNodes[0];
-            if (isPreferredOver(newNode, currentNode, selectorNode)) {
-                return currentNode;
-            } else {
-                return newNode;
-            }
-        } else {
-            return prefOfSelectorNode.getLeastNode(newNode, occupiedNodes);
-        }
     }
 
     private double defaultFitnessEvaluation(double[] Satisfactions) {
@@ -509,7 +485,7 @@ public class StableMatchingProblem implements Problem {
             PreferenceList ofInd = preferenceLists.get(i);
             Set<Integer> SetMatches = matches.getSet(i);
             for (int x : SetMatches) {
-                setScore += ofInd.getScoreByIndex(x);
+                setScore += ofInd.get(x);
             }
             satisfactions[i] = setScore;
         }
@@ -518,7 +494,7 @@ public class StableMatchingProblem implements Problem {
             PreferenceList ofInd = preferenceLists.get(i);
             Set<Integer> SetMatches = matches.getSet(i);
             for (int x : SetMatches) {
-                setScore += ofInd.getScoreByIndex(x);
+                setScore += ofInd.get(x);
             }
             satisfactions[i] = setScore;
         }

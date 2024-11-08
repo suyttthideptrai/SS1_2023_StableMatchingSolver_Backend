@@ -165,7 +165,7 @@ public class NewPreferencesProvider {
         PreferenceList a;
         Expression e;
         if (set == 0) {
-            a = new PreferenceList(this.sizeOf2, this.sizeOf1);
+            a = new PreferenceList();
             if (this.expressionOfSet1 == null) {
                 return this.getPreferenceListByDefault(index);
             }
@@ -173,10 +173,10 @@ public class NewPreferencesProvider {
             for (int i = this.sizeOf1; i < numberOfIndividuals; i++) {
                 e.setVariables(this.getVariableValuesForSet1(index, i));
                 double totalScore = e.evaluate();
-                a.add(totalScore);
+                a.put(i, totalScore);
             }
         } else {
-            a = new PreferenceList(this.sizeOf1, 0);
+            a = new PreferenceList();
             if (this.expressionOfSet2 == null) {
                 return this.getPreferenceListByDefault(index);
             }
@@ -184,10 +184,9 @@ public class NewPreferencesProvider {
             for (int i = 0; i < sizeOf1; i++) {
                 e.setVariables(this.getVariableValuesForSet2(index, i));
                 double totalScore = e.evaluate();
-                a.add(totalScore);
+                a.put(i, totalScore);
             }
         }
-        a.sort();
         return a;
     }
 
@@ -196,7 +195,7 @@ public class NewPreferencesProvider {
         int numberOfProperties = individualProperties.length;
         PreferenceList a;
         if (set == 0) {
-            a = new PreferenceList(this.sizeOf2, this.sizeOf1);
+            a = new PreferenceList();
             for (int i = sizeOf1; i < numberOfIndividuals; i++) {
                 double totalScore = 0;
                 for (int j = 0; j < numberOfProperties; j++) {
@@ -207,10 +206,10 @@ public class NewPreferencesProvider {
                     double PropertyWeight = individualWeights[i][j];
                     totalScore += getDefaultScaling(requirement, PropertyValue) * PropertyWeight;
                 }
-                a.add(totalScore);
+                a.put(i, totalScore);
             }
         } else {
-            a = new PreferenceList(this.sizeOf1, 0);
+            a = new PreferenceList();
             for (int i = 0; i < sizeOf1; i++) {
                 double totalScore = 0;
                 for (int j = 0; j < numberOfProperties; j++) {
@@ -223,10 +222,9 @@ public class NewPreferencesProvider {
                     totalScore += getDefaultScaling(requirement, PropertyValue) * PropertyWeight;
                 }
                 // Add
-                a.add(totalScore);
+                a.put(i, totalScore);
             }
         }
-        a.sort();
         return a;
     }
 

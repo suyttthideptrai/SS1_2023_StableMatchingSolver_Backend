@@ -11,7 +11,6 @@ import java.util.logging.Logger;
 @ControllerAdvice
 public class GlobalExceptionHandler {
     Logger logger = Logger.getLogger("GlobalExceptionHandler");
-
     @ExceptionHandler(RejectedExecutionException.class)
     public ResponseEntity<String> handleRejectedExecutionException(RejectedExecutionException ex) {
         logger.warning("Queue full!");

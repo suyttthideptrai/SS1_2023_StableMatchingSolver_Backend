@@ -60,7 +60,7 @@ public class Matches implements Serializable {
     /**
      *
      * @param target
-     * @return The copy of current matches
+     * @return The copy of current matches of target
      */
     public Set<Integer> getIndividualMatches(int target) {
         return new TreeSet<>(matches.get(target));

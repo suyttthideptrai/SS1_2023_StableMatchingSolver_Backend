@@ -14,18 +14,27 @@ import java.util.*;
 public class Matches implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    private final List<TreeSet<Integer>> matches;
-    private final Set<Integer> leftOvers = new TreeSet<>();
+    private final TreeSet<Integer>[] matches;
+    private final TreeSet<Integer> leftOvers = (new TreeSet<>());
 
     public Matches(int individualCount) {
-        matches = new ArrayList<>(individualCount);
+        matches = new TreeSet[individualCount];
         for (int i = 0; i < individualCount; i++) {
-            matches.add(new TreeSet<>());
+            matches[i] = new TreeSet<>();
         }
     }
 
+    public boolean isMatched(int index) {
+        return !matches[index].isEmpty();
+    }
+
+    /**
+     *
+     * @param index
+     * @return The copy of current matches of element at index
+     */
     public Set<Integer> getSet(int index) {
-        return matches.get(index );
+        return matches[index];
     }
 
     public void addLeftOver(int index) {
@@ -33,7 +42,7 @@ public class Matches implements Serializable {
     }
 
     public int size() {
-        return matches.size();
+        return matches.length;
     }
 
     public boolean isAlreadyMatch(int Node1, int Node2) {
@@ -47,23 +56,11 @@ public class Matches implements Serializable {
     }
 
     public void addMatch(int target, int prefer) {
-        matches.get(target)
-                .add(prefer);
+        matches[target].add(prefer);
     }
 
     public void disMatch(int target, int nodeToRemove) {
-        matches.get(target)
-                .remove(nodeToRemove);
-    }
-
-
-    /**
-     *
-     * @param target
-     * @return The copy of current matches of target
-     */
-    public Set<Integer> getIndividualMatches(int target) {
-        return new TreeSet<>(matches.get(target));
+        matches[target].remove(nodeToRemove);
     }
 
     public String toString() {

@@ -2,19 +2,18 @@ package com.example.SS2_Backend.model.stableMatching;
 
 import com.example.SS2_Backend.model.stableMatching.Matches.Matches;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
 import org.moeaframework.core.Problem;
 import org.moeaframework.core.Solution;
-import org.moeaframework.core.Variable;
 import org.moeaframework.core.variable.EncodingUtils;
 import org.moeaframework.core.variable.Permutation;
 
 import java.util.*;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.function.DoubleUnaryOperator;
 import java.util.stream.DoubleStream;
-
-import lombok.extern.slf4j.Slf4j;
 
 import static com.example.SS2_Backend.util.StringExpressionEvaluator.*;
 
@@ -243,18 +242,14 @@ public class StableMatchingProblem implements Problem {
 
 
     private Matches StableMatchingExtra(int[] nodes) {
-        //Parse Variable
-        //System.out.println("parsing");
-        Matches matches = new Matches(nodes.length);
-        Set<Integer> MatchedNode = new TreeSet<>();
-        Queue<Integer> UnMatchedNode = new LinkedList<>( );
-        Arrays.stream(nodes)
-            .forEach(UnMatchedNode::add);
+        final Matches matches = new Matches(nodes.length);
+        final Queue<Integer> UnMatchedNode = new ArrayBlockingQueue<>(nodes.length);
+        Arrays.stream(nodes).forEach(UnMatchedNode::add);
 
         while (!UnMatchedNode.isEmpty()) {
             int leftNode = UnMatchedNode.poll();
 
-            if (MatchedNode.contains(leftNode)) {
+            if (matches.isMatched(leftNode)) {
                 continue;
             }
 
@@ -268,40 +263,30 @@ public class StableMatchingProblem implements Problem {
                     //AddMatch (Node, NodeToConnect)
                     matches.addMatch(rightNode, leftNode);
                     matches.addMatch(leftNode, rightNode);
-                    MatchedNode.add(rightNode);
                     break;
                 } else {
                     //If the RightNode's Capacity is Full then Left Node will Compete with Nodes that are inside RightNode
-                    //Loser will be the return value
+                    int rightNodeWorstMatch = getLoser(leftNode, rightNode, matches);
 
-                    int rightNodeLoser = getLoser(leftNode, rightNode, matches);
-
-                    //If RightNode is the LastChoice of Loser -> then
-                    // Loser will be terminated and Saved in Matches.LeftOvers Container
-                    if (rightNodeLoser == leftNode) {
-                        int leftNodeLoser = getLoser(rightNode, leftNode, matches);
-
-                        if ( leftNodeLoser == rightNode) {
-                            //System.out.println(Node + " has nowhere to go. Go to LeftOvers!");
-                            matches.addLeftOver(rightNodeLoser);
+                    if (rightNodeWorstMatch == leftNode) {
+                        //If RightNode is the worst match for leftNode then add leftNode to leftOvers
+                        if (rightNode == getLoser(rightNode, leftNode, matches)) {
+                            matches.addLeftOver(leftNode);
                             break;
                         }
                         //Or else Loser go back to UnMatched Queue & Waiting for it's Matching Procedure
                     } else {
-                        matches.disMatch(rightNode, rightNodeLoser);
-                        matches.disMatch(rightNodeLoser, rightNode);
-                        UnMatchedNode.add(rightNodeLoser);
-                        MatchedNode.remove(rightNodeLoser);
-                        //System.out.println(Loser + " lost the game, waiting for another chance.");
+                        matches.disMatch(rightNode, rightNodeWorstMatch);
+                        matches.disMatch(rightNodeWorstMatch, rightNode);
+                        UnMatchedNode.add(rightNodeWorstMatch);
                         matches.addMatch(rightNode, leftNode);
                         matches.addMatch(leftNode, rightNode);
-                        MatchedNode.add(leftNode);
-                        //System.out.println(Node + " is more suitable than " + Loser + " matched with " + preferNode);
                         break;
                     }
                 }
             }
         }
+
         return matches;
     }
 
@@ -313,12 +298,10 @@ public class StableMatchingProblem implements Problem {
      * @return Index of the least preferred node of matchee
      */
     private int getLoser(int matcher, int matchee, Matches matches) {
-        Set<Integer> nodes = matches.getIndividualMatches(matchee);
-        nodes.add(matcher);
+        Set<Integer> currentMatches = matches.getSet(matchee);
         return preferenceLists
             .get(matchee)
-            .getLeastNode(nodes)
-            .get();
+            .getLeastNode(matcher, currentMatches);
     }
 
     private double defaultFitnessEvaluation(double[] Satisfactions) {

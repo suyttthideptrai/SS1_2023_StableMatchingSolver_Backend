@@ -11,12 +11,12 @@ import java.util.*;
 public class PreferenceList extends HashMap<Integer, Double> {
     /**
      *
-     * @param nodes list of nodes in this preference list
-     * @return null if nodes is empty or nodes given are not in the preference
-     * list, else Index of node with the smallest score
+     * @param currentMatches list of nodes in this preference list that are matched
+     * @param newMatch node in this preference list competing with currentMatches
+     * @return return the node with worst score, default to newMatch
      */
-    public Optional<Integer> getLeastNode(Set<Integer> nodes) {
-        return nodes.stream()
-            .min((x, y) -> (get(x) > get(y)) ? y : x) ;
+    public Integer getLeastNode(int newMatch, Set<Integer> currentMatches) {
+        return currentMatches.stream()
+            .reduce(newMatch, (x, y) -> (get(x) > get(y)) ? y : x) ;
     }
 }

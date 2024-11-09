@@ -255,7 +255,7 @@ public class StableMatchingProblem implements Problem {
 
             //Loop through LeftNode's preference list to find a Match
             for (int rightNode : preferenceLists.get(leftNode).keySet()) {
-                if (matches.isAlreadyMatch(rightNode, leftNode)) {
+                if (matches.isMatched(rightNode, leftNode)) {
                     break;
                 }
                 //If the RightNode Capacity is not full -> create connection between LeftNode - RightNode

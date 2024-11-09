@@ -19,4 +19,10 @@ public class PreferenceList extends HashMap<Integer, Double> {
         return currentMatches.stream()
             .reduce(newMatch, (x, y) -> (get(x) > get(y)) ? y : x) ;
     }
+
+    public Integer getLeastNode(int newMatch, int currentMatch) {
+            return (get(newMatch) > get(currentMatch))
+                ? currentMatch
+                : newMatch;
+    }
 }

@@ -7,10 +7,11 @@ import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
 import org.moeaframework.core.Problem;
 import org.moeaframework.core.Solution;
-import org.moeaframework.core.Variable;
+import org.moeaframework.core.variable.EncodingUtils;
 import org.moeaframework.core.variable.Permutation;
 
 import java.util.*;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.function.DoubleUnaryOperator;
 import java.util.stream.DoubleStream;
 
@@ -63,11 +64,6 @@ public class StableMatchingRBOProblem implements Problem {
     private boolean f1Status = false;
     private boolean f2Status = false;
     private boolean fnfStatus = false;
-
-    /* Phần được thay thế từ phần Code cũ
-    * Thay từ Individual từ Code cũ thành các Array khác nhau với độ dài bằng nhau
-    * */
-
     private String[][] individualRequirements;
     private double[][] individualWeights;
     private double[][] individualProperties;
@@ -196,7 +192,7 @@ public class StableMatchingRBOProblem implements Problem {
     // Evaluate
     public void evaluate(Solution solution) {
         log.info("Evaluating ... "); // Start matching & collect result
-        Matches result = StableMatchingExtra(solution.getVariable(0));
+        Matches result = StableMatchingExtra(EncodingUtils.getPermutation(solution.getVariable(0)));
         double[] Satisfactions = getAllSatisfactions(result); // Get all satisfactions
         double fitnessScore;
         if (!this.fnfStatus) {
@@ -256,73 +252,48 @@ public class StableMatchingRBOProblem implements Problem {
     }
 
 
-    private Matches StableMatchingExtra(Variable var) {
+    private Matches StableMatchingExtra(int[] indicies) {
         Matches matches = new Matches(numberOfIndividuals);
-        Set<Integer> MatchedNode = new HashSet<>();
-        Permutation castVar = (Permutation) var;
-        int[] decodeVar = castVar.toArray();
-        Queue<Integer> UnMatchedNode = new LinkedList<>();
-        for (int val : decodeVar) {
-            UnMatchedNode.add(val);
-        }
+        Queue<Integer> UnMatchedNode = new ArrayBlockingQueue<>(indicies.length);
+        Arrays.stream(indicies).forEach(UnMatchedNode::add);
 
         while (!UnMatchedNode.isEmpty()) {
-            int newNode;
-            newNode = UnMatchedNode.poll();
+            int leftNode = UnMatchedNode.poll();
 
-            if (MatchedNode.contains(newNode)) {
+            if (matches.isMatched(leftNode)) {
                 continue;
             }
-            PreferenceList nodePreference = preferenceLists.get(newNode);
-//			int padding = getPaddingOf(Node);
+
             //Loop through LeftNode's preference list to find a Match
-            for (int preferNode : nodePreference.keySet()) {
+            for (int rightNode : preferenceLists.get(leftNode).keySet()) {
                 //Next Match (RightNode) is found on the list
-                if (matches.isAlreadyMatch(preferNode, newNode)) {
+                if (matches.isMatched(rightNode, leftNode)) {
                     break;
                 }
                 //If the RightNode Capacity is not full -> create connection between LeftNode - RightNode
-                if (!matches.isFull(preferNode, this.individualCapacities[preferNode])) {
-                    matches.addMatch(preferNode, newNode);
-                    matches.addMatch(newNode, preferNode);
-                    MatchedNode.add(preferNode);
+                if (!matches.isFull(rightNode, this.individualCapacities[rightNode])) {
+                    matches.addMatch(rightNode, leftNode);
+                    matches.addMatch(leftNode, rightNode);
                     break;
                 } else {
                     //If the RightNode's Capacity is Full then Left Node will Compete with Nodes that are inside RightNode
                     //Loser will be the return value
                     //System.out.println(preferNode + " is full! Begin making a Compete game involve: " + Node + " ..." );
 
-                    int Loser = getLeastScoreNode(preferNode,
-                            newNode,
-                            matches.getIndividualMatches(preferNode));
+                    int Loser = getLoser(rightNode, leftNode, matches);
 
-                    //If RightNode is the LastChoice of Loser -> then
-                    // Loser will be terminated and Saved in Matches.LeftOvers Container
-                    //System.out.println("Found Loser: " + Loser);
-                    if (Loser == newNode) {
-                        PreferenceList leftNodePreference = preferenceLists.get(newNode);
-
-                        ArrayList<Integer> temp = new ArrayList<Integer>();
-                        temp.add(preferNode);
-                        temp.addAll(List.of(matches.getIndividualMatches(newNode)));
-
-                        int leftNodeWorstMatch = leftNodePreference.getLeastNode(temp.toArray(new Integer[0]));
-                        if (leftNodeWorstMatch == preferNode) {
-                            //System.out.println(Node + " has nowhere to go. Go to LeftOvers!");
-                            matches.addLeftOver(Loser);
+                    if (Loser == leftNode) {
+                        //If rightNode is the last choice of leftNode then add leftNode to leftOvers
+                        if (rightNode == getLoser(leftNode, rightNode, matches)) {
+                            matches.addLeftOver(leftNode);
                             break;
                         }
-                        //Or else Loser go back to UnMatched Queue & Waiting for it's Matching Procedure
-                    } else {
-                        matches.disMatch(preferNode, Loser);
-                        matches.disMatch(Loser, preferNode);
+                    } else { //Or else Loser go back to UnMatched Queue & Waiting for it's Matching Procedure
+                        matches.disMatch(rightNode, Loser);
+                        matches.disMatch(Loser, rightNode);
                         UnMatchedNode.add(Loser);
-                        MatchedNode.remove(Loser);
-                        //System.out.println(Loser + " lost the game, waiting for another chance.");
-                        matches.addMatch(preferNode, newNode);
-                        matches.addMatch(newNode, preferNode);
-                        MatchedNode.add(newNode);
-                        //System.out.println(Node + " is more suitable than " + Loser + " matched with " + preferNode);
+                        matches.addMatch(rightNode, leftNode);
+                        matches.addMatch(leftNode, rightNode);
                         break;
                     }
                 }
@@ -332,12 +303,10 @@ public class StableMatchingRBOProblem implements Problem {
     }
 
 
-    private int getLeastScoreNode(int selectorNode, int newNode, Integer[] occupiedNodes) {
-        PreferenceList prefOfSelectorNode = preferenceLists.get(selectorNode);
-        ArrayList<Integer> nodes = new ArrayList<>();
-        nodes.add(newNode);
-        nodes.addAll(List.of(occupiedNodes));
-        return prefOfSelectorNode.getLeastNode(nodes.toArray(new Integer[0]));
+    private int getLoser(int matchee, int matcher, Matches matches) {
+        return preferenceLists
+            .get(matchee)
+            .getLeastNode(matcher, matches.getSet(matchee));
     }
 
     private double defaultFitnessEvaluation(double[] Satisfactions) {
@@ -497,8 +466,7 @@ public class StableMatchingRBOProblem implements Problem {
         for (int i = 0; i < numSet0; i++) {
             double setScore = 0.0;
             PreferenceList ofInd = preferenceLists.get(i);
-            Set<Integer> SetMatches = matches.getSet(i);
-            for (int x : SetMatches) {
+            for (int x : matches.getSet(i)) {
                 setScore += ofInd.get(x);
             }
             satisfactions[i] = setScore;
@@ -506,8 +474,7 @@ public class StableMatchingRBOProblem implements Problem {
         for (int i = numSet0; i < numberOfIndividuals; i++) {
             double setScore = 0.0;
             PreferenceList ofInd = preferenceLists.get(i);
-            Set<Integer> SetMatches = matches.getSet(i);
-            for (int x : SetMatches) {
+            for (int x : matches.getSet(i)) {
                 setScore += ofInd.get(x);
             }
             satisfactions[i] = setScore;

@@ -12,25 +12,25 @@ import java.util.stream.Collectors;
 @Data
 public class MatchesOTO implements Serializable {
     private static final long serialVersionUID = 2L;
-    private final List<Integer> matches;
+    private final Integer[] matches;
     private final Set<Integer> leftOver;
 
-    public MatchesOTO(int[] matches, Set<Integer> leftOver) {
-        this.matches = Arrays.stream(matches).boxed().collect(Collectors.toList());
+    public MatchesOTO(Integer[] matches, Set<Integer> leftOver) {
+        this.matches = matches;
         this.leftOver = leftOver;
     }
     public Matches toMatches() {
-        Matches obj = new Matches(matches.size());
+        Matches obj = new Matches(matches.length);
         for (int match : matches) {
             if (match == -1) continue;
-            obj.addMatch(match, matches.get(match));
-            obj.addMatch(matches.get(match), match);
+            obj.addMatch(match, matches[match]);
+            obj.addMatch(matches[match], match);
         }
         for(int individual: leftOver) obj.addLeftOver(individual);
         return obj;
     }
 
     public boolean isEmpty() {
-        return matches.isEmpty();
+        return matches.length == 0;
     }
 }

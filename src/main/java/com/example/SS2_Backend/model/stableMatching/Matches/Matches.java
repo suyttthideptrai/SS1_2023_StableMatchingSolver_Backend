@@ -12,8 +12,6 @@ import java.util.*;
  */
 @Data
 public class Matches implements Serializable {
-
-    private static final long serialVersionUID = 1L;
     private final TreeSet<Integer>[] matches;
     private final TreeSet<Integer> leftOvers = (new TreeSet<>());
 
@@ -45,7 +43,7 @@ public class Matches implements Serializable {
         return matches.length;
     }
 
-    public boolean isAlreadyMatch(int Node1, int Node2) {
+    public boolean isMatched(int Node1, int Node2) {
         Set<Integer> ofNode1 = getSet(Node1);
         return ofNode1.contains(Node2);
     }

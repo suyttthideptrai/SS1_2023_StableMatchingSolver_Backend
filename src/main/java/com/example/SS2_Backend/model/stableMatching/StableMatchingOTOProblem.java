@@ -8,6 +8,7 @@ import org.moeaframework.core.Problem;
 import org.moeaframework.core.Solution;
 import org.moeaframework.core.variable.Permutation;
 import java.util.*;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.stream.Collectors;
 
 import static com.example.SS2_Backend.util.StringExpressionEvaluator.convertToStringWithoutScientificNotation;
@@ -118,36 +119,37 @@ public class StableMatchingOTOProblem implements Problem {
         }
     }
     public MatchesOTO StableMatchingAlgorithm(int[] order) {
-        Queue<Integer> singleQueue = Arrays.stream(order).boxed().collect(Collectors.toCollection(LinkedList::new));
-        int[] matches = new int[problemSize];
+        Queue<Integer> unmatched = new ArrayBlockingQueue<>(order.length);
+        Arrays.stream(order).forEach(unmatched::add);
+        // when init all element are null
+        Integer[] matches = new Integer[order.length];
         for (int i = 0; i < problemSize; i++) matches[i] = -1;
-        Set<Integer> matched = new HashSet<>();
-        Set<Integer> leftOver = new HashSet<>();
-        while(!singleQueue.isEmpty()){
-            int a = singleQueue.poll();
-            if (matched.contains(a)) continue;
-            PreferenceList aPreference = preferences.get(a);
-            int prefLen = aPreference.size();
-            for (int b : aPreference.keySet()) {
-                if (matches[a] == b && matches[b] == a) break;
-                if (!matched.contains(b)) {
-                    matched.add(a);
-                    matched.add(b);
-                    matches[a] = b;
-                    matches[b] = a;
+        Set<Integer> matched = new TreeSet<>();
+        Set<Integer> leftOver = new TreeSet<>();
+
+        while(!unmatched.isEmpty()){
+            int leftNode = unmatched.poll();
+            if (matched.contains(leftNode)) continue;
+            for (int rightNode : preferences.get(leftNode).keySet()) {
+                if (rightNode == matches[leftNode]
+                    && matches[rightNode] == leftNode)
+                    break;
+                if (null == matches[rightNode]) {
+                    matches[leftNode] = rightNode;
+                    matches[rightNode] = leftNode;
                     break;
                 } else {
-                    int bPartner = matches[b];
-                    if (bLikeAMore(a, b, bPartner)) {
-                        singleQueue.add(bPartner);
-                        matched.remove(bPartner);
-                        matches[bPartner] = -1;
-                        matched.add(a);
-                        matches[a] = b;
-                        matches[b] = a;
+                    int rightMatch = matches[rightNode];
+                    if (bLikeAMore(leftNode, rightNode, rightMatch)) {
+                        unmatched.add(rightMatch);
+                        matched.remove(rightMatch);
+                        matches[rightMatch] = -1;
+                        matched.add(leftNode);
+                        matches[leftNode] = rightNode;
+                        matches[rightNode] = leftNode;
                         break;
-                    } else if (1 == prefLen - 1) {
-                        leftOver.add(a);
+                    } else {
+                        leftOver.add(leftNode);
                     }
                 }
             }
@@ -155,14 +157,14 @@ public class StableMatchingOTOProblem implements Problem {
         return new MatchesOTO(matches, leftOver);
     }
     public double[] getAllSatisfactions(MatchesOTO matches) {
-        List<Integer> list = matches.getMatches();
+        Integer[] list = matches.getMatches();
         double[] totalSatisfaction = new double[problemSize];
         for (int a = 0; a < problemSize; a++) {
-            int b = list.get(a);
+            int b = list[a];
             if (b == -1) totalSatisfaction[a] = 0;
             else {
-                double aSatis = 12d;
-                double bSatis = 12d;
+                double aSatis = getPreferenceOfIndividual(a).get(b);
+                double bSatis = getPreferenceOfIndividual(b).get(a);
                 totalSatisfaction[a] = aSatis + bSatis;
             }
         }
@@ -170,7 +172,7 @@ public class StableMatchingOTOProblem implements Problem {
     }
 
     public boolean bLikeAMore(int a, int b, int c) {
-        return true;
+        return c == preferences.get(b).getLeastNode(a, c);
     }
     @Override
     public Solution newSolution() {

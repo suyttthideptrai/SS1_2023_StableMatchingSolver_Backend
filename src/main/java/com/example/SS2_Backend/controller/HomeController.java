@@ -5,7 +5,6 @@ import com.example.SS2_Backend.dto.request.NewStableMatchingProblemDTO;
 import com.example.SS2_Backend.dto.request.StableMatchingOTMProblemDTO;
 import com.example.SS2_Backend.dto.request.StableMatchingProblemDTO;
 import com.example.SS2_Backend.dto.response.Response;
-import com.example.SS2_Backend.util.ErrorMapper;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,9 +18,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.validation.BindingResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.validation.DataBinder;
-import org.springframework.validation.Validator;
-import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -43,8 +39,6 @@ public class HomeController {
     @Autowired
     private OTMStableMatchingSolver stableMatchingOTMProblemDTO;
 
-    private ErrorMapper errorMapper;
-
     @GetMapping("/")
     public String home() {
         return "index";
@@ -65,11 +59,12 @@ public class HomeController {
             @Valid @RequestBody NewStableMatchingProblemDTO object,
             BindingResult bindingResult
     ) {
-
-        if (bindingResult.hasErrors() || object.isEvaluateFunctionValid()) {
+        object.isEvaluateFunctionValid(bindingResult);
+        object.is2DArrayValid(bindingResult);
+        if (bindingResult.hasErrors()) {
             List<String> errors = bindingResult.
                     getAllErrors().stream().map(DefaultMessageSourceResolvable::getDefaultMessage)
-                    .collect(Collectors.toList());
+                    .toList();
 
             return CompletableFuture.completedFuture(new ResponseEntity<>(new Response(
                     400,
@@ -77,8 +72,7 @@ public class HomeController {
                     // "Invalidated Data. Please check your input data!",
                     null
             ), HttpStatus.BAD_REQUEST));
-        }
-        if (object.isEvaluateFunctionValid()) {
+        } else {
             return CompletableFuture.completedFuture(new ResponseEntity<>(new Response(
                     400,
                     "Invalid evaluateFunctions, please retry.",
@@ -86,7 +80,6 @@ public class HomeController {
                     null
             ), HttpStatus.BAD_REQUEST));
         }
-        return CompletableFuture.completedFuture(stableMatchingSolverRBO.solveStableMatching(object));
     }
 
     @Async("taskExecutor")

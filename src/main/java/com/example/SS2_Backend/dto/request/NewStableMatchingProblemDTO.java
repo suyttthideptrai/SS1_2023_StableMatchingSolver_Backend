@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
 import net.objecthunter.exp4j.ValidationResult;
+import org.jfree.util.Log;
+import org.springframework.validation.BindingResult;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,7 +19,6 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-//@EvaluateFunctionConstraint
 
 public class NewStableMatchingProblemDTO {
     private String problemName;
@@ -101,7 +102,7 @@ public class NewStableMatchingProblemDTO {
                 "}";
     }
 
-    public boolean isEvaluateFunctionValid() {
+    public void isEvaluateFunctionValid(BindingResult bindingResult) {
         ArrayList<Boolean> validEvalFunc = new ArrayList<>();
         for (String evaluateFunction: this.getEvaluateFunction()) {
             ExpressionBuilder e = new ExpressionBuilder(evaluateFunction);
@@ -113,8 +114,28 @@ public class NewStableMatchingProblemDTO {
             ValidationResult res = expressionValidator.validate();
             validEvalFunc.add(res.isValid());
         }
+        if (validEvalFunc.stream().allMatch(e -> e)) {
+            Log.debug("Valid evaluate function(s).");
+        } else {
+            bindingResult.reject("evaluateFunction", "Invalid evaluation function(s). Rejected.");
+        }
 
-        return validEvalFunc.stream().allMatch(e -> e);
+    }
+
+    public void is2DArrayValid(BindingResult bindingResult) {
+        if (individualRequirements.size() != numberOfIndividuals) {
+            bindingResult.reject("individualRequirements", "Invalid individualRequirements, doesn't match the number of individuals");
+        } else if (individualWeights.size() != numberOfIndividuals) {
+            bindingResult.reject("individualWeights", "Invalid individualWeights, doesn't match the number of individuals");
+        } else if (individualProperties.size() != numberOfIndividuals) {
+            bindingResult.reject("individualProperties", "Invalid individualProperties, doesn't match the number of individuals");
+        } else if (individualSetIndices.length != numberOfIndividuals) {
+            bindingResult.reject("individualSetIndices", "Invalid individualSetIndices, doesn't match the number of individuals");
+        } else if (individualCapacities.length != numberOfIndividuals) {
+            bindingResult.reject("individualCapacities", "Invalid individualCapacities, doesn't match the number of individuals");
+        } else {
+            Log.debug("Validation completed, all the arrays related to the numberOfIndividuals are all valid!");
+        }
     }
 
     public static String[][] fromListToStringArray(List<List<String>> list) {

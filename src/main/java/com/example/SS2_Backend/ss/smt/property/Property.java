@@ -8,8 +8,8 @@ import lombok.Getter;
 
 import java.util.Objects;
 
-import static com.example.SS2_Backend.util.Utils.isDouble;
-import static com.example.SS2_Backend.util.Utils.isInteger;
+import static com.example.SS2_Backend.util.NumberUtils.isDouble;
+import static com.example.SS2_Backend.util.NumberUtils.isInteger;
 
 public class Property {
     private static final boolean INCREMENT = true;

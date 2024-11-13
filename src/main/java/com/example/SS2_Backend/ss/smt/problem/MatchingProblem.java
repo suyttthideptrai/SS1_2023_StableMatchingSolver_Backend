@@ -1,8 +1,10 @@
 package com.example.SS2_Backend.ss.smt.problem;
 
+import com.example.SS2_Backend.ss.smt.evaluator.FitnessEvaluator;
 import com.example.SS2_Backend.ss.smt.match.Matches;
 import com.example.SS2_Backend.ss.smt.preference.PreferenceList;
-import com.example.SS2_Backend.ss.smt.preference.impl.NewProvider;
+import com.example.SS2_Backend.ss.smt.preference.impl.provider.NewProvider;
+import com.example.SS2_Backend.util.StringUtils;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
@@ -14,73 +16,155 @@ import org.moeaframework.core.variable.Permutation;
 
 import java.util.List;
 
-import static com.example.SS2_Backend.ss.smt.util.EvaluationUtils.*;
 import static com.example.SS2_Backend.util.StringExpressionEvaluator.convertToStringWithoutScientificNotation;
 
+/**
+ * base class for MatchingProblem
+ */
 @Slf4j
 @Getter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public abstract class MatchingProblem implements Problem {
+
+    /** problem name */
     final String problemName;
+
+    /** all eval functions */
     final String[] evaluateFunctions;
+
+    /** problem fitness function */
     final String fitnessFunction;
 
-    boolean f1Status = false; boolean f2Status = false; boolean fnfStatus = false;
-
+    /** preference list  */
     List<PreferenceList> preferenceLists;
+
+    /** preference list builder */
     final NewProvider preferencesProvider;
 
-    final String[][] individualRequirements;
-    final double[][] individualWeights;
-    final double[][] individualProperties;
-    final int numberOfIndividuals;
-    final int[] individualSetIndices;
-    final int[] individualCapacities;
+    /** requirements of all individuals */
+    final String[][] requirements;
 
-    protected MatchingProblem(String problemName, String[] evaluateFunctions, String fitnessFunction, NewProvider preferencesProvider, boolean f1Status, boolean f2Status, boolean fnfStatus, String[][] individualRequirements, double[][] individualWeights, double[][] individualProperties, int numberOfIndividuals, int[] individualSetIndices, int[] individualCapacities) {
+    /** weights of all individuals */
+    final double[][] weights;
+
+    /** properties of all individuals  */
+    final double[][] properties;
+
+    /** capacities of all individuals */
+    final int[] capacities;
+
+    /** problem size (number of individuals in matching problem */
+    final int problemSize;
+
+    /** number of set in matching problem */
+    final int setNum;
+
+    /** fitness evaluator */
+    final FitnessEvaluator fitnessEvaluator;
+
+
+    protected MatchingProblem(String problemName,
+                              String[] evaluateFunctions,
+                              String fitnessFunction,
+                              NewProvider preferencesProvider,
+                              String[][] requirements,
+                              double[][] weights,
+                              double[][] properties,
+                              int problemSize,
+                              int setNum,
+                              int[] capacities,
+                              FitnessEvaluator fitnessEvaluator) {
+
         this.problemName = problemName;
         this.evaluateFunctions = evaluateFunctions;
         this.fitnessFunction = fitnessFunction;
         this.preferencesProvider = preferencesProvider;
-        this.f1Status = f1Status;
-        this.f2Status = f2Status;
-        this.fnfStatus = fnfStatus;
-        this.individualRequirements = individualRequirements;
-        this.individualWeights = individualWeights;
-        this.individualProperties = individualProperties;
-        this.numberOfIndividuals = numberOfIndividuals;
-        this.individualSetIndices = individualSetIndices;
-        this.individualCapacities = individualCapacities;
+        this.requirements = requirements;
+        this.weights = weights;
+        this.properties = properties;
+        this.problemSize = problemSize;
+        this.setNum = setNum;
+        this.capacities = capacities;
+        this.fitnessEvaluator = fitnessEvaluator;
     }
 
-    @Override
-    public String getName() {
-        return problemName;
-    }
-
+    /**
+     * generate new solution
+     * @return Solution contains Variable(s)
+     */
     @Override
     public Solution newSolution() {
         Solution solution = new Solution(1, 1);
-        Permutation permutationVar = new Permutation(numberOfIndividuals);
+        Permutation permutationVar = new Permutation(problemSize);
         solution.setVariable(0, permutationVar);
         return solution;
     }
 
+    /**
+     * evaluate function for matching problem
+     * @param solution Solution contains Variable(s)
+     */
     @Override
     public void evaluate(Solution solution) {
         log.info("Evaluating ... "); // Start matching & collect result
         Matches result = stableMatching(solution.getVariable(0));
-        double[] Satisfactions = getAllSatisfactions(result);
+        double[] Satisfactions = fitnessEvaluator.getAllSatisfactions(result, preferenceLists);
         double fitnessScore;
-        if (!this.fnfStatus) {
-            fitnessScore = defaultFitnessEvaluation(Satisfactions);
+        if (!this.hasFitnessFunc()) {
+            fitnessScore = fitnessEvaluator.defaultFitnessEvaluation(Satisfactions);
         } else {
             String fnf = this.fitnessFunction.trim();
-            fitnessScore = withFitnessFunctionEvaluation(Satisfactions, fnf);
+            fitnessScore = fitnessEvaluator.withFitnessFunctionEvaluation(Satisfactions, fnf);
         }
         solution.setAttribute("matches", result);
         solution.setObjective(0, -fitnessScore);
         log.info("Score: {}", convertToStringWithoutScientificNotation(fitnessScore));
+    }
+
+
+    /**
+     * check exists evaluation function of a set by set num
+     * @param setNum set index
+     * @return true if exists
+     */
+    protected boolean hasEvaluationFunc(int setNum) {
+        return StringUtils.isEmptyOrNull(this.evaluateFunctions[setNum]);
+    }
+
+    /**
+     * check exists fitness function
+     * @return true if exists
+     */
+    protected boolean hasFitnessFunc() {
+        return StringUtils.isEmptyOrNull(this.fitnessFunction);
+    }
+
+    /**
+     * get problem size (total of individuals)
+     * @return size
+     */
+    protected int getProblemSize() {
+        return this.problemSize;
+    }
+
+    /**
+     * Main matching logic for Stable Matching Problem Types
+     *
+     * @param var Variable
+     * @return Matches
+     */
+    protected Matches stableMatching(Variable var) {
+        return null;
+    }
+
+
+    /**
+     * MOEA Framework Problem implements
+     */
+
+    @Override
+    public String getName() {
+        return problemName;
     }
 
     @Override
@@ -98,15 +182,8 @@ public abstract class MatchingProblem implements Problem {
         return 1;
     }
 
-    protected int getNumberOfIndividuals() {
-        return numberOfIndividuals;
-    }
-
-    // This method will be implemented in child classes
-    protected Matches stableMatching(Variable var) {
-        return null;
-    }
-
     @Override
-    public void close() {}
+    public void close() {
+    }
+
 }

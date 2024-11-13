@@ -55,7 +55,6 @@ public class ValidationUtils {
         if (CollectionUtils.isEmpty(listObjectError)) {
             return new HashMap<>();
         }
-        ;
         HashMap<String, List<String>> errMap = new HashMap<>();
         for (ObjectError objectError : listObjectError) {
             String fieldErrKey = ((FieldError) objectError).getField();

@@ -6,8 +6,8 @@ import lombok.experimental.FieldDefaults;
 
 import java.util.List;
 
-import static com.example.SS2_Backend.util.Utils.fillWithChar;
-import static com.example.SS2_Backend.util.Utils.formatDouble;
+import static com.example.SS2_Backend.util.NumberUtils.formatDouble;
+import static com.example.SS2_Backend.util.StringUtils.fillWithChar;
 
 /**
  * Represents a list of individuals involved in a one-to-many matching problem model.

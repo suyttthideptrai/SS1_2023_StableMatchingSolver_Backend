@@ -1,22 +1,22 @@
-package com.example.SS2_Backend.model.stableMatching;
+package com.example.SS2_Backend.ss.smt.preference.impl.list;
 
+import com.example.SS2_Backend.ss.smt.preference.PreferenceList;
 import lombok.Getter;
+
+import java.util.Set;
 
 import static com.example.SS2_Backend.util.NumberUtils.formatDouble;
 
-/**
- * {rank,  score}, {r, s}, {r, s}, ...
- * access by indices
- */
+
 @Getter
-public class PreferenceList {
+public class OldPreferenceListImpl implements PreferenceList {
 
     private final double[] scores;
     private final int[] positions;
     private int current;
     private final int padding;
 
-    public PreferenceList(int size, int padding) {
+    public OldPreferenceListImpl(int size, int padding) {
         scores = new double[size];
         positions = new int[size];
         current = 0;
@@ -31,7 +31,10 @@ public class PreferenceList {
     //public boolean isEmpty() {return this.preferenceList.isEmpty();}
 
 
-    public int getLeastNode(int newNode, Integer[] currentNodes) {
+    /**
+     * {@inheritDoc}
+     */
+    public int getLeastNode(int newNode, Set<Integer> currentNodes) {
         int leastNode = newNode - this.padding;
         for (int currentNode : currentNodes) {
             if (this.scores[leastNode] > this.scores[currentNode - this.padding]) {
@@ -41,7 +44,32 @@ public class PreferenceList {
         return leastNode + this.padding;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public int getLeastNode(int newNode, int oldNode) {
+        if (this.scores[newNode - this.padding] > this.scores[oldNode - this.padding]) {
+            return oldNode - this.padding;
+        }
+        return newNode + this.padding;
+    }
 
+    /**
+     * get last position in this preference list
+     *
+     * @return last option
+     */
+    public int getLastOption() {
+        return positions[this.size() - 1];
+    }
+
+    /**
+     * check if score of node is greater than nodeToCompare in this preference list
+     *
+     * @param node as name
+     * @param nodeToCompare as name
+     * @return as title true
+     */
     public boolean isScoreGreater(int node, int nodeToCompare) {
         return this.scores[node - this.padding] > this.scores[nodeToCompare - this.padding];
     }
@@ -63,8 +91,8 @@ public class PreferenceList {
 
     /**
      * @param score score of the respective competitor
-     *              <p>
-     *              this method registers new competitor instance to the preference list (OrderedMap)
+     *
+     * registers new competitor instance to the preference list
      */
     public void add(double score) {
         this.scores[current] = score;
@@ -154,24 +182,4 @@ public class PreferenceList {
         return scores[x - this.padding];
     }
 
-
-//    public static void main(String[] args) {
-//        OldPreferenceListImpl pref = new OldPreferenceListImpl(3);
-//        pref.add(12.4);
-//        pref.add(100.4);
-//        pref.add(8.4);
-//        System.out.println(pref);
-//        pref.sort();
-//        System.out.println(pref);
-//        //get leastNode
-////        IndexScore newNode = new IndexScore(6, 12.4);
-////        pref.add(newNode);
-//        System.out.println(pref);
-//        Integer[] currentNodes = {1, 2, 3};
-//        System.out.println(pref.getLeastNode(2, currentNodes, 0));
-//        System.out.println(pref.getScoreByIndex(1, 0));
-//        System.out.println(pref.getScoreByIndex(1, 0));
-//        System.out.println(pref.getScoreByIndex(2, 0));
-//        System.out.println(pref.getScoreByIndex(3, 0));
-//    }
 }

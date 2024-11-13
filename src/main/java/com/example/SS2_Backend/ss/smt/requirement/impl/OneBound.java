@@ -3,7 +3,7 @@ package com.example.SS2_Backend.ss.smt.requirement.impl;
 import com.example.SS2_Backend.ss.smt.requirement.Requirement;
 import lombok.Getter;
 
-import static com.example.SS2_Backend.util.Utils.formatDouble;
+import static com.example.SS2_Backend.util.NumberUtils.formatDouble;
 
 @Getter
 public class OneBound extends Requirement {

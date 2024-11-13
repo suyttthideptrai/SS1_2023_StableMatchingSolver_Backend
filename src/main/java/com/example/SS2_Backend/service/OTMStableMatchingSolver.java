@@ -79,7 +79,7 @@ public class OTMStableMatchingSolver {
             matchingSolution.setSetSatisfactions(problem.getAllSatisfactions((Matches) results
                     .get(0)
                     .getAttribute("matches")));
-            //matchingSolution.setPreferences(problem.getPreferenceLists());
+            //matchingSolution.setPreferences(problem.getStandardPreferenceListImpls());
             //matchingSolution.setIndividuals(problem.getIndividuals().getIndividuals());
 
             return ResponseEntity.ok(Response

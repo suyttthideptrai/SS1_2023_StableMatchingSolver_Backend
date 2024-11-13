@@ -1,8 +1,7 @@
 package com.example.SS2_Backend.model.stableMatching;
 
-import java.util.Arrays;
-import static com.example.SS2_Backend.util.Utils.isDouble;
-import static com.example.SS2_Backend.util.Utils.isInteger;
+import static com.example.SS2_Backend.util.NumberUtils.isDouble;
+import static com.example.SS2_Backend.util.NumberUtils.isInteger;
 
 public class MatchingHelperFunctions {
     public static String[] decodeInputRequirement(String item) {

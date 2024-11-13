@@ -1,19 +1,20 @@
-package com.example.SS2_Backend.ss.smt.util;
+package com.example.SS2_Backend.ss.smt;
 
 import com.example.SS2_Backend.dto.request.NewStableMatchingProblemDTO;
-import com.example.SS2_Backend.ss.smt.preference.PreferenceList;
+import com.example.SS2_Backend.ss.smt.preference.impl.list.OldPreferenceListImpl;
 import com.example.SS2_Backend.ss.smt.preference.PreferenceProvider;
 
 import java.util.List;
 
-public interface ProblemSetUpUtils {
+// Khả năng viết thành class luôn ko cần interface
+public interface MatchingProblemBuilder {
     void setPopulation(NewStableMatchingProblemDTO request);
     PreferenceProvider createPreferencesProvider();
-    List<PreferenceList> getPreferences();
+    List<OldPreferenceListImpl> getPreferences();
     PreferenceProvider getPreferencesProvider();
     void setPreferencesProvider(PreferenceProvider provider);
 
-    void setPreferenceLists(List<PreferenceList> preferenceLists);
+    void setPreferenceLists(List<OldPreferenceListImpl> oldPreferenceListImpls);
     String getEvaluateFunctionForSet1();
     String getEvaluateFunctionForSet2();
     int[] getIndividualSetIndices();

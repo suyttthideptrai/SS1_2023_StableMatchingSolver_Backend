@@ -1,8 +1,9 @@
 package com.example.SS2_Backend.ss.smt.problem.impl;
 
-import com.example.SS2_Backend.model.stableMatching.PreferenceList;
+import com.example.SS2_Backend.ss.smt.evaluator.FitnessEvaluator;
+import com.example.SS2_Backend.ss.smt.preference.PreferenceList;
 import com.example.SS2_Backend.ss.smt.match.Matches;
-import com.example.SS2_Backend.ss.smt.preference.impl.NewProvider;
+import com.example.SS2_Backend.ss.smt.preference.impl.provider.NewProvider;
 import com.example.SS2_Backend.ss.smt.problem.MatchingProblem;
 import org.moeaframework.core.Variable;
 import org.moeaframework.core.variable.Permutation;
@@ -14,80 +15,91 @@ import java.util.Set;
 
 public class RBOProblem extends MatchingProblem {
 
-    public RBOProblem(
-            String problemName, String[] evaluateFunctions, String fitnessFunction,
-            NewProvider preferencesProvider,
-            boolean f1Status, boolean f2Status, boolean fnfStatus,
-            String[][] individualRequirements, double[][] individualWeights, double[][] individualProperties,
-            int numberOfIndividuals,
-            int[] individualSetIndices, int[] individualCapacities) {
-        super(problemName, evaluateFunctions, fitnessFunction, preferencesProvider, f1Status, f2Status, fnfStatus, individualRequirements, individualWeights, individualProperties, numberOfIndividuals, individualSetIndices, individualCapacities);
+    public RBOProblem(String problemName,
+                      String[] evaluateFunctions,
+                      String fitnessFunction,
+                      NewProvider preferencesProvider,
+                      String[][] individualRequirements,
+                      double[][] individualWeights,
+                      double[][] individualProperties,
+                      int problemSize,
+                      int setNum,
+                      int[] individualCapacities,
+                      FitnessEvaluator fitnessEvaluator) {
+        super(problemName,
+                evaluateFunctions,
+                fitnessFunction,
+                preferencesProvider,
+                individualRequirements,
+                individualWeights,
+                individualProperties,
+                problemSize,
+                setNum,
+                individualCapacities,
+                fitnessEvaluator);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected Matches stableMatching(Variable var) {
-        com.example.SS2_Backend.model.stableMatching.Matches.Matches matches = new com.example.SS2_Backend.model.stableMatching.Matches.Matches(numberOfIndividuals);
-        Set<Integer> MatchedNode = new HashSet<>();
+
+        Matches matches = new Matches(this.getProblemSize());
         Permutation castVar = (Permutation) var;
         int[] decodeVar = castVar.toArray();
-        Queue<Integer> UnMatchedNode = new LinkedList<>();
+        Queue<Integer> unMatchedNode = new LinkedList<>();
         for (int val : decodeVar) {
-            UnMatchedNode.add(val);
+            unMatchedNode.add(val);
         }
+        Set<Integer> matchedNode = new HashSet<>();
 
-        while (!UnMatchedNode.isEmpty()) {
+        while (!unMatchedNode.isEmpty()) {
             int newNode;
-            newNode = UnMatchedNode.poll();
+            newNode = unMatchedNode.poll();
 
-            if (MatchedNode.contains(newNode)) {
+            if (matchedNode.contains(newNode)) {
                 continue;
             }
-            PreferenceList nodePreference = super.getPreferenceLists().get(newNode);
-//			int padding = getPaddingOf(Node);
-            //Loop through LeftNode's preference list to find a Match
-            for (int i = 0; i < nodePreference.size(); i++) {
-                //Next Match (RightNode) is found on the list
-                int preferNode = nodePreference.getIndexByPosition(i);
-                if (matches.isAlreadyMatch(preferNode, newNode)) {
+
+            PreferenceList newNodePreference = super.getPreferenceLists().get(newNode);
+            for (int i = 0; i < newNodePreference.size(); i++) {
+
+                int preferNode = newNodePreference.getIndexByPosition(i);
+
+                if (matches.isMatched(preferNode, newNode)) {
                     break;
                 }
-                //If the RightNode Capacity is not full -> create connection between LeftNode - RightNode
-                if (!matches.isFull(preferNode, super.getIndividualCapacities()[preferNode])) {
-                    matches.addMatch(preferNode, newNode);
-                    matches.addMatch(newNode, preferNode);
-                    MatchedNode.add(preferNode);
+
+                if (!matches.isFull(preferNode, super.getCapacities()[preferNode])) {
+                    matches.addMatchBi(preferNode, newNode);
+                    matchedNode.add(preferNode);
                     break;
+
                 } else {
-                    //If the RightNode's Capacity is Full then Left Node will Compete with Nodes that are inside RightNode
-                    //Loser will be the return value
-                    //System.out.println(preferNode + " is full! Begin making a Compete game involve: " + Node + " ..." );
 
-                    int Loser = getLeastScoreNode(preferNode,
-                            newNode,
-                            matches.getIndividualMatches(preferNode));
+                    int loser = this.getPreferenceLists()
+                            .get(preferNode)
+                            .getLeastNode(newNode, matches.getSetOf(preferNode));
 
-                    //If RightNode is the LastChoice of Loser -> then
-                    // Loser will be terminated and Saved in Matches.LeftOvers Container
-                    //System.out.println("Found Loser: " + Loser);
-                    if (Loser == newNode) {
-                        if (getLastChoiceOf(newNode) == preferNode) {
-                            //System.out.println(Node + " has nowhere to go. Go to LeftOvers!");
-                            matches.addLeftOver(Loser);
+                    if (loser == newNode) {
+
+                        if (newNodePreference.getLastOption() == preferNode) {
+                            matches.addLeftOver(loser);
                             break;
                         }
-                        //Or else Loser go back to UnMatched Queue & Waiting for it's Matching Procedure
+
                     } else {
-                        matches.disMatch(preferNode, Loser);
-                        matches.disMatch(Loser, preferNode);
-                        UnMatchedNode.add(Loser);
-                        MatchedNode.remove(Loser);
-                        //System.out.println(Loser + " lost the game, waiting for another chance.");
-                        matches.addMatch(preferNode, newNode);
-                        matches.addMatch(newNode, preferNode);
-                        MatchedNode.add(newNode);
-                        //System.out.println(Node + " is more suitable than " + Loser + " matched with " + preferNode);
+
+                        matches.removeMatchBi(preferNode, loser);
+                        matches.addMatchBi(preferNode, newNode);
+                        matchedNode.remove(loser);
+                        unMatchedNode.add(loser);
+                        matchedNode.add(newNode);
                         break;
+
                     }
+
                 }
             }
         }

@@ -355,9 +355,7 @@ public class StableMatchingRBOProblem implements Problem {
     }
 
     private double defaultFitnessEvaluation(double[] Satisfactions) {
-        return Arrays
-                .stream(Satisfactions)
-                .sum();
+        return Arrays.stream(Satisfactions).sum();
     }
 
     /**

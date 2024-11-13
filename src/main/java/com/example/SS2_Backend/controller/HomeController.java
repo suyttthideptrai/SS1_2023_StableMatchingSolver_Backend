@@ -5,6 +5,7 @@ import com.example.SS2_Backend.dto.request.NewStableMatchingProblemDTO;
 import com.example.SS2_Backend.dto.request.StableMatchingOTMProblemDTO;
 import com.example.SS2_Backend.dto.request.StableMatchingProblemDTO;
 import com.example.SS2_Backend.dto.response.Response;
+import com.example.SS2_Backend.util.ValidationUtils;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -56,30 +57,10 @@ public class HomeController {
     @Async("taskExecutor")
     @PostMapping("/stable-matching-rbo-solver")
     public CompletableFuture<ResponseEntity<Response>> solveStableMatching(
-            @Valid @RequestBody NewStableMatchingProblemDTO object,
+            @RequestBody NewStableMatchingProblemDTO object,
             BindingResult bindingResult
     ) {
-        object.isEvaluateFunctionValid(bindingResult);
-        object.is2DArrayValid(bindingResult);
-        if (bindingResult.hasErrors()) {
-            List<String> errors = bindingResult.
-                    getAllErrors().stream().map(DefaultMessageSourceResolvable::getDefaultMessage)
-                    .toList();
-
-            return CompletableFuture.completedFuture(new ResponseEntity<>(new Response(
-                    400,
-                    errors.toString(),
-                    // "Invalidated Data. Please check your input data!",
-                    null
-            ), HttpStatus.BAD_REQUEST));
-        } else {
-            return CompletableFuture.completedFuture(new ResponseEntity<>(new Response(
-                    400,
-                    "Invalid evaluateFunctions, please retry.",
-                    // "Invalidated Data. Please check your input data!",
-                    null
-            ), HttpStatus.BAD_REQUEST));
-        }
+        return CompletableFuture.completedFuture(stableMatchingSolverRBO.solveStableMatching(object));
     }
 
     @Async("taskExecutor")

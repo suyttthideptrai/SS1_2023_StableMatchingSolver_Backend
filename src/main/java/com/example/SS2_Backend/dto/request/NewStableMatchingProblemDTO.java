@@ -106,6 +106,7 @@ public class NewStableMatchingProblemDTO {
         ArrayList<Boolean> validEvalFunc = new ArrayList<>();
         for (String evaluateFunction: this.getEvaluateFunction()) {
             ExpressionBuilder e = new ExpressionBuilder(evaluateFunction);
+            Log.debug("[Evaluate Function] Validating " + evaluateFunction);
             for (int i = 1; i <= this.getNumberOfProperty(); i++) {
                 e.variable(String.format("P%d", i)).variable(String.format("W%d", i));
             }
@@ -113,9 +114,10 @@ public class NewStableMatchingProblemDTO {
             Expression expressionValidator = e.build();
             ValidationResult res = expressionValidator.validate();
             validEvalFunc.add(res.isValid());
+            Log.debug("[Evaluate Function] " + evaluateFunction + "validation result: " + res.isValid());
         }
-        if (validEvalFunc.stream().allMatch(e -> e)) {
-            Log.debug("Valid evaluate function(s).");
+        if (validEvalFunc.stream().allMatch(e -> true)) {
+            Log.debug("Valida evaluate function(s).");
         } else {
             bindingResult.reject("evaluateFunction", "Invalid evaluation function(s). Rejected.");
         }
@@ -135,6 +137,24 @@ public class NewStableMatchingProblemDTO {
             bindingResult.reject("individualCapacities", "Invalid individualCapacities, doesn't match the number of individuals");
         } else {
             Log.debug("Validation completed, all the arrays related to the numberOfIndividuals are all valid!");
+        }
+    }
+
+    public void valid2dArraysDimension(BindingResult bindingResult) {
+        boolean isValid = true;
+        String[][] individual2DReq = fromListToStringArray(individualRequirements);
+        double[][] individual2DWeight = fromListToDoubleArray(individualWeights);
+        double[][] individual2DValue = fromListToDoubleArray(individualProperties);
+
+        for (int i = 0; isValid && i < individual2DValue.length; ++i) {
+            isValid = (individual2DValue[i].length == individual2DWeight[i].length)
+                    && (individual2DValue[i].length == individual2DReq[i].length);
+        }
+
+        if (isValid) {
+            Log.debug("Validation completed, all the arrays related to the numberOfIndividuals are all valid!");
+        } else {
+            bindingResult.reject("Invalid 2D Array's length", "Dimension của các ma trận không đồng đều");
         }
     }
 

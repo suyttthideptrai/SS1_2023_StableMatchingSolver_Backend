@@ -5,25 +5,31 @@ import com.example.SS2_Backend.dto.request.NewStableMatchingProblemDTO;
 import com.example.SS2_Backend.dto.request.StableMatchingOTMProblemDTO;
 import com.example.SS2_Backend.dto.request.StableMatchingProblemDTO;
 import com.example.SS2_Backend.dto.response.Response;
+import com.example.SS2_Backend.util.ValidationUtils;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import com.example.SS2_Backend.service.GameTheorySolver;
 import com.example.SS2_Backend.service.OTMStableMatchingSolver;
 import com.example.SS2_Backend.service.StableMatchingSolver;
 import com.example.SS2_Backend.service.StableMatchingSolverRBO;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.validation.BindingResult;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api")
 @CrossOrigin(origins = "*", maxAge = 3600)
 public class HomeController {
-
     private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
     @Autowired
     private GameTheorySolver gameTheorySolver;
@@ -33,7 +39,6 @@ public class HomeController {
     private StableMatchingSolverRBO stableMatchingSolverRBO;
     @Autowired
     private OTMStableMatchingSolver stableMatchingOTMProblemDTO;
-
 
     @GetMapping("/")
     public String home() {
@@ -51,7 +56,10 @@ public class HomeController {
     * */
     @Async("taskExecutor")
     @PostMapping("/stable-matching-rbo-solver")
-    public CompletableFuture<ResponseEntity<Response>> solveStableMatching(@RequestBody NewStableMatchingProblemDTO object) {
+    public CompletableFuture<ResponseEntity<Response>> solveStableMatching(
+            @RequestBody NewStableMatchingProblemDTO object,
+            BindingResult bindingResult
+    ) {
         return CompletableFuture.completedFuture(stableMatchingSolverRBO.solveStableMatching(object));
     }
 
@@ -86,14 +94,6 @@ public class HomeController {
         return CompletableFuture.completedFuture(gameTheorySolver.solveGameTheory(gameTheoryProblem));
     }
 
-    //	@PostMapping("/problem-result-insights/{sessionCode}")
-//	public ResponseEntity<Response> getProblemResultInsights(@RequestBody GameTheoryProblemDTO gameTheoryProblem, @PathVariable String sessionCode) {
-//		return gameTheorySolver.getProblemResultInsights(gameTheoryProblem, sessionCode);
-//	}
-//	@PostMapping("/matching-problem-result-insights/{sessionCode}")
-//	public ResponseEntity<Response> getMatchingResultInsights(@RequestBody StableMatchingProblemDTO object, @PathVariable String sessionCode) {
-//		return stableMatchingSolver.getProblemResultInsights(object, sessionCode);
-//	}
     @Async("taskExecutor")
     @PostMapping("/problem-result-insights/{sessionCode}")
     public CompletableFuture<ResponseEntity<Response>> getProblemResultInsights(@RequestBody GameTheoryProblemDTO gameTheoryProblem,

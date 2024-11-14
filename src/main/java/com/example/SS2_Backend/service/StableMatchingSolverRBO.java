@@ -7,6 +7,7 @@ import com.example.SS2_Backend.model.stableMatching.*;
 import com.example.SS2_Backend.model.stableMatching.Matches.Matches;
 import com.example.SS2_Backend.model.stableMatching.Matches.MatchingSolution;
 import com.example.SS2_Backend.model.stableMatching.Matches.MatchingSolutionInsights;
+import com.example.SS2_Backend.util.ValidationUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.moeaframework.Executor;
@@ -17,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.BindingResult;
 
 import java.util.*;
 
@@ -30,6 +32,18 @@ public class StableMatchingSolverRBO {
     public ResponseEntity<Response> solveStableMatching(NewStableMatchingProblemDTO request) {
 
         try {
+            log.info("Validating StableMatchingProblemDTO Request ...");
+            BindingResult bindingResult = ValidationUtils.validate(request);
+            request.isEvaluateFunctionValid(bindingResult);
+            request.is2DArrayValid(bindingResult);
+            request.valid2dArraysDimension(bindingResult);
+            if (bindingResult.hasErrors()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(Response.builder()
+                                .data(ValidationUtils.getAllErrorDetails(bindingResult))
+                                .build());
+            }
+
             log.info("[Service] Stable Matching: Load problem...");
             log.info("[Service] Stable Matching: Building preference list...");
 

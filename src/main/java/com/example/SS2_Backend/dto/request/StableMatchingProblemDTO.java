@@ -36,7 +36,6 @@ public class StableMatchingProblemDTO {
     @Min(value = 1, message = ErrMessage.MES_003)
     private int numberOfProperty;
 
-    //TODO: cái mảng này để chi nhỉ?
     //TODO: làm gì có cái array nào length < 0 mà min 0
     @Size(min = 0, message = ErrMessage.MES_004)
     private int[] individualSetIndices;

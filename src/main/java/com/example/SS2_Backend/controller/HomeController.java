@@ -57,8 +57,7 @@ public class HomeController {
     @Async("taskExecutor")
     @PostMapping("/stable-matching-rbo-solver")
     public CompletableFuture<ResponseEntity<Response>> solveStableMatching(
-            @RequestBody NewStableMatchingProblemDTO object,
-            BindingResult bindingResult
+            @RequestBody NewStableMatchingProblemDTO object
     ) {
         return CompletableFuture.completedFuture(stableMatchingSolverRBO.solveStableMatching(object));
     }
@@ -73,19 +72,6 @@ public class HomeController {
     @PostMapping("/stable-matching-otm-solver")
     public CompletableFuture<ResponseEntity<Response>> solveStableMatchingOTM(@RequestBody StableMatchingOTMProblemDTO object) {
         return CompletableFuture.completedFuture(stableMatchingOTMProblemDTO.solveStableMatching(object));
-    }
-
-    @Async("taskExecutor")
-    @GetMapping("/test")
-    public CompletableFuture<ResponseEntity<Set<String>>> test() throws InterruptedException {
-        logger.info("Test Called");
-        //Thread.sleep(5000);
-        return CompletableFuture.completedFuture(ResponseEntity.ok(Set.of("Tst",
-                "Test",
-                "Test1",
-                "Test2",
-                "Test3",
-                "Test4")));
     }
 
     @Async("taskExecutor")

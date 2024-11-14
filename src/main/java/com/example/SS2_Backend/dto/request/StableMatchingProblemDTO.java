@@ -5,7 +5,6 @@ import com.example.SS2_Backend.model.stableMatching.Individual;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,7 +16,7 @@ import java.util.ArrayList;
 @AllArgsConstructor
 public class StableMatchingProblemDTO {
     private String problemName;
-    @Min(value = 2, message = MessageConst.MatchingValidate.MES_001)
+    @Min(value = 2, message = MessageConst.ErrMessage.MES_001)
     private int numberOfSets;
     private int numberOfIndividuals;
     @JsonDeserialize(contentUsing = IndividualDeserializer.class)

@@ -2,18 +2,21 @@ package com.example.SS2_Backend.model.stableMatching;
 
 import com.example.SS2_Backend.model.stableMatching.Matches.Matches;
 import lombok.Data;
+import lombok.Getter;
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
 import org.moeaframework.core.Problem;
 import org.moeaframework.core.Solution;
-import org.moeaframework.core.Variable;
+import org.moeaframework.core.variable.EncodingUtils;
 import org.moeaframework.core.variable.Permutation;
 
 import java.util.*;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.function.DoubleUnaryOperator;
 import java.util.stream.DoubleStream;
 
 import lombok.extern.slf4j.Slf4j;
+import org.moeaframework.problem.AbstractProblem;
 
 import static com.example.SS2_Backend.util.StringExpressionEvaluator.*;
 
@@ -50,6 +53,7 @@ import static com.example.SS2_Backend.util.StringExpressionEvaluator.*;
 @Data
 public class StableMatchingProblem implements Problem {
 
+    @Getter
     private IndividualList individuals;
 
     private String evaluateFunctionForSet1;
@@ -60,10 +64,10 @@ public class StableMatchingProblem implements Problem {
      * Preference List of each individual/object inside this whole population
      */
 
-    private List<PreferenceList> preferenceLists; // Preference List of each Individual
+    private PreferenceMap[] preferenceMaps; // Preference List of each Individual
 
     private String fitnessFunction; // Evaluate total Score of each Solution set
-    private PreferencesProvider preferencesProvider;
+    private PreferenceMapProvider preferencesProvider;
     private boolean f1Status = false;
     private boolean f2Status = false;
     private boolean fnfStatus = false;
@@ -83,9 +87,9 @@ public class StableMatchingProblem implements Problem {
     }
 
     private void initializeFields() {
-        this.preferencesProvider = new PreferencesProvider(individuals);
+        this.preferencesProvider = new PreferenceMapProvider(individuals);
         initializePrefProvider();
-        preferenceLists = getPreferences();
+        preferenceMaps = getPreferences();
     }
 
     private void initializePrefProvider() {
@@ -168,7 +172,7 @@ public class StableMatchingProblem implements Problem {
     // Evaluate
     public void evaluate(Solution solution) {
         log.info("Evaluating ... "); // Start matching & collect result
-        Matches result = StableMatchingExtra(solution.getVariable(0));
+        Matches result = StableMatchingExtra(EncodingUtils.getPermutation(solution.getVariable(0)));
         // check excluded pairs here
         // first check the first pair of the 2d array, the first element is the index of the individual, the second element is the index of the individual that the first individual is matched with
         // if result.getSet(firstIndividualIndex).contains(secondIndividualIndex) == true [0,1], result.getSet(0) = [1,2,3] .contains(1) == true, return, stop the evaluation
@@ -220,8 +224,8 @@ public class StableMatchingProblem implements Problem {
     /**
      * Extra Methods for  Stable Matching Problem
      */
-    public PreferenceList getPreferenceOfIndividual(int index) {
-        PreferenceList a;
+    public PreferenceMap getPreferenceOfIndividual(int index) {
+        PreferenceMap a;
         if (!f1Status && !f2Status) {
             a = preferencesProvider.getPreferenceListByDefault(index);
         } else {
@@ -231,88 +235,72 @@ public class StableMatchingProblem implements Problem {
     }
 
     // Add to a complete List
-    private List<PreferenceList> getPreferences() {
-        List<PreferenceList> fullList = new ArrayList<>();
+    private PreferenceMap[] getPreferences() {
+        PreferenceMap[] fullList = new PreferenceMap[individuals.getNumberOfIndividual()];
         for (int i = 0; i < individuals.getNumberOfIndividual(); i++) {
-            PreferenceList a = getPreferenceOfIndividual(i);
-            fullList.add(a);
+            PreferenceMap a = getPreferenceOfIndividual(i);
+            fullList[i] = a;
         }
         return fullList;
     }
 
 
-    private Matches StableMatchingExtra(Variable var) {
+    private Matches StableMatchingExtra(int[] queue) {
         //Parse Variable
         //System.out.println("parsing");
         Matches matches = new Matches(individuals.getNumberOfIndividual());
-        Set<Integer> MatchedNode = new HashSet<>();
-        Permutation castVar = (Permutation) var;
-        int[] decodeVar = castVar.toArray();
-        Queue<Integer> UnMatchedNode = new LinkedList<>();
-        for (int val : decodeVar) {
-            UnMatchedNode.add(val);
-        }
+        Queue<Integer> unmatchedNodes = new ArrayBlockingQueue<>(queue.length);
+        Arrays.stream(queue).forEach(unmatchedNodes::add);
 
-        while (!UnMatchedNode.isEmpty()) {
+        while (!unmatchedNodes.isEmpty()) {
             //printPreferenceLists();
             //System.out.println(matches);
             //System.out.println(UnMatchedNode);
-            int newNode;
-            newNode = UnMatchedNode.poll();
+            int leftNode = unmatchedNodes.poll();
 
-            if (MatchedNode.contains(newNode)) {
-                continue;
-            }
-            //System.out.println("working on Node:" + Node);
             //Get pref List of LeftNode
-            PreferenceList nodePreference = preferenceLists.get(newNode);
+            PreferenceMap nodePreference = preferenceMaps[leftNode];
 //			int padding = individuals.getPaddingOf(Node);
             //Loop through LeftNode's preference list to find a Match
-            for (int i = 0; i < nodePreference.size(); i++) {
+            for (int rightNode : nodePreference.keySet()) {
                 //Next Match (RightNode) is found on the list
-                int preferNode = nodePreference.getIndexByPosition(i);
                 //System.out.println(Node + " Prefer : " + preferNode);
-                if (matches.isAlreadyMatch(preferNode, newNode)) {
+                if (matches.isAlreadyMatch(rightNode, leftNode)) {
                     //System.out.println(Node + " is already match with " + preferNode);
                     break;
                 }
                 //If the RightNode Capacity is not full -> create connection between LeftNode - RightNode
-                if (!matches.isFull(preferNode, this.individuals.getCapacityOf(preferNode))) {
+                if (!matches.isFull(rightNode, this.individuals.getCapacityOf(rightNode))) {
                     //System.out.println(preferNode + " is not full.");
                     //AddMatch (Node, NodeToConnect)
-                    matches.addMatch(preferNode, newNode);
-                    matches.addMatch(newNode, preferNode);
-                    MatchedNode.add(preferNode);
+                    matches.addMatch(rightNode, leftNode);
+                    matches.addMatch(leftNode, rightNode);
                     break;
                 } else {
                     //If the RightNode's Capacity is Full then Left Node will Compete with Nodes that are inside RightNode
                     //Loser will be the return value
                     //System.out.println(preferNode + " is full! Begin making a Compete game involve: " + Node + " ..." );
 
-                    int Loser = getLeastScoreNode(preferNode,
-                            newNode,
-                            matches.getIndividualMatches(preferNode));
+                    int Loser = getLeastScoreNode(rightNode,
+                            leftNode,
+                            matches.getSet(rightNode));
 
                     //If RightNode is the LastChoice of Loser -> then
                     // Loser will be terminated and Saved in Matches.LeftOvers Container
                     //System.out.println("Found Loser: " + Loser);
-                    if (Loser == newNode) {
-                        if (getLastChoiceOf(newNode) == preferNode) {
+                    if (Loser == leftNode) {
+                        if (getLeastScoreNode(leftNode, rightNode, matches.getSet(leftNode)) == rightNode) {
                             //System.out.println(Node + " has nowhere to go. Go to LeftOvers!");
                             matches.addLeftOver(Loser);
                             break;
                         }
                         //Or else Loser go back to UnMatched Queue & Waiting for it's Matching Procedure
                     } else {
-                        matches.disMatch(preferNode, Loser);
-                        matches.disMatch(Loser, preferNode);
-                        UnMatchedNode.add(Loser);
-                        MatchedNode.remove(Loser);
-                        //System.out.println(Loser + " lost the game, waiting for another chance.");
-                        matches.addMatch(preferNode, newNode);
-                        matches.addMatch(newNode, preferNode);
-                        MatchedNode.add(newNode);
-                        //System.out.println(Node + " is more suitable than " + Loser + " matched with " + preferNode);
+                        matches.disMatch(rightNode, Loser);
+                        matches.disMatch(Loser, rightNode);
+                        unmatchedNodes.add(Loser);
+                        matches.addMatch(rightNode, leftNode);
+                        matches.addMatch(leftNode, rightNode);
                         break;
                     }
                 }
@@ -321,33 +309,9 @@ public class StableMatchingProblem implements Problem {
         return matches;
     }
 
-    // Stable Matching Algorithm Component: isPreferredOver
-    private boolean isPreferredOver(int newNode, int currentNode, int SelectorNode) {
-        PreferenceList preferenceOfSelectorNode = preferenceLists.get(SelectorNode);
-        return preferenceOfSelectorNode.isScoreGreater(newNode, currentNode);
-    }
-
-    /**
-     * @param target - The index of the individual whose last choice is to be found
-     * @return The index of the last choice on the target preference list
-     */
-    private int getLastChoiceOf(int target) {
-        PreferenceList pref = preferenceLists.get(target);
-        return pref.getIndexByPosition(pref.size() - 1);
-    }
-
-    private int getLeastScoreNode(int selectorNode, int newNode, Integer[] occupiedNodes) {
-        PreferenceList prefOfSelectorNode = preferenceLists.get(selectorNode);
-        if (individuals.getCapacityOf(selectorNode) == 1) {
-            int currentNode = occupiedNodes[0];
-            if (isPreferredOver(newNode, currentNode, selectorNode)) {
-                return currentNode;
-            } else {
-                return newNode;
-            }
-        } else {
+    private int getLeastScoreNode(int selectorNode, int newNode, Set<Integer> occupiedNodes) {
+        PreferenceMap prefOfSelectorNode = preferenceMaps[selectorNode];
             return prefOfSelectorNode.getLeastNode(newNode, occupiedNodes);
-        }
     }
 
     private double defaultFitnessEvaluation(double[] Satisfactions) {
@@ -503,25 +467,15 @@ public class StableMatchingProblem implements Problem {
 
     public double[] getAllSatisfactions(Matches matches) {
         double[] satisfactions = new double[individuals.getNumberOfIndividual()];
-        int numSet0 = individuals.getNumberOfIndividualForSet0();
-        for (int i = 0; i < numSet0; i++) {
-            double setScore = 0.0;
-            PreferenceList ofInd = preferenceLists.get(i);
-            Set<Integer> SetMatches = matches.getSet(i);
-            for (int x : SetMatches) {
-                setScore += ofInd.getScoreByIndex(x);
-            }
-            satisfactions[i] = setScore;
+        for (int i = 0; i < individuals.getNumberOfIndividual(); i++) {
+            PreferenceMap ofInd = preferenceMaps[i];
+            Set<Integer> match = matches.getSet(i);
+
+            satisfactions[i] = match.stream()
+                .mapToDouble(ofInd::get)
+                .sum();
         }
-        for (int i = numSet0; i < individuals.getNumberOfIndividual(); i++) {
-            double setScore = 0.0;
-            PreferenceList ofInd = preferenceLists.get(i);
-            Set<Integer> SetMatches = matches.getSet(i);
-            for (int x : SetMatches) {
-                setScore += ofInd.getScoreByIndex(x);
-            }
-            satisfactions[i] = setScore;
-        }
+
         return satisfactions;
     }
 
@@ -561,13 +515,12 @@ public class StableMatchingProblem implements Problem {
 
     public String getPreferenceListsString() {
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < preferenceLists.size(); i++) {
+        for (int i = 0; i < preferenceMaps.length; i++) {
             sb
                     .append("ID ")
                     .append(i)
                     .append(" : ");
-            sb.append(preferenceLists
-                    .get(i)
+            sb.append(preferenceMaps[i]
                     .toString());
             sb.append("\n");
         }

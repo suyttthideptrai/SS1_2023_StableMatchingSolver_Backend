@@ -1,6 +1,7 @@
 package com.example.SS2_Backend.model.stableMatching.Matches;
 
 import lombok.Data;
+import lombok.Getter;
 
 import java.io.Serializable;
 import java.util.*;
@@ -10,22 +11,20 @@ import java.util.*;
  * Matches = {Match1, Match2, Match3, ...}
  * Match can be an Object of "Pair" or "MatchSet" Class, both Implement "MatchItem" Interface
  */
-@Data
+@Getter
 public class Matches implements Serializable {
-
-    private static final long serialVersionUID = 1L;
-    private final Vector<Set<Integer>> matches;
-    private final Set<Integer> leftOvers = new HashSet<>();
+    private final Set<Integer>[] matches;
+    private final Set<Integer> leftOvers = new TreeSet<>();
 
     public Matches(int cap) {
-        this.matches = new Vector<>(cap);
+        this.matches = new Set[cap];
         for (int i = 0; i < cap; i++) {
-            this.matches.add(new HashSet<>());
+            this.matches[i] = new TreeSet<>();
         }
     }
 
     public Set<Integer> getSet(int index) {
-        return matches.get(index);
+        return matches[index];
     }
 
     public void addLeftOver(int index) {
@@ -33,7 +32,7 @@ public class Matches implements Serializable {
     }
 
     public int size() {
-        return matches.size();
+        return matches.length;
     }
 
     public boolean isAlreadyMatch(int Node1, int Node2) {
@@ -47,21 +46,16 @@ public class Matches implements Serializable {
     }
 
     public void addMatch(int target, int prefer) {
-        matches
-                .get(target)
-                .add(prefer);
+        matches[target].add(prefer);
     }
 
     public void disMatch(int target, int nodeToRemove) {
-        matches
-                .get(target)
+        matches[target]
                 .remove(nodeToRemove);
     }
 
     public Integer[] getIndividualMatches(int target) {
-        return matches
-                .get(target)
-                .toArray(new Integer[0]);
+        return matches[target].toArray(new Integer[0]);
     }
 
     public String toString() {

@@ -1,6 +1,5 @@
 package com.example.SS2_Backend.model.stableMatching.Matches;
 
-import lombok.Data;
 import lombok.Getter;
 
 import java.io.Serializable;
@@ -12,7 +11,7 @@ import java.util.*;
  * Match can be an Object of "Pair" or "MatchSet" Class, both Implement "MatchItem" Interface
  */
 @Getter
-public class Matches {
+public class Matches implements Serializable {
     private final Set<Integer>[] matches;
     private final Set<Integer> leftOvers = new TreeSet<>();
 

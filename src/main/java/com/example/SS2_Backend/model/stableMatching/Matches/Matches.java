@@ -12,7 +12,7 @@ import java.util.*;
  * Match can be an Object of "Pair" or "MatchSet" Class, both Implement "MatchItem" Interface
  */
 @Getter
-public class Matches implements Serializable {
+public class Matches {
     private final Set<Integer>[] matches;
     private final Set<Integer> leftOvers = new TreeSet<>();
 

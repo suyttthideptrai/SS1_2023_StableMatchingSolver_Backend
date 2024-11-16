@@ -469,9 +469,8 @@ public class StableMatchingProblem implements Problem {
         double[] satisfactions = new double[individuals.getNumberOfIndividual()];
         for (int i = 0; i < individuals.getNumberOfIndividual(); i++) {
             PreferenceMap ofInd = preferenceMaps[i];
-            Set<Integer> match = matches.getSet(i);
-
-            satisfactions[i] = match.stream()
+            satisfactions[i] = matches.getSet(i)
+                .stream()
                 .mapToDouble(ofInd::get)
                 .sum();
         }

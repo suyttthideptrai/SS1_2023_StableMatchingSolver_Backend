@@ -265,7 +265,6 @@ public class StableMatchingProblem implements Problem {
                     matches.addMatch(leftNode, rightNode);
                     break;
                 } else {
-                    //If both node is full then compete
                     int rightNodeWorstMatch = getLeastScoreNode(rightNode, leftNode, matches);
                     int leftNodeWorstMatch = getLeastScoreNode(leftNode, rightNode, matches);
 

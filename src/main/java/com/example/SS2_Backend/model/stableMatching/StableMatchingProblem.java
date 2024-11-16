@@ -246,27 +246,15 @@ public class StableMatchingProblem implements Problem {
 
 
     private Matches StableMatchingExtra(int[] queue) {
-        //Parse Variable
-        //System.out.println("parsing");
         Matches matches = new Matches(individuals.getNumberOfIndividual());
-        Queue<Integer> unmatchedNodes = new ArrayBlockingQueue<>(queue.length);
+        Queue<Integer> unmatchedNodes = new ArrayBlockingQueue<>(individuals.getNumberOfIndividual());
         Arrays.stream(queue).forEach(unmatchedNodes::add);
 
+        //Loop through the preference list of a node to find match
         while (!unmatchedNodes.isEmpty()) {
-            //printPreferenceLists();
-            //System.out.println(matches);
-            //System.out.println(UnMatchedNode);
             int leftNode = unmatchedNodes.poll();
-
-            //Get pref List of LeftNode
-            PreferenceMap nodePreference = preferenceMaps[leftNode];
-//			int padding = individuals.getPaddingOf(Node);
-            //Loop through LeftNode's preference list to find a Match
-            for (int rightNode : nodePreference.keySet()) {
-                //Next Match (RightNode) is found on the list
-                //System.out.println(Node + " Prefer : " + preferNode);
+            for (int rightNode : preferenceMaps[leftNode].keySet()) {
                 if (matches.isAlreadyMatch(rightNode, leftNode)) {
-                    //System.out.println(Node + " is already match with " + preferNode);
                     break;
                 }
                 //If the RightNode Capacity is not full -> create connection between LeftNode - RightNode
@@ -277,28 +265,21 @@ public class StableMatchingProblem implements Problem {
                     matches.addMatch(leftNode, rightNode);
                     break;
                 } else {
-                    //If the RightNode's Capacity is Full then Left Node will Compete with Nodes that are inside RightNode
-                    //Loser will be the return value
-                    //System.out.println(preferNode + " is full! Begin making a Compete game involve: " + Node + " ..." );
-
-                    int Loser = getLeastScoreNode(rightNode,
-                            leftNode,
-                            matches.getSet(rightNode));
+                    //If both node is full then compete
+                    int rightNodeWorstMatch = getLeastScoreNode(rightNode, leftNode, matches);
+                    int leftNodeWorstMatch = getLeastScoreNode(leftNode, rightNode, matches);
 
                     //If RightNode is the LastChoice of Loser -> then
                     // Loser will be terminated and Saved in Matches.LeftOvers Container
-                    //System.out.println("Found Loser: " + Loser);
-                    if (Loser == leftNode) {
-                        if (getLeastScoreNode(leftNode, rightNode, matches.getSet(leftNode)) == rightNode) {
-                            //System.out.println(Node + " has nowhere to go. Go to LeftOvers!");
-                            matches.addLeftOver(Loser);
+                    if (rightNodeWorstMatch == leftNode) {
+                        if (leftNodeWorstMatch == rightNode) {
+                            matches.addLeftOver(leftNode);
                             break;
                         }
-                        //Or else Loser go back to UnMatched Queue & Waiting for it's Matching Procedure
                     } else {
-                        matches.disMatch(rightNode, Loser);
-                        matches.disMatch(Loser, rightNode);
-                        unmatchedNodes.add(Loser);
+                        matches.disMatch(rightNode, rightNodeWorstMatch);
+                        matches.disMatch(rightNodeWorstMatch, rightNode);
+                        unmatchedNodes.add(rightNodeWorstMatch);
                         matches.addMatch(rightNode, leftNode);
                         matches.addMatch(leftNode, rightNode);
                         break;
@@ -309,9 +290,9 @@ public class StableMatchingProblem implements Problem {
         return matches;
     }
 
-    private int getLeastScoreNode(int selectorNode, int newNode, Set<Integer> occupiedNodes) {
+    private int getLeastScoreNode(int selectorNode, int newNode, Matches matches) {
         PreferenceMap prefOfSelectorNode = preferenceMaps[selectorNode];
-            return prefOfSelectorNode.getLeastNode(newNode, occupiedNodes);
+            return prefOfSelectorNode.getLeastNode(newNode, matches.getSet(selectorNode));
     }
 
     private double defaultFitnessEvaluation(double[] Satisfactions) {

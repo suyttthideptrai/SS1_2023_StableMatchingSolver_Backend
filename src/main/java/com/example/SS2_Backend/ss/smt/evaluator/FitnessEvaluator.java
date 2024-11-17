@@ -18,6 +18,4 @@ public interface FitnessEvaluator {
 
     double withFitnessFunctionEvaluation(double[] satisfactions, String fnf);
 
-    String getFitnessFunction();
-
 }

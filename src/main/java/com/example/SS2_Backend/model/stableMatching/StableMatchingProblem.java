@@ -55,6 +55,7 @@ public class StableMatchingProblem implements Problem {
     private String evaluateFunctionForSet1;
 
     private String evaluateFunctionForSet2;
+
     int [][] excludedPairs;
     /**
      * Preference List of each individual/object inside this whole population

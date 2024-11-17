@@ -2,6 +2,7 @@ package com.example.SS2_Backend.model.stableMatching.oneToMany;
 
 import com.example.SS2_Backend.model.stableMatching.Property;
 import com.example.SS2_Backend.model.stableMatching.Requirement.Requirement;
+import com.example.SS2_Backend.model.stableMatching.Requirement.RequirementDecoder;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,7 +10,6 @@ import lombok.experimental.FieldDefaults;
 
 import java.util.List;
 
-import static com.example.SS2_Backend.model.stableMatching.Individual.decodeInputRequirement;
 
 /**
  * Represents a standard individual entity in a one-to-many matching problem model.
@@ -54,7 +54,7 @@ public class Individual {
      */
     @JsonProperty("Properties")
     public void setProperty(double propertyValue, double propertyWeight, String inputRequirement) {
-        String[] decodedRequirement = decodeInputRequirement(inputRequirement);
+        String[] decodedRequirement = RequirementDecoder.decodeInputRequirement(inputRequirement);
         Property property = new Property(propertyValue, propertyWeight, decodedRequirement);
         this.properties.add(property);
     }

@@ -57,8 +57,7 @@ public class HomeController {
     @Async("taskExecutor")
     @PostMapping("/stable-matching-rbo-solver")
     public CompletableFuture<ResponseEntity<Response>> solveStableMatching(
-            @RequestBody NewStableMatchingProblemDTO object
-    ) {
+            @RequestBody NewStableMatchingProblemDTO object) {
         return CompletableFuture.completedFuture(stableMatchingSolverRBO.solveStableMatching(object));
     }
 
@@ -97,6 +96,16 @@ public class HomeController {
                 object,
                 sessionCode));
     }
+
+    @Async("taskExecutor")
+    @PostMapping("/rbo-matching-problem-result-insights/{sessionCode}")
+    public CompletableFuture<ResponseEntity<Response>> getMatchingResultInsights(@RequestBody NewStableMatchingProblemDTO object,
+                                                                                 @PathVariable String sessionCode) {
+        return CompletableFuture.completedFuture(stableMatchingSolverRBO.getProblemResultInsights(
+                object,
+                sessionCode));
+    }
+
 
     @Async("taskExecutor")
     @PostMapping("/otm-matching-problem-result-insights/{sessionCode}")

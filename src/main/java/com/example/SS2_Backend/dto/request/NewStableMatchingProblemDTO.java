@@ -1,17 +1,13 @@
 package com.example.SS2_Backend.dto.request;
 import com.example.SS2_Backend.constants.MessageConst.ErrMessage;
 import com.example.SS2_Backend.constants.MessageConst.ErrCode;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
 import net.objecthunter.exp4j.ValidationResult;
-import org.jfree.util.Log;
 import org.springframework.validation.BindingResult;
 
 import java.util.ArrayList;
@@ -80,7 +76,7 @@ public class NewStableMatchingProblemDTO {
     public void isEvaluateFunctionValid(BindingResult bindingResult) {
         ArrayList<Boolean> validEvalFunc = new ArrayList<>();
         for (String evaluateFunction: this.getEvaluateFunction()) {
-            if (!evaluateFunction.isNotEmpty()) {
+            if (evaluateFunction.isEmpty()) {
                 bindingResult.rejectValue("evaluateFunction", "", "Empty evaluateFunction(s)");
                 return;
             }
@@ -114,31 +110,31 @@ public class NewStableMatchingProblemDTO {
         //TODO: tách message & errCode ra thành constant, trường hợp này dùng chung hết một message và error code
         if (!bindingResult.hasFieldErrors("individualRequirements")
                 && individualRequirements.size() != numberOfIndividuals) {
-            bindingResult.rejectValue("individualRequirements", ErrCode.INVALID_LENGTH, MessageConst.INVALID_ARR_SIZE);
+            bindingResult.rejectValue("individualRequirements", ErrCode.INVALID_LENGTH, ErrMessage.INVALID_ARR_SIZE);
         }
 
         //TODO: thêm error code
         if (!bindingResult.hasFieldErrors("individualWeights")
                 && individualWeights.size() != numberOfIndividuals) {
-            bindingResult.rejectValue("individualWeights", ErrCode.INVALID_LENGTH, MessageConst.INVALID_ARR_SIZE);
+            bindingResult.rejectValue("individualWeights", ErrCode.INVALID_LENGTH, ErrMessage.INVALID_ARR_SIZE);
         }
 
         //TODO: thêm error code
         if (!bindingResult.hasFieldErrors("individualProperties")
                 && individualProperties.size() != numberOfIndividuals) {
-            bindingResult.rejectValue("individualProperties", ErrCode.INVALID_LENGTH, MessageConst.INVALID_ARR_SIZE);
+            bindingResult.rejectValue("individualProperties", ErrCode.INVALID_LENGTH, ErrMessage.INVALID_ARR_SIZE);
         }
 
         //TODO: thêm error code
         if (!bindingResult.hasFieldErrors("individualSetIndices")
                 && individualSetIndices.length != numberOfIndividuals) {
-            bindingResult.rejectValue("individualSetIndices", ErrCode.INVALID_LENGTH, MessageConst.INVALID_ARR_SIZE);
+            bindingResult.rejectValue("individualSetIndices", ErrCode.INVALID_LENGTH, ErrMessage.INVALID_ARR_SIZE);
         }
 
         //TODO: thêm error code
         if (!bindingResult.hasFieldErrors("individualCapacities")
                 && individualCapacities.length != numberOfIndividuals) {
-            bindingResult.rejectValue("individualCapacities", ErrCode.INVALID_LENGTH, MessageConst.INVALID_ARR_SIZE);
+            bindingResult.rejectValue("individualCapacities", ErrCode.INVALID_LENGTH, ErrMessage.INVALID_ARR_SIZE);
         }
 
     }
@@ -155,7 +151,9 @@ public class NewStableMatchingProblemDTO {
 
         //TODO: tại sao không loop qua list mà phải map về array?
         //TODO: loop qua 3 List<List<T>>, bỏ 2 hàm static đi NẾU không cần thiết phải map về array
-        for (int i = 0; isValid && i < individual2DValue.size(); ++i) {
+        // REPLY: Em cần phải chuyển nó về 2D Array để xử lý trong bài toán
+        // (Có thể em sẽ thử đưa lại về dạng List<List<T>> xem nếu em xong phần Test)
+        for (int i = 0; isValid && i < individualProperties.size(); ++i) {
             isValid = (individualProperties.get(i).size() == individualWeights.get(i).size())
                     && (individualProperties.get(i).size() == individualRequirements.get(i).size());
         }

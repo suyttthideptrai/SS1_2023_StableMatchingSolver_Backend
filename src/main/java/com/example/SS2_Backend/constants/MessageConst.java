@@ -17,7 +17,7 @@ public class MessageConst {
         String PROBLEM_NAME = "The problemName should only has 255 characters";
         String POPULATION_SIZE = "The populationSize should be less than 1000";
         String GENERATION = "The generation value should be less than 100";
-        String ALGORITHM = "The algorithm shouldn\'t be empty";
+        String ALGORITHM = "The algorithm shouldn't be empty";
         String EVAL_FN_NUM = "The number of evaluateFunctions should be at least 2";
     }
 

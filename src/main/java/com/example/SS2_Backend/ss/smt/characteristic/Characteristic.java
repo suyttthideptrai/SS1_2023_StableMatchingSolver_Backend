@@ -1,12 +1,13 @@
 package com.example.SS2_Backend.ss.smt.characteristic;
 
+import com.example.SS2_Backend.ss.smt.requirement.Requirement;
+
 /**
  * @author Tiến Thành
  * Như tên gọi, lưu dữ liệu về Property & Requirement của một trong số những characteristics
  * trên một individual
  * Có nhiều loại Characteristic nên viết thành interface
  */
-@Deprecated
 public interface Characteristic {
 
     /**
@@ -17,9 +18,23 @@ public interface Characteristic {
     int getType();
 
     /**
-     * Lấy giá trị thực của Property
+     * Lấy giá trị thực của Characteristic
+     *
      * @return giá trị
      */
-    int getPropertyValue();
+    Object getProperty();
 
+    /**
+     * Lấy trọng số của Characteristic
+     *
+     * @return Double
+     */
+    Double getWeight();
+
+    /**
+     * Lấy yêu cầu của Characteristic
+     *
+     * @return Yêu cầu
+     */
+    <T extends Requirement> T getRequirement();
 }

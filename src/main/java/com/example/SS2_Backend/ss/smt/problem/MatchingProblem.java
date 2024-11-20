@@ -1,5 +1,7 @@
 package com.example.SS2_Backend.ss.smt.problem;
 
+import com.example.SS2_Backend.constants.MatchingConst;
+import com.example.SS2_Backend.ss.smt.MatchingData;
 import com.example.SS2_Backend.ss.smt.evaluator.FitnessEvaluator;
 import com.example.SS2_Backend.ss.smt.match.Matches;
 import com.example.SS2_Backend.ss.smt.preference.PreferenceList;
@@ -30,10 +32,11 @@ public abstract class MatchingProblem implements Problem {
     /** problem name */
     final String problemName;
 
-    /** all eval functions - this should be implemented later when all the components stable */
-//    final String[] evaluateFunctions;
-    final String evaluateFunctionForSet1;
-    final String evaluateFunctionForSet2;
+    /** Matching data */
+    final MatchingData matchingData;
+
+    /** all eval functions */
+    final String[] evaluateFunctions;
 
     /** problem fitness function */
     final String fitnessFunction;
@@ -41,27 +44,8 @@ public abstract class MatchingProblem implements Problem {
     /** preference list  */
     List<PreferenceList> preferenceLists;
 
-    /** preference list builder */
-    final PreferenceProvider preferencesProvider;
 
-    /** requirements of all individuals */
-    final String[][] requirements;
-
-    /** weights of all individuals */
-    final double[][] weights;
-
-    /** properties of all individuals  */
-    final double[][] properties;
-
-    /** capacities of all individuals */
-    final int[] capacities;
-
-    /** problem size (number of individuals in matching problem
-     * -- GETTER --
-     *  get problem size (total of individuals)
-     *
-     * @return size
-     */
+    /** problem size (number of individuals in matching problem */
     @Getter
     final int problemSize;
 
@@ -75,28 +59,17 @@ public abstract class MatchingProblem implements Problem {
     protected MatchingProblem(String problemName,
                               String[] evaluateFunctions,
                               String fitnessFunction,
-                              NewProvider preferencesProvider,
-                              String[][] requirements,
-                              double[][] weights,
-                              double[][] properties,
+                              MatchingData matchingData,
                               int problemSize,
                               int setNum,
-                              int[] capacities,
-                              String evaluateFunctionForSet,
-                              String evaluateFunctionForSet2,
                               FitnessEvaluator fitnessEvaluator) {
 
         this.problemName = problemName;
-        this.evaluateFunctionForSet1 = evaluateFunctionForSet;
-        this.evaluateFunctionForSet2 = evaluateFunctionForSet2;
+        this.evaluateFunctions = evaluateFunctions;
         this.fitnessFunction = fitnessFunction;
-        this.preferencesProvider = preferencesProvider;
-        this.requirements = requirements;
-        this.weights = weights;
-        this.properties = properties;
+        this.matchingData = matchingData;
         this.problemSize = problemSize;
         this.setNum = setNum;
-        this.capacities = capacities;
         this.fitnessEvaluator = fitnessEvaluator;
     }
 
@@ -118,7 +91,6 @@ public abstract class MatchingProblem implements Problem {
      */
     @Override
     public void evaluate(Solution solution) {
-        log.info("Evaluating ... "); // Start matching & collect result
         Matches result = stableMatching(solution.getVariable(0));
         double[] Satisfactions = fitnessEvaluator.getAllSatisfactions(result, preferenceLists);
         double fitnessScore;
@@ -128,9 +100,8 @@ public abstract class MatchingProblem implements Problem {
             String fnf = this.fitnessFunction.trim();
             fitnessScore = fitnessEvaluator.withFitnessFunctionEvaluation(Satisfactions, fnf);
         }
-        solution.setAttribute("matches", result);
+        solution.setAttribute(MatchingConst.MatchesKey, result);
         solution.setObjective(0, -fitnessScore);
-        log.info("Score: {}", convertToStringWithoutScientificNotation(fitnessScore));
     }
 
 
@@ -138,12 +109,8 @@ public abstract class MatchingProblem implements Problem {
      * check exists evaluation function of a set by set num
      * @return true if exists
      */
-//    protected boolean hasEvaluationFunc(int setNum) {
-//        return StringUtils.isEmptyOrNull(this.evaluateFunctions[setNum]);
-//    }
-
-    protected boolean hasEvaluationFunc() {
-        return StringUtils.isEmptyOrNull(this.evaluateFunctionForSet1) && StringUtils.isEmptyOrNull(this.evaluateFunctionForSet2);
+    protected boolean hasEvaluationFunc(int setNum) {
+        return StringUtils.isEmptyOrNull(this.evaluateFunctions[setNum]);
     }
 
     /**
@@ -171,7 +138,7 @@ public abstract class MatchingProblem implements Problem {
 
     @Override
     public String getName() {
-        return problemName;
+        return this.problemName;
     }
 
     @Override

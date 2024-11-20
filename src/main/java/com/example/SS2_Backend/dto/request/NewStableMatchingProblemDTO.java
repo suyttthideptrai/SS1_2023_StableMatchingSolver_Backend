@@ -49,26 +49,21 @@ public class NewStableMatchingProblemDTO {
     @Size(min = 3, message = ErrMessage.MES_002)
     private List<List<Double>> individualProperties;
 
-    // TODO: validate size >=2, validate not empty for each
     @Size(min = 2, message = ErrMessage.EVAL_FN_NUM)
     private String[] evaluateFunction;
 
-    //TODO: validate not blank
     @NotBlank
     private String fitnessFunction;
 
-    //TODO: validate <= 1000
     @Max(value = 1000, message = ErrMessage.POPULATION_SIZE)
     private int populationSize;
 
-    //TODO: validate <= 100
     @Max(value = 100, message = ErrMessage.GENERATION)
     private int generation;
 
     private int maxTime;
 
-    //TODO: add message
-    @NotEmpty(message = ErrMessage.ALGORITHM)
+    @NotEmpty(message = ErrMessage.NOT_BLANK)
     private String algorithm;
 
     private String distributedCores;

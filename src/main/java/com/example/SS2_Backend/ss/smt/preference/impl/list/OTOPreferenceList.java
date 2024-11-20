@@ -8,7 +8,7 @@ import java.util.Set;
 /**
  * @author vu hoang
  */
-public class OTOPreferenceListImpl extends HashMap<Integer, Double> implements PreferenceList {
+public class OTOPreferenceList extends HashMap<Integer, Double> implements PreferenceList {
 
     /**
      * {@inheritDoc}

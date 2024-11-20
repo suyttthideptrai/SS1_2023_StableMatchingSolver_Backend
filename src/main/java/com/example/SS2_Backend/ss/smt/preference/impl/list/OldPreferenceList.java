@@ -9,14 +9,14 @@ import static com.example.SS2_Backend.util.NumberUtils.formatDouble;
 
 
 @Getter
-public class OldPreferenceListImpl implements PreferenceList {
+public class OldPreferenceList implements PreferenceList {
 
     private final double[] scores;
     private final int[] positions;
     private int current;
     private final int padding;
 
-    public OldPreferenceListImpl(int size, int padding) {
+    public OldPreferenceList(int size, int padding) {
         scores = new double[size];
         positions = new int[size];
         current = 0;

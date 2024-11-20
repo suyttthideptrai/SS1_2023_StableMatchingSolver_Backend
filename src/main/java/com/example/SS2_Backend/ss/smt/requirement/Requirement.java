@@ -1,38 +1,28 @@
 package com.example.SS2_Backend.ss.smt.requirement;
 
-import lombok.Getter;
+/**
+ * Interface for property requirement
+ *
+ */
+public interface Requirement {
 
-@Getter
-public abstract class Requirement {
+    /**
+     * get type of Requirement for calculation
+     * @return type (as int)
+     */
+    int getType();
 
-    private final int type;
+    /**
+     * get value for custom function calculate
+     * @return value
+     */
+    double getValueForFunction();
 
-    protected Requirement(int type) {
-        this.type = type;
-    }
-
-    public abstract double getValueForFunction();
-
-    public int getTargetValue() {
-        return 0;
-    }
-
-    public double getBound() {
-        return 0;
-    }
-
-    public String getExpression() {
-        return null;
-    }
-
-    public double getUpperBound() {
-        return 0;
-    }
-
-    public double getLowerBound() {
-        return 0;
-    }
-
-    public abstract String toString();
+    /**
+     * get default scaling based on Requirement values
+     *
+     * @return scale (must be from 0.0 to 1.0).
+     */
+    double getDefaultScaling(double propertyValue);
 
 }

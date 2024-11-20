@@ -28,12 +28,18 @@ public class OldPreferenceList implements PreferenceList {
     }
 
 
-    //public boolean isEmpty() {return this.preferenceList.isEmpty();}
-
-
     /**
-     * {@inheritDoc}
+     * @param score score of the respective competitor
+     *              <p>
+     *              this method registers new competitor instance to the preference list (OrderedMap)
      */
+    public void add(double score) {
+        this.scores[current] = score;
+        this.positions[current] = current;
+        this.current++;
+    }
+
+
     public int getLeastNode(int newNode, Set<Integer> currentNodes) {
         int leastNode = newNode - this.padding;
         for (int currentNode : currentNodes) {
@@ -44,32 +50,16 @@ public class OldPreferenceList implements PreferenceList {
         return leastNode + this.padding;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public int getLeastNode(int newNode, int oldNode) {
-        if (this.scores[newNode - this.padding] > this.scores[oldNode - this.padding]) {
-            return oldNode - this.padding;
+        if (isScoreGreater(newNode, oldNode)) {
+            return oldNode;
+        } else {
+            return newNode;
         }
-        return newNode + this.padding;
     }
 
-    /**
-     * get last position in this preference list
-     *
-     * @return last option
-     */
-    public int getLastOption() {
-        return positions[this.size() - 1];
-    }
 
-    /**
-     * check if score of node is greater than nodeToCompare in this preference list
-     *
-     * @param node as name
-     * @param nodeToCompare as name
-     * @return as title true
-     */
     public boolean isScoreGreater(int node, int nodeToCompare) {
         return this.scores[node - this.padding] > this.scores[nodeToCompare - this.padding];
     }
@@ -88,17 +78,11 @@ public class OldPreferenceList implements PreferenceList {
         }
     }
 
-
-    /**
-     * @param score score of the respective competitor
-     *
-     * registers new competitor instance to the preference list
-     */
-    public void add(double score) {
-        this.scores[current] = score;
-        this.positions[current] = current;
-        this.current++;
+    @Override
+    public int getLastOption() {
+        return 0;
     }
+
 
     public void sort() {
         sortDescendingByScores();

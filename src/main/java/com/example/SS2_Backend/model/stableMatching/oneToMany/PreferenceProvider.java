@@ -11,7 +11,6 @@ import java.util.*;
 /**
  * This class is responsible for generating preference lists for each individual based on
  * customizable evaluation functions, which account for multiple attributes, weights, and requirements.
- * The {@code PreferenceProvider} leverages Exp4J to parse and evaluate these functions, creating tailored
  * preference lists for matching providers and consumers in a one-to-many stable matching scenario.
  *
  * <p>It evaluates each individual's preferences using provider and consumer evaluation expressions. These

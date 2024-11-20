@@ -1,7 +1,6 @@
 package com.example.SS2_Backend.ss.smt;
 
-import com.example.SS2_Backend.model.stableMatching.Requirement.Requirement;
-import com.example.SS2_Backend.ss.smt.characteristic.Characteristic;
+import com.example.SS2_Backend.ss.smt.requirement.Requirement;
 import lombok.Getter;
 
 import java.util.HashMap;
@@ -67,12 +66,22 @@ public class MatchingData {
     }
 
     /**
+     * get number of set in this MatchingData's Problem
+     * <br/> example: one-to-many (two set) -> return 2
+     *
+     * @return number of set
+     */
+    public int getNumberOfSets() {
+        return this.setNums.size();
+    }
+
+    /**
      * get set no of individual at idx
      *
      * @param idx idx
      * @return set
      */
-    public int getSetOf(int idx) {
+    public int getSetNoOf(int idx) {
         return this.sets[idx];
     }
 
@@ -82,7 +91,7 @@ public class MatchingData {
      * @param setNo set
      * @return total
      */
-    public int getTotalOfSet(int setNo) {
+    public int getTotalIndividualOfSet(int setNo) {
         return this.setNums.get(setNo);
     }
 
@@ -151,7 +160,7 @@ public class MatchingData {
         for (int i = 0; i < this.size; i++) {
             //name / set
             sb.append(String.format("%-3d| ", i));
-            sb.append(String.format("%-4d| ", this.getSetOf(i)));
+            sb.append(String.format("%-4d| ", this.getSetNoOf(i)));
             sb.append(String.format("%-20s| ", "Node " + i));
             // prop value
             StringBuilder ss = new StringBuilder();

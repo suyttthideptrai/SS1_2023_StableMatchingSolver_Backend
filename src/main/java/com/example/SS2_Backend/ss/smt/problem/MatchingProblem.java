@@ -4,9 +4,7 @@ import com.example.SS2_Backend.constants.MatchingConst;
 import com.example.SS2_Backend.ss.smt.MatchingData;
 import com.example.SS2_Backend.ss.smt.evaluator.FitnessEvaluator;
 import com.example.SS2_Backend.ss.smt.match.Matches;
-import com.example.SS2_Backend.ss.smt.preference.PreferenceList;
-import com.example.SS2_Backend.ss.smt.preference.PreferenceProvider;
-import com.example.SS2_Backend.ss.smt.preference.impl.provider.NewProvider;
+import com.example.SS2_Backend.ss.smt.preference.PreferenceListWrapper;
 import com.example.SS2_Backend.util.StringUtils;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -16,10 +14,6 @@ import org.moeaframework.core.Problem;
 import org.moeaframework.core.Solution;
 import org.moeaframework.core.Variable;
 import org.moeaframework.core.variable.Permutation;
-
-import java.util.List;
-
-import static com.example.SS2_Backend.util.StringExpressionEvaluator.convertToStringWithoutScientificNotation;
 
 /**
  * base class for MatchingProblem
@@ -42,7 +36,7 @@ public abstract class MatchingProblem implements Problem {
     final String fitnessFunction;
 
     /** preference list  */
-    List<PreferenceList> preferenceLists;
+    PreferenceListWrapper preferenceLists;
 
 
     /** problem size (number of individuals in matching problem */
@@ -92,13 +86,13 @@ public abstract class MatchingProblem implements Problem {
     @Override
     public void evaluate(Solution solution) {
         Matches result = stableMatching(solution.getVariable(0));
-        double[] Satisfactions = fitnessEvaluator.getAllSatisfactions(result, preferenceLists);
+        double[] satisfactions = this.preferenceLists.getAllSatisfactions(result);
         double fitnessScore;
-        if (!this.hasFitnessFunc()) {
-            fitnessScore = fitnessEvaluator.defaultFitnessEvaluation(Satisfactions);
+        if (this.hasFitnessFunc()) {
+            fitnessScore = fitnessEvaluator
+                    .withFitnessFunctionEvaluation(satisfactions, this.fitnessFunction);
         } else {
-            String fnf = this.fitnessFunction.trim();
-            fitnessScore = fitnessEvaluator.withFitnessFunctionEvaluation(Satisfactions, fnf);
+            fitnessScore = fitnessEvaluator.defaultFitnessEvaluation(satisfactions);
         }
         solution.setAttribute(MatchingConst.MatchesKey, result);
         solution.setObjective(0, -fitnessScore);

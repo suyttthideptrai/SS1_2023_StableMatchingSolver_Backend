@@ -43,7 +43,7 @@ public class StableMatchingProblemDTO {
 
     public int getNumberOfIndividuals() {
         return Individuals.size();
-    }
+        }
 
     @Override
     public String toString() {

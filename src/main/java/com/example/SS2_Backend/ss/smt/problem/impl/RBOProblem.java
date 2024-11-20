@@ -25,6 +25,8 @@ public class RBOProblem extends MatchingProblem {
                       int problemSize,
                       int setNum,
                       int[] individualCapacities,
+                      String evaluateFunctionForSet,
+                      String evaluateFunctionForSet2,
                       FitnessEvaluator fitnessEvaluator) {
         super(problemName,
                 evaluateFunctions,
@@ -36,7 +38,10 @@ public class RBOProblem extends MatchingProblem {
                 problemSize,
                 setNum,
                 individualCapacities,
-                fitnessEvaluator);
+                evaluateFunctionForSet,
+                evaluateFunctionForSet2,
+                fitnessEvaluator
+                );
     }
 
     /**

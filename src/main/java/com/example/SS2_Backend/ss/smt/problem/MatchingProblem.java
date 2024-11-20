@@ -3,6 +3,7 @@ package com.example.SS2_Backend.ss.smt.problem;
 import com.example.SS2_Backend.ss.smt.evaluator.FitnessEvaluator;
 import com.example.SS2_Backend.ss.smt.match.Matches;
 import com.example.SS2_Backend.ss.smt.preference.PreferenceList;
+import com.example.SS2_Backend.ss.smt.preference.PreferenceProvider;
 import com.example.SS2_Backend.ss.smt.preference.impl.provider.NewProvider;
 import com.example.SS2_Backend.util.StringUtils;
 import lombok.AccessLevel;
@@ -29,8 +30,10 @@ public abstract class MatchingProblem implements Problem {
     /** problem name */
     final String problemName;
 
-    /** all eval functions */
-    final String[] evaluateFunctions;
+    /** all eval functions - this should be implemented later when all the components stable */
+//    final String[] evaluateFunctions;
+    final String evaluateFunctionForSet1;
+    final String evaluateFunctionForSet2;
 
     /** problem fitness function */
     final String fitnessFunction;
@@ -39,7 +42,7 @@ public abstract class MatchingProblem implements Problem {
     List<PreferenceList> preferenceLists;
 
     /** preference list builder */
-    final NewProvider preferencesProvider;
+    final PreferenceProvider preferencesProvider;
 
     /** requirements of all individuals */
     final String[][] requirements;
@@ -53,7 +56,13 @@ public abstract class MatchingProblem implements Problem {
     /** capacities of all individuals */
     final int[] capacities;
 
-    /** problem size (number of individuals in matching problem */
+    /** problem size (number of individuals in matching problem
+     * -- GETTER --
+     *  get problem size (total of individuals)
+     *
+     * @return size
+     */
+    @Getter
     final int problemSize;
 
     /** number of set in matching problem */
@@ -73,10 +82,13 @@ public abstract class MatchingProblem implements Problem {
                               int problemSize,
                               int setNum,
                               int[] capacities,
+                              String evaluateFunctionForSet,
+                              String evaluateFunctionForSet2,
                               FitnessEvaluator fitnessEvaluator) {
 
         this.problemName = problemName;
-        this.evaluateFunctions = evaluateFunctions;
+        this.evaluateFunctionForSet1 = evaluateFunctionForSet;
+        this.evaluateFunctionForSet2 = evaluateFunctionForSet2;
         this.fitnessFunction = fitnessFunction;
         this.preferencesProvider = preferencesProvider;
         this.requirements = requirements;
@@ -124,11 +136,14 @@ public abstract class MatchingProblem implements Problem {
 
     /**
      * check exists evaluation function of a set by set num
-     * @param setNum set index
      * @return true if exists
      */
-    protected boolean hasEvaluationFunc(int setNum) {
-        return StringUtils.isEmptyOrNull(this.evaluateFunctions[setNum]);
+//    protected boolean hasEvaluationFunc(int setNum) {
+//        return StringUtils.isEmptyOrNull(this.evaluateFunctions[setNum]);
+//    }
+
+    protected boolean hasEvaluationFunc() {
+        return StringUtils.isEmptyOrNull(this.evaluateFunctionForSet1) && StringUtils.isEmptyOrNull(this.evaluateFunctionForSet2);
     }
 
     /**
@@ -137,14 +152,6 @@ public abstract class MatchingProblem implements Problem {
      */
     protected boolean hasFitnessFunc() {
         return StringUtils.isEmptyOrNull(this.fitnessFunction);
-    }
-
-    /**
-     * get problem size (total of individuals)
-     * @return size
-     */
-    protected int getProblemSize() {
-        return this.problemSize;
     }
 
     /**

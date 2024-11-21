@@ -2,7 +2,6 @@ package com.example.SS2_Backend.ss.smt.requirement;
 
 /**
  * Interface for property requirement
- *
  */
 public interface Requirement {
 

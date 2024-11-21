@@ -1,19 +1,53 @@
 package com.example.SS2_Backend.ss.smt.preference;
 
+import com.example.SS2_Backend.constants.MatchingConst;
+import com.example.SS2_Backend.ss.smt.MatchingData;
 import com.example.SS2_Backend.ss.smt.match.Matches;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 /**
- * Wrapper class to interact with big list of preference list
+ * Wrapper class provides methods to interact with big list of preference list
  */
 public class PreferenceListWrapper {
 
     /** preference lists */
-    List<PreferenceList> lists;
+    private final List<PreferenceList> lists;
 
     public PreferenceListWrapper(List<PreferenceList> lists) {
         this.lists = lists;
+    }
+
+    /**
+     * lấy thằng học dốt nhất
+     *
+     * @param set set tổ (tổ 1, tổ 2, tổ 3, ...)
+     * @param preferNode thằng đánh giá (chấm điểm)
+     * @param proposeNode thằng mới đi học
+     * @param setOfPreferNode các thằng đang trong tổ
+     * @param preferNodeCapacity sĩ số tổ
+     *
+     * @return thằng học dốt nhất
+     */
+    public int getLeastScoreNode(int set,
+                                 int preferNode,
+                                 int proposeNode,
+                                 Set<Integer> setOfPreferNode,
+                                 int preferNodeCapacity) {
+        PreferenceList prefOfSelectorNode = this.lists.get(preferNode);
+        // Lớp có một thằng
+        if (Objects.equals(preferNodeCapacity, 1)) {
+            int currentNode = setOfPreferNode.iterator().next();
+            if (isPreferredOver(proposeNode, currentNode, preferNode)) {
+                return currentNode;
+            } else {
+                return proposeNode;
+            }
+        } else {
+            return prefOfSelectorNode.getLeastNode(set, proposeNode, setOfPreferNode);
+        }
     }
 
     /**
@@ -26,16 +60,64 @@ public class PreferenceListWrapper {
         return lists.get(idx);
     }
 
+    // Stable Matching Algorithm Component: isPreferredOver
+    public boolean isPreferredOver(int proposeNode, int preferNodeCurrentNode, int preferNode) {
+        PreferenceList preferenceOfSelectorNode = lists.get(preferNode);
+        return preferenceOfSelectorNode.isScoreGreater(MatchingConst.UNUSED_VALUE,
+                proposeNode,
+                preferNodeCurrentNode);
+    }
+
     /**
+     * Lấy bảng điểm của cả lớp
      * get all satisfaction based on matches
      *
      * @param matches matching result
      * @return satisfactions
      */
-    public double[] getAllSatisfactions(Matches matches) {
-        double[] satisfactions = new double[lists.size()];
-        //TODO: implement
+    public double[] getAllSatisfactions(Matches matches, MatchingData matchingData) {
+        int problemSize = matchingData.getSize();
+        double[] satisfactions = new double[problemSize];
+//        int numSet0 = matchingData.getTotalIndividualOfSet(0);
+//        for (int i = 0; i < numSet0; i++) {
+//            double setScore = 0.0;
+//            PreferenceList ofInd = lists.get(i);
+//            Set<Integer> SetMatches = matches.getSetOf(i);
+//            for (int x : SetMatches) {
+//                setScore += ofInd.getScore(x);
+//            }
+//            satisfactions[i] = setScore;
+//        }
+//        for (int i = numSet0; i < individuals.getNumberOfIndividual(); i++) {
+//            double setScore = 0.0;
+//            PreferenceList ofInd = preferenceLists.get(i);
+//            Set<Integer> SetMatches = matches.getSet(i);
+//            for (int x : SetMatches) {
+//                setScore += ofInd.getScoreByIndex(x);
+//            }
+//            satisfactions[i] = setScore;
+//        }
+        for (int i = 0; i < problemSize; i++) {
+            double setScore = 0.0;
+            PreferenceList ofInd = lists.get(i);
+            Set<Integer> setMatches = matches.getSetOf(i);
+            for (int node : setMatches) {
+                setScore += ofInd.getScore(node);
+            }
+            satisfactions[i] = setScore;
+        }
         return satisfactions;
+    }
+
+    /**
+     * get last option of target
+     *
+     * @param target position of individual
+     * @return last option
+     */
+    public int getLastChoiceOf(int set, int target) {
+        PreferenceList pref = lists.get(target);
+        return pref.getPositionByRank(set, pref.size(set) - 1);
     }
 
 }

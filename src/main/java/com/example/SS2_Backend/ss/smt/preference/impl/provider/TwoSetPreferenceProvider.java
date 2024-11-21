@@ -4,7 +4,7 @@ import com.example.SS2_Backend.ss.smt.preference.PreferenceList;
 import com.example.SS2_Backend.ss.smt.MatchingData;
 import com.example.SS2_Backend.ss.smt.preference.PreferenceBuilder;
 import com.example.SS2_Backend.ss.smt.preference.PreferenceListWrapper;
-import com.example.SS2_Backend.ss.smt.preference.impl.list.OldPreferenceList;
+import com.example.SS2_Backend.ss.smt.preference.impl.list.TwoSetPreferenceList;
 import com.example.SS2_Backend.ss.smt.requirement.Requirement;
 import com.example.SS2_Backend.util.PreferenceProviderUtils;
 import lombok.Data;
@@ -102,10 +102,10 @@ public class TwoSetPreferenceProvider implements PreferenceBuilder {
 
     public PreferenceList getPreferenceListByFunction(int index) {
         int set = matchingData.getSetNoOf(index);
-        OldPreferenceList a;
+        TwoSetPreferenceList a;
         Expression e;
         if (set == 0) {
-            a = new OldPreferenceList(this.sizeOf2, this.sizeOf1);
+            a = new TwoSetPreferenceList(this.sizeOf2, this.sizeOf1);
             if (this.expressionOfSet1 == null) {
                 return this.getPreferenceListByDefault(index);
             }
@@ -116,7 +116,7 @@ public class TwoSetPreferenceProvider implements PreferenceBuilder {
                 a.add(totalScore);
             }
         } else {
-            a = new OldPreferenceList(this.sizeOf1, 0);
+            a = new TwoSetPreferenceList(this.sizeOf1, 0);
             if (this.expressionOfSet2 == null) {
                 return this.getPreferenceListByDefault(index);
             }
@@ -134,9 +134,9 @@ public class TwoSetPreferenceProvider implements PreferenceBuilder {
     public PreferenceList getPreferenceListByDefault(int index) {
         int set = matchingData.getSetNoOf(index);
         int numberOfProperties = matchingData.getPropertyNum();
-        OldPreferenceList a;
+        TwoSetPreferenceList a;
         if (set == 0) {
-            a = new OldPreferenceList(this.sizeOf2, this.sizeOf1);
+            a = new TwoSetPreferenceList(this.sizeOf2, this.sizeOf1);
             for (int i = sizeOf1; i < matchingData.getSize(); i++) {
                 double totalScore = 0;
                 for (int j = 0; j < numberOfProperties; j++) {
@@ -149,7 +149,7 @@ public class TwoSetPreferenceProvider implements PreferenceBuilder {
                 a.add(totalScore);
             }
         } else {
-            a = new OldPreferenceList(this.sizeOf1, 0);
+            a = new TwoSetPreferenceList(this.sizeOf1, 0);
             for (int i = 0; i < sizeOf1; i++) {
                 double totalScore = 0;
                 for (int j = 0; j < numberOfProperties; j++) {

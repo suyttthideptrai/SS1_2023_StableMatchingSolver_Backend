@@ -11,7 +11,6 @@ import com.example.SS2_Backend.model.stableMatching.Matches.MatchingSolutionInsi
 import com.example.SS2_Backend.ss.smt.Matches;
 import com.example.SS2_Backend.ss.smt.MatchingProblem;
 import com.example.SS2_Backend.ss.smt.implement.MTMProblem;
-import com.example.SS2_Backend.util.Testing;
 import com.example.SS2_Backend.util.ValidationUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +37,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class StableMatchingSolverRBO implements MatchingSolver{
 
-    private static final int RUN_COUNT_PER_ALGORITHM = 10; // for insight running, each algorithm will be run for 10 times
+    private static final int RUN_COUNT_PER_ALGORITHM = 10;
     private final SimpMessagingTemplate simpMessagingTemplate;
 
     public ResponseEntity<Response> solve(NewStableMatchingProblemDTO request) {
@@ -86,7 +85,7 @@ public class StableMatchingSolverRBO implements MatchingSolver{
             MatchingSolution matchingSolution = formatSolution(algorithm, results, runtime);
             matchingSolution.setSetSatisfactions(problem.getMatchesSatisfactions((Matches) results
                     .get(0)
-                    .getAttribute("matches")));
+                    .getAttribute(MatchingConst.MATCHES_KEY)));
 
             return ResponseEntity.ok(Response
                     .builder()

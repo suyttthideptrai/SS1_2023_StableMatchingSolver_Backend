@@ -78,25 +78,7 @@ public class PreferenceListWrapper {
     public double[] getMatchesSatisfactions(Matches matches, MatchingData matchingData) {
         int problemSize = matchingData.getSize();
         double[] satisfactions = new double[problemSize];
-//        int numSet0 = matchingData.getTotalIndividualOfSet(0);
-//        for (int i = 0; i < numSet0; i++) {
-//            double setScore = 0.0;
-//            PreferenceList ofInd = lists.get(i);
-//            Set<Integer> SetMatches = matches.getSetOf(i);
-//            for (int x : SetMatches) {
-//                setScore += ofInd.getScore(x);
-//            }
-//            satisfactions[i] = setScore;
-//        }
-//        for (int i = numSet0; i < individuals.getNumberOfIndividual(); i++) {
-//            double setScore = 0.0;
-//            PreferenceList ofInd = preferenceLists.get(i);
-//            Set<Integer> SetMatches = matches.getSet(i);
-//            for (int x : SetMatches) {
-//                setScore += ofInd.getScoreByIndex(x);
-//            }
-//            satisfactions[i] = setScore;
-//        }
+
         for (int i = 0; i < problemSize; i++) {
             double setScore = 0.0;
             PreferenceList ofInd = lists.get(i);

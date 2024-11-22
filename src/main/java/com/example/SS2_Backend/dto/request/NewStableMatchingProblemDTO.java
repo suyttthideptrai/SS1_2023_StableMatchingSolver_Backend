@@ -1,8 +1,11 @@
 package com.example.SS2_Backend.dto.request;
-import com.example.SS2_Backend.constants.MessageConst;
+
 import com.example.SS2_Backend.constants.MessageConst.ErrMessage;
-import com.example.SS2_Backend.constants.MessageConst.ErrCode;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,49 +23,49 @@ import java.util.List;
 @AllArgsConstructor
 public class NewStableMatchingProblemDTO {
 
-    @Size(max = 255, message = MessageConst.ErrMessage.PROBLEM_NAME)
+    @Size(max = 255, message = ErrMessage.PROBLEM_NAME)
     private String problemName;
 
-    @Min(value = 2, message = MessageConst.ErrMessage.MES_001)
+    @Min(value = 2, message = ErrMessage.MES_001)
     private int numberOfSets;
 
-    @Min(value = 3, message = MessageConst.ErrMessage.MES_002)
+    @Min(value = 3, message = ErrMessage.MES_002)
     private int numberOfIndividuals;
 
-    @Min(value = 1, message = MessageConst.ErrMessage.MES_003)
+    @Min(value = 1, message = ErrMessage.MES_003)
     private int numberOfProperty;
 
-    @Size(min = 1, message = MessageConst.ErrMessage.MES_004)
+    @Size(min = 1, message = ErrMessage.MES_004)
     private int[] individualSetIndices;
 
-    @Size(min = 1, message = MessageConst.ErrMessage.MES_004)
+    @Size(min = 1, message = ErrMessage.MES_004)
     private int[] individualCapacities;
 
-    @Size(min = 3, message = MessageConst.ErrMessage.MES_002)
+    @Size(min = 3, message = ErrMessage.MES_002)
     private String[][] individualRequirements;
 
-    @Size(min = 3, message = MessageConst.ErrMessage.MES_002)
+    @Size(min = 3, message = ErrMessage.MES_002)
     private double[][] individualWeights;
 
-    @Size(min = 3, message = MessageConst.ErrMessage.MES_002)
+    @Size(min = 3, message = ErrMessage.MES_002)
     private double[][] individualProperties;
 
     private String[] evaluateFunctions;
 
-    @NotBlank(message = MessageConst.ErrMessage.NOT_BLANK)
+    @NotBlank(message = ErrMessage.NOT_BLANK)
     private String fitnessFunction;
 
     private int [][] excludedPairs;
 
-    @Max(value = 1000, message = MessageConst.ErrMessage.POPULATION_SIZE)
+    @Max(value = 1000, message = ErrMessage.POPULATION_SIZE)
     private int populationSize;
 
-    @Max(value = 100, message = MessageConst.ErrMessage.GENERATION)
+    @Max(value = 100, message = ErrMessage.GENERATION)
     private int generation;
 
     private int maxTime;
 
-    @NotEmpty(message = MessageConst.ErrMessage.NOT_BLANK)
+    @NotEmpty(message = ErrMessage.NOT_BLANK)
     private String algorithm;
 
     private String distributedCores;

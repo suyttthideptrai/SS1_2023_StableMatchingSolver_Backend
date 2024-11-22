@@ -11,7 +11,7 @@ import static com.example.SS2_Backend.util.NumberUtils.formatDouble;
 /**
  *  Old implementation of Two Sided Stable Matching Problem's Preference List
  * that contains only two sets.
- *  In this implementation, set parameters for functions is ignored
+ *  In this implementation, set parameters of interface methods is ignored
  */
 @Getter
 @Slf4j

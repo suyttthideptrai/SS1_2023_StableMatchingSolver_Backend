@@ -12,7 +12,7 @@ public interface Requirement {
     int getType();
 
     /**
-     * get value for custom function calculate
+     * get value for custom function computation
      * @return value
      */
     double getValueForFunction();

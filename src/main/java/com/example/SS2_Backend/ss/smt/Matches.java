@@ -1,4 +1,4 @@
-package com.example.SS2_Backend.ss.smt.match;
+package com.example.SS2_Backend.ss.smt;
 
 import lombok.AccessLevel;
 import lombok.Data;

@@ -38,13 +38,13 @@ public class StableMatchingProblemDTO {
     private int[] individualCapacities;
 
     @Size(min = 3, message = ErrMessage.MES_002)
-    private List<List<String>> individualRequirements;
+    private String[][] individualRequirements;
 
     @Size(min = 3, message = ErrMessage.MES_002)
-    private List<List<Double>> individualWeights;
+    private double[][] individualWeights;
 
     @Size(min = 3, message = ErrMessage.MES_002)
-    private List<List<Double>> individualProperties;
+    private double[][] individualProperties;
 
     private String[] evaluateFunctions;
 
@@ -91,60 +91,60 @@ public class StableMatchingProblemDTO {
 
     }
 
-    public void is2DArrayValid(BindingResult bindingResult) {
+//    public void is2DArrayValid(BindingResult bindingResult) {
+//
+//        if (!bindingResult.hasFieldErrors("individualRequirements")
+//                && individualRequirements.size() != numberOfIndividuals) {
+//            bindingResult.rejectValue("individualRequirements", ErrCode.INVALID_LENGTH, ErrMessage.INVALID_ARR_SIZE);
+//        }
+//
+//        if (!bindingResult.hasFieldErrors("individualWeights")
+//                && individualWeights.size() != numberOfIndividuals) {
+//            bindingResult.rejectValue("individualWeights", ErrCode.INVALID_LENGTH, ErrMessage.INVALID_ARR_SIZE);
+//        }
+//
+//        if (!bindingResult.hasFieldErrors("individualProperties")
+//                && individualProperties.size() != numberOfIndividuals) {
+//            bindingResult.rejectValue("individualProperties", ErrCode.INVALID_LENGTH, ErrMessage.INVALID_ARR_SIZE);
+//        }
+//
+//        if (!bindingResult.hasFieldErrors("individualSetIndices")
+//                && individualSetIndices.length != numberOfIndividuals) {
+//            bindingResult.rejectValue("individualSetIndices", ErrCode.INVALID_LENGTH, ErrMessage.INVALID_ARR_SIZE);
+//        }
+//
+//        if (!bindingResult.hasFieldErrors("individualCapacities")
+//                && individualCapacities.length != numberOfIndividuals) {
+//            bindingResult.rejectValue("individualCapacities", ErrCode.INVALID_LENGTH, ErrMessage.INVALID_ARR_SIZE);
+//        }
+//
+//    }
 
-        if (!bindingResult.hasFieldErrors("individualRequirements")
-                && individualRequirements.size() != numberOfIndividuals) {
-            bindingResult.rejectValue("individualRequirements", ErrCode.INVALID_LENGTH, ErrMessage.INVALID_ARR_SIZE);
-        }
-
-        if (!bindingResult.hasFieldErrors("individualWeights")
-                && individualWeights.size() != numberOfIndividuals) {
-            bindingResult.rejectValue("individualWeights", ErrCode.INVALID_LENGTH, ErrMessage.INVALID_ARR_SIZE);
-        }
-
-        if (!bindingResult.hasFieldErrors("individualProperties")
-                && individualProperties.size() != numberOfIndividuals) {
-            bindingResult.rejectValue("individualProperties", ErrCode.INVALID_LENGTH, ErrMessage.INVALID_ARR_SIZE);
-        }
-
-        if (!bindingResult.hasFieldErrors("individualSetIndices")
-                && individualSetIndices.length != numberOfIndividuals) {
-            bindingResult.rejectValue("individualSetIndices", ErrCode.INVALID_LENGTH, ErrMessage.INVALID_ARR_SIZE);
-        }
-
-        if (!bindingResult.hasFieldErrors("individualCapacities")
-                && individualCapacities.length != numberOfIndividuals) {
-            bindingResult.rejectValue("individualCapacities", ErrCode.INVALID_LENGTH, ErrMessage.INVALID_ARR_SIZE);
-        }
-
-    }
-
-    public void valid2dArraysDimension(BindingResult bindingResult) {
-        // không check thêm nếu có lỗi trước đó
-        if (!bindingResult.hasFieldErrors("individualRequirements")
-                || !bindingResult.hasFieldErrors("individualWeights")
-                || !bindingResult.hasFieldErrors("individualProperties")) {
-            return;
-        }
-
-        boolean isValid = true;
-
-        //TODO: tại sao không loop qua list mà phải map về array?
-        //TODO: loop qua 3 List<List<T>>, bỏ 2 hàm static đi NẾU không cần thiết phải map về array
-        // REPLY: Em cần phải chuyển nó về 2D Array để xử lý trong bài toán
-        // (Có thể em sẽ thử đưa lại về dạng List<List<T>> xem nếu em xong phần Test)
-        for (int i = 0; isValid && i < individualProperties.size(); ++i) {
-            isValid = (individualProperties.get(i).size() == individualWeights.get(i).size())
-                    && (individualProperties.get(i).size() == individualRequirements.get(i).size());
-        }
-
-        if (!isValid) {
-            bindingResult.rejectValue("individualRequirements", "", "");
-            bindingResult.rejectValue("individualWeights", "", "");
-            bindingResult.rejectValue("individualProperties", "", "");
-        }
-    }
+//    public void valid2dArraysDimension(BindingResult bindingResult) {
+//        // không check thêm nếu có lỗi trước đó
+//        if (!bindingResult.hasFieldErrors("individualRequirements")
+//                || !bindingResult.hasFieldErrors("individualWeights")
+//                || !bindingResult.hasFieldErrors("individualProperties")) {
+//            return;
+//        }
+//
+//        boolean isValid = true;
+//
+//        //TODO: tại sao không loop qua list mà phải map về array?
+//        //TODO: loop qua 3 List<List<T>>, bỏ 2 hàm static đi NẾU không cần thiết phải map về array
+//        // REPLY: Em cần phải chuyển nó về 2D Array để xử lý trong bài toán
+//        // (Có thể em sẽ thử đưa lại về dạng List<List<T>> xem nếu em xong phần Test)
+//        for (int i = 0; isValid && i < individualProperties.size(); ++i) {
+//            isValid = (individualProperties.get(i).size() == individualWeights.get(i).size())
+//                    && (individualProperties.get(i).size() == individualRequirements.get(i).size());
+//        }
+//
+//        if (!isValid) {
+//            bindingResult.rejectValue("individualRequirements", "", "");
+//            bindingResult.rejectValue("individualWeights", "", "");
+//            bindingResult.rejectValue("individualProperties", "", "");
+//        }
+//    }
 
     public static String[][] fromListToStringArray(List<List<String>> list) {
         String[][] array = new String[list.size()][];
@@ -163,19 +163,21 @@ public class StableMatchingProblemDTO {
         return array;
     }
 
+    @Override
     public String toString() {
-        return "Matching_Theory_Problem {" + "\n" +
-                " ProblemName = " + problemName + "\n" +
-                ", NumberOfSets = " + numberOfSets + "\n" +
-                ", NumberOfIndividuals = " + numberOfIndividuals + "\n" +
-                ", IndividualSetIndices = " + Arrays.toString(individualSetIndices) + "\n" +
-                ", IndividualCapacities = " + Arrays.toString(individualCapacities) + "\n" +
-                ", fitnessFunction = '" + fitnessFunction + "\n" +
-                ", PopulationSize = " + populationSize + "\n" +
-                ", Generation = " +generation + "\n" +
-                ", individualRequirements: " + Arrays.deepToString(individualRequirements.toArray()) + "\n" +
-                ", individualWeights: " + Arrays.deepToString(individualWeights.toArray()) + "\n" +
-                ", individualProperties: " + Arrays.deepToString(individualProperties.toArray()) + "\n" +
-                "}";
+        return "StableMatchingProblemDTO{" + "problemName='" + problemName + '\'' +
+                ", numberOfSets=" + numberOfSets + ", numberOfIndividuals=" + numberOfIndividuals +
+                ", numberOfProperty=" + numberOfProperty + ", individualSetIndices=" +
+                Arrays.toString(individualSetIndices) + ", individualCapacities=" +
+                Arrays.toString(individualCapacities) + ", individualRequirements=" +
+                Arrays.toString(individualRequirements) + ", individualWeights=" +
+                Arrays.toString(individualWeights) + ", individualProperties=" +
+                Arrays.toString(individualProperties) + ", evaluateFunctions=" +
+                Arrays.toString(evaluateFunctions) + ", fitnessFunction='" + fitnessFunction +
+                '\'' + ", excludedPairs=" + Arrays.toString(excludedPairs) + ", populationSize=" +
+                populationSize + ", generation=" + generation + ", maxTime=" + maxTime +
+                ", algorithm='" + algorithm + '\'' + ", distributedCores='" + distributedCores +
+                '\'' + '}';
     }
+
 }

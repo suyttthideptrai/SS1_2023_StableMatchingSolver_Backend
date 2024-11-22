@@ -5,7 +5,7 @@ import com.example.SS2_Backend.ss.smt.preference.PreferenceList;
 import com.example.SS2_Backend.ss.smt.MatchingData;
 import com.example.SS2_Backend.ss.smt.MatchingProblem;
 import com.example.SS2_Backend.ss.smt.evaluator.FitnessEvaluator;
-import com.example.SS2_Backend.ss.smt.match.Matches;
+import com.example.SS2_Backend.ss.smt.Matches;
 import com.example.SS2_Backend.ss.smt.preference.PreferenceListWrapper;
 import com.example.SS2_Backend.util.StringUtils;
 import lombok.AccessLevel;
@@ -19,6 +19,7 @@ import org.moeaframework.core.variable.Permutation;
 
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Objects;
 import java.util.Queue;
 import java.util.Set;
 
@@ -73,7 +74,17 @@ public class MTMProblem implements MatchingProblem {
     @Override
     public void evaluate(Solution solution) {
         Matches result = this.stableMatching(solution.getVariable(0));
-        double[] satisfactions = this.preferenceLists.getAllSatisfactions(result, matchingData);
+        // Check Exclude Pairs
+        int[][] excludedPairs = this.matchingData.getExcludedPairs();
+        if (Objects.nonNull(excludedPairs)) {
+            for (int[] excludedPair : excludedPairs) {
+                if (result.getSetOf(excludedPair[0]).contains(excludedPair[1])) {
+                    solution.setObjective(0, Double.MAX_VALUE);
+                    return;
+                }
+            }
+        }
+        double[] satisfactions = this.preferenceLists.getMatchesSatisfactions(result, matchingData);
         double fitnessScore;
         if (this.hasFitnessFunc()) {
             fitnessScore = fitnessEvaluator
@@ -81,7 +92,7 @@ public class MTMProblem implements MatchingProblem {
         } else {
             fitnessScore = fitnessEvaluator.defaultFitnessEvaluation(satisfactions);
         }
-        solution.setAttribute(MatchingConst.MatchesKey, result);
+        solution.setAttribute(MatchingConst.MATCHES_KEY, result);
         solution.setObjective(0, -fitnessScore);
     }
 
@@ -92,6 +103,11 @@ public class MTMProblem implements MatchingProblem {
      */
     public boolean hasFitnessFunc() {
         return StringUtils.isEmptyOrNull(this.fitnessFunction);
+    }
+
+
+    public double[] getMatchesSatisfactions(Matches matches) {
+        return this.preferenceLists.getMatchesSatisfactions(matches, matchingData);
     }
 
     /**

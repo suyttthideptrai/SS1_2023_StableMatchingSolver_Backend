@@ -1,7 +1,5 @@
 package com.example.SS2_Backend.ss.smt.preference;
 
-import com.example.SS2_Backend.ss.smt.preference.PreferenceList;
-
 /**
  * Builder for preference list
  */

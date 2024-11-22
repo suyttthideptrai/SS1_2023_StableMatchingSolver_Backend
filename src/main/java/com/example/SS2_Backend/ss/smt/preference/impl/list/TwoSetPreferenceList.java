@@ -38,6 +38,7 @@ public class TwoSetPreferenceList implements PreferenceList {
         return positions.length;
     }
 
+
     /**
      * {@inheritDoc}
      */

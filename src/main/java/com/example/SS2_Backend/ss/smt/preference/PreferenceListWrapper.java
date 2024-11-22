@@ -2,7 +2,7 @@ package com.example.SS2_Backend.ss.smt.preference;
 
 import com.example.SS2_Backend.constants.MatchingConst;
 import com.example.SS2_Backend.ss.smt.MatchingData;
-import com.example.SS2_Backend.ss.smt.match.Matches;
+import com.example.SS2_Backend.ss.smt.Matches;
 
 import java.util.List;
 import java.util.Objects;
@@ -75,7 +75,7 @@ public class PreferenceListWrapper {
      * @param matches matching result
      * @return satisfactions
      */
-    public double[] getAllSatisfactions(Matches matches, MatchingData matchingData) {
+    public double[] getMatchesSatisfactions(Matches matches, MatchingData matchingData) {
         int problemSize = matchingData.getSize();
         double[] satisfactions = new double[problemSize];
 //        int numSet0 = matchingData.getTotalIndividualOfSet(0);

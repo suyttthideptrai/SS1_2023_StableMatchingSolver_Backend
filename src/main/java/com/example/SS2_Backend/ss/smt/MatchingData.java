@@ -2,6 +2,7 @@ package com.example.SS2_Backend.ss.smt;
 
 import com.example.SS2_Backend.ss.smt.requirement.Requirement;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,8 +31,10 @@ public class MatchingData {
     /** total individual foreach set */
     private final Map<Integer, Integer> setNums;
 
-    /** number of characteristics */
-    private final int charNum;
+    /** exclude/ conflict pairs, solution will be considered as NOT GOOD if Matches it produces
+     *  contains one of the excludedPairs */
+    @Setter
+    int[][] excludedPairs;
 
     /** characteristic data */
     private final double[][] propertyValues;
@@ -43,7 +46,6 @@ public class MatchingData {
                         int propertyNum,
                         int[] sets,
                         int[] capacities,
-                        int charNum,
                         double[][] propertyValues,
                         double[][] weights,
                         Requirement[][] requirements) {
@@ -58,7 +60,6 @@ public class MatchingData {
         this.sets = sets;
         this.capacities = capacities;
         this.setNums = setNums;
-        this.charNum = charNum;
         this.propertyValues = propertyValues;
         this.weights = weights;
         this.requirements = requirements;

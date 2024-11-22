@@ -44,4 +44,9 @@ public class OTOPreferenceList extends HashMap<Integer, Double> implements Prefe
         return 0;
     }
 
+    @Override
+    public double getScoreByIndex(int index) {
+        return get(index);
+    }
+
 }

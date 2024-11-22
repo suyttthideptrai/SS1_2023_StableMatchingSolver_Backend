@@ -6,7 +6,7 @@ import com.example.SS2_Backend.ss.smt.preference.PreferenceProvider;
 
 import java.util.List;
 
-// Khả năng viết thành class luôn ko cần interface
+// Khả năng viết thành class luôn ko cần interface, sẽ implement ở tầng service, prepare các fields cần thiết ở đó
 public interface MatchingProblemBuilder {
     void setPopulation(NewStableMatchingProblemDTO request);
     PreferenceProvider createPreferencesProvider();

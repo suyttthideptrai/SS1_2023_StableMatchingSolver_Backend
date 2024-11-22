@@ -7,6 +7,7 @@ import com.example.SS2_Backend.ss.smt.preference.PreferenceProvider;
 import com.example.SS2_Backend.ss.smt.preference.impl.provider.NewProvider;
 import com.example.SS2_Backend.util.StringUtils;
 import lombok.AccessLevel;
+import lombok.Data;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +24,7 @@ import static com.example.SS2_Backend.util.StringExpressionEvaluator.convertToSt
  * base class for MatchingProblem
  */
 @Slf4j
-@Getter
+@Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public abstract class MatchingProblem implements Problem {
 
@@ -31,9 +32,7 @@ public abstract class MatchingProblem implements Problem {
     final String problemName;
 
     /** all eval functions - this should be implemented later when all the components stable */
-//    final String[] evaluateFunctions;
-    final String evaluateFunctionForSet1;
-    final String evaluateFunctionForSet2;
+    final String[] evaluateFunctions;
 
     /** problem fitness function */
     final String fitnessFunction;
@@ -62,7 +61,6 @@ public abstract class MatchingProblem implements Problem {
      *
      * @return size
      */
-    @Getter
     final int problemSize;
 
     /** number of set in matching problem */
@@ -76,21 +74,20 @@ public abstract class MatchingProblem implements Problem {
                               String[] evaluateFunctions,
                               String fitnessFunction,
                               NewProvider preferencesProvider,
+                              List<PreferenceList> preferenceLists,
                               String[][] requirements,
                               double[][] weights,
                               double[][] properties,
                               int problemSize,
                               int setNum,
                               int[] capacities,
-                              String evaluateFunctionForSet,
-                              String evaluateFunctionForSet2,
                               FitnessEvaluator fitnessEvaluator) {
 
         this.problemName = problemName;
-        this.evaluateFunctionForSet1 = evaluateFunctionForSet;
-        this.evaluateFunctionForSet2 = evaluateFunctionForSet2;
+        this.evaluateFunctions = evaluateFunctions;
         this.fitnessFunction = fitnessFunction;
         this.preferencesProvider = preferencesProvider;
+        this.preferenceLists = preferenceLists;
         this.requirements = requirements;
         this.weights = weights;
         this.properties = properties;
@@ -138,12 +135,8 @@ public abstract class MatchingProblem implements Problem {
      * check exists evaluation function of a set by set num
      * @return true if exists
      */
-//    protected boolean hasEvaluationFunc(int setNum) {
-//        return StringUtils.isEmptyOrNull(this.evaluateFunctions[setNum]);
-//    }
-
-    protected boolean hasEvaluationFunc() {
-        return StringUtils.isEmptyOrNull(this.evaluateFunctionForSet1) && StringUtils.isEmptyOrNull(this.evaluateFunctionForSet2);
+    protected boolean hasEvaluationFunc(int setNum) {
+        return StringUtils.isEmptyOrNull(this.evaluateFunctions[setNum]);
     }
 
     /**

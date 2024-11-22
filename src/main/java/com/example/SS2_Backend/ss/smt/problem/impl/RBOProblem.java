@@ -8,10 +8,7 @@ import com.example.SS2_Backend.ss.smt.problem.MatchingProblem;
 import org.moeaframework.core.Variable;
 import org.moeaframework.core.variable.Permutation;
 
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.Set;
+import java.util.*;
 
 public class RBOProblem extends MatchingProblem {
 
@@ -19,29 +16,28 @@ public class RBOProblem extends MatchingProblem {
                       String[] evaluateFunctions,
                       String fitnessFunction,
                       NewProvider preferencesProvider,
+                      List<PreferenceList> preferenceLists,
                       String[][] individualRequirements,
                       double[][] individualWeights,
                       double[][] individualProperties,
                       int problemSize,
                       int setNum,
                       int[] individualCapacities,
-                      String evaluateFunctionForSet,
-                      String evaluateFunctionForSet2,
                       FitnessEvaluator fitnessEvaluator) {
-        super(problemName,
+        super(
+                problemName,
                 evaluateFunctions,
                 fitnessFunction,
                 preferencesProvider,
+                preferenceLists,
                 individualRequirements,
                 individualWeights,
                 individualProperties,
                 problemSize,
                 setNum,
                 individualCapacities,
-                evaluateFunctionForSet,
-                evaluateFunctionForSet2,
                 fitnessEvaluator
-                );
+        );
     }
 
     /**
@@ -67,7 +63,7 @@ public class RBOProblem extends MatchingProblem {
                 continue;
             }
 
-            PreferenceList newNodePreference = super.getPreferenceLists().get(newNode);
+            PreferenceList newNodePreference = getPreferenceLists().get(newNode);
             for (int i = 0; i < newNodePreference.size(); i++) {
 
                 int preferNode = newNodePreference.getIndexByPosition(i);
@@ -76,14 +72,14 @@ public class RBOProblem extends MatchingProblem {
                     break;
                 }
 
-                if (!matches.isFull(preferNode, super.getCapacities()[preferNode])) {
+                if (!matches.isFull(preferNode, getCapacities()[preferNode])) {
                     matches.addMatchBi(preferNode, newNode);
                     matchedNode.add(preferNode);
                     break;
 
                 } else {
 
-                    int loser = this.getPreferenceLists()
+                    int loser = getPreferenceLists()
                             .get(preferNode)
                             .getLeastNode(newNode, matches.getSetOf(preferNode));
 

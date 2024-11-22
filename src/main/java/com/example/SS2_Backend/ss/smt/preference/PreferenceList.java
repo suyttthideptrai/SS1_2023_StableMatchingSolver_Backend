@@ -47,4 +47,8 @@ public interface PreferenceList {
      */
     int getLastOption();
 
+    double getScoreByIndex(int index);
+
+    boolean isScoreGreater(int index1, int index2);
+
 }

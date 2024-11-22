@@ -25,6 +25,7 @@ import static com.example.SS2_Backend.util.StringExpressionEvaluator.*;
 
 @Slf4j
 @Data
+@NoArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
 public class StableMatchingOTMProblem implements Problem {
 

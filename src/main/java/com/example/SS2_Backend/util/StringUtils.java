@@ -29,4 +29,23 @@ public class StringUtils {
         return String.format(format, "").replace(' ', character);
     }
 
+    /**
+     * find first non-numeric character index in a String
+     * @param str input string
+     * @return index of first non-numeric char
+     */
+    public static int findFirstNonNumericCharIndex(String str) {
+        str = str.trim();
+        int index = 0;
+        while (index < str.length() &&
+                (Character.isDigit(str.charAt(index)) || str.charAt(index) == '.')) {
+            index++;
+        }
+        if (index < str.length()) {
+            return index;
+        } else {
+            return -1;
+        }
+    }
+
 }

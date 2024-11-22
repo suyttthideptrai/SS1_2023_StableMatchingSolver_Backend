@@ -2,39 +2,67 @@ package com.example.SS2_Backend.ss.smt.preference.impl.list;
 
 import com.example.SS2_Backend.ss.smt.preference.PreferenceList;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Set;
 
 import static com.example.SS2_Backend.util.NumberUtils.formatDouble;
 
-
+/**
+ *  Old implementation of Two Sided Stable Matching Problem's Preference List
+ * that contains only two sets.
+ *  In this implementation, set parameters of interface methods is ignored
+ */
 @Getter
-public class OldPreferenceList implements PreferenceList {
+@Slf4j
+public class TwoSetPreferenceList implements PreferenceList {
 
     private final double[] scores;
     private final int[] positions;
     private int current;
     private final int padding;
 
-    public OldPreferenceList(int size, int padding) {
+    public TwoSetPreferenceList(int size, int padding) {
         scores = new double[size];
         positions = new int[size];
         current = 0;
         this.padding = padding;
     }
 
-    public int size() {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int size(int set) {
+        // ignore set param
         return positions.length;
     }
-
-
-    //public boolean isEmpty() {return this.preferenceList.isEmpty();}
 
 
     /**
      * {@inheritDoc}
      */
-    public int getLeastNode(int newNode, Set<Integer> currentNodes) {
+    @Override
+    public int getNumberOfOtherSets() {
+        return 0;
+    }
+
+
+    /**
+     * @param score score of the respective competitor
+     *
+     * this method registers new competitor instance to the preference list
+     */
+    public void add(double score) {
+        this.scores[current] = score;
+        this.positions[current] = current;
+        this.current++;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public int getLeastNode(int set, int newNode, Set<Integer> currentNodes) {
         int leastNode = newNode - this.padding;
         for (int currentNode : currentNodes) {
             if (this.scores[leastNode] > this.scores[currentNode - this.padding]) {
@@ -47,58 +75,44 @@ public class OldPreferenceList implements PreferenceList {
     /**
      * {@inheritDoc}
      */
-    public int getLeastNode(int newNode, int oldNode) {
-        if (this.scores[newNode - this.padding] > this.scores[oldNode - this.padding]) {
-            return oldNode - this.padding;
+    @Override
+    public int getLeastNode(int set, int newNode, int oldNode) {
+        if (isScoreGreater(set, newNode, oldNode)) {
+            return oldNode;
+        } else {
+            return newNode;
         }
-        return newNode + this.padding;
     }
 
-    /**
-     * get last position in this preference list
-     *
-     * @return last option
-     */
-    public int getLastOption() {
-        return positions[this.size() - 1];
-    }
 
     /**
-     * check if score of node is greater than nodeToCompare in this preference list
-     *
-     * @param node as name
-     * @param nodeToCompare as name
-     * @return as title true
+     * {@inheritDoc}
      */
-    public boolean isScoreGreater(int node, int nodeToCompare) {
+    public boolean isScoreGreater(int set, int node, int nodeToCompare) {
         return this.scores[node - this.padding] > this.scores[nodeToCompare - this.padding];
     }
 
     /**
      * <i>THIS METHOD ONLY VALUABLE AFTER @method sortByValueDescending IS INVOKED </i>
-     * @param position position (rank best <-- 0, 1, 2, 3, ... --> worst) on the preference list
+     * @param rank position (rank best <-- 0, 1, 2, 3, ... --> worst) on the preference list
      * @return unique identifier of the competitor instance that holds the respective position on the list
      */
-    public int getIndexByPosition(int position) throws ArrayIndexOutOfBoundsException {
+    public int getPositionByRank(int set, int rank) throws ArrayIndexOutOfBoundsException {
         try {
-            return positions[position] + this.padding;
+            return positions[rank] + this.padding;
         } catch (ArrayIndexOutOfBoundsException e) {
-            System.err.println("Position " + position + " not found: " + e.getMessage());
+            log.error("Position {} not found:", rank, e);
             return -1;
         }
     }
 
-
     /**
-     * @param score score of the respective competitor
-     *
-     * registers new competitor instance to the preference list
+     * {@inheritDoc}
      */
-    public void add(double score) {
-        this.scores[current] = score;
-        this.positions[current] = current;
-        this.current++;
+    public int getLastOption(int set) {
+        return this.getPositionByRank(set, this.positions.length - 1);
     }
+
 
     public void sort() {
         sortDescendingByScores();
@@ -178,8 +192,16 @@ public class OldPreferenceList implements PreferenceList {
         return result.toString();
     }
 
-    public double getScoreByIndex(int x) {
-        return scores[x - this.padding];
+    /**
+     * {@inheritDoc}
+     */
+    public double getScore(int position) {
+        try {
+            return scores[position - this.padding];
+        } catch (ArrayIndexOutOfBoundsException e) {
+            log.error("Position {} not found:", position, e);
+            return 0;
+        }
     }
 
 }

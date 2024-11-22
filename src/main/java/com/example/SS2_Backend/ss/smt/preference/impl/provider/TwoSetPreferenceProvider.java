@@ -11,7 +11,9 @@ import lombok.Data;
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -168,7 +170,11 @@ public class TwoSetPreferenceProvider implements PreferenceBuilder {
 
     @Override
     public PreferenceListWrapper toListWrapper() {
-        return null;
+        List<PreferenceList> lists = new ArrayList<>();
+        for (int i = 0; i < matchingData.getSize(); i++) {
+            lists.add(this.getPreferenceListByFunction(i));
+        }
+        return new PreferenceListWrapper(lists);
     }
 
 }

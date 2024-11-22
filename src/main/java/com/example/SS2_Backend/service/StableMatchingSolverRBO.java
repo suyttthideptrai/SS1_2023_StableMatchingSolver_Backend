@@ -1,17 +1,25 @@
 package com.example.SS2_Backend.service;
 
+import com.example.SS2_Backend.constants.MatchingConst;
+import com.example.SS2_Backend.dto.mapper.StableMatchingProblemMapper;
 import com.example.SS2_Backend.dto.request.NewStableMatchingProblemDTO;
 import com.example.SS2_Backend.dto.response.Progress;
 import com.example.SS2_Backend.dto.response.Response;
-import com.example.SS2_Backend.model.stableMatching.*;
-import com.example.SS2_Backend.model.stableMatching.Matches.Matches;
+import com.example.SS2_Backend.model.stableMatching.Matches.MatchesOTO;
 import com.example.SS2_Backend.model.stableMatching.Matches.MatchingSolution;
 import com.example.SS2_Backend.model.stableMatching.Matches.MatchingSolutionInsights;
+import com.example.SS2_Backend.ss.smt.Matches;
+import com.example.SS2_Backend.ss.smt.MatchingProblem;
+import com.example.SS2_Backend.ss.smt.implement.MTMProblem;
+import com.example.SS2_Backend.util.Testing;
 import com.example.SS2_Backend.util.ValidationUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.moeaframework.Executor;
-import org.moeaframework.core.*;
+import org.moeaframework.core.NondominatedPopulation;
+import org.moeaframework.core.Problem;
+import org.moeaframework.core.Solution;
+import org.moeaframework.core.TerminationCondition;
 import org.moeaframework.core.termination.MaxFunctionEvaluations;
 import org.moeaframework.util.TypedProperties;
 import org.springframework.http.HttpStatus;
@@ -20,44 +28,39 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class StableMatchingSolverRBO {
-    private final SimpMessagingTemplate simpMessagingTemplate;
-    private static final Integer RUN_COUNT_PER_ALGORITHM = 10;
+public class StableMatchingSolverRBO implements MatchingSolver{
 
-    public ResponseEntity<Response> solveStableMatching(NewStableMatchingProblemDTO request) {
+    private static final int RUN_COUNT_PER_ALGORITHM = 10; // for insight running, each algorithm will be run for 10 times
+    private final SimpMessagingTemplate simpMessagingTemplate;
+
+    public ResponseEntity<Response> solve(NewStableMatchingProblemDTO request) {
 
         try {
             log.info("Validating StableMatchingProblemDTO Request ...");
             BindingResult bindingResult = ValidationUtils.validate(request);
-            request.isEvaluateFunctionValid(bindingResult);
-            request.is2DArrayValid(bindingResult);
-            request.valid2dArraysDimension(bindingResult);
             if (bindingResult.hasErrors()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(Response.builder()
+                return ResponseEntity
+                        .status(HttpStatus.BAD_REQUEST)
+                        .body(Response
+                                .builder()
                                 .data(ValidationUtils.getAllErrorDetails(bindingResult))
                                 .build());
             }
+            log.info("Building preference list...");
 
-            log.info("[Service] Stable Matching: Load problem...");
-            log.info("[Service] Stable Matching: Building preference list...");
-
-            StableMatchingRBOProblem problem = new StableMatchingRBOProblem();
-
-            problem.setProblemName(request.getProblemName());
-            problem.setEvaluateFunctionForSet1(request.getEvaluateFunction()[0]);
-            problem.setEvaluateFunctionForSet2(request.getEvaluateFunction()[1]);
-            problem.setFitnessFunction(request.getFitnessFunction());
-            problem.setPopulation(request);
-
-            log.info("[Service] Stable Matching: Problem: " + problem.getProblemName() +
-                    " loaded successfully!");
-
+            MatchingProblem problem = StableMatchingProblemMapper.toMTM(request);
+            log.info("Start solving: {}, problem name: {}, problem size: {}",
+                    problem.getMatchingTypeName(),
+                    problem.getName(),
+                    problem.getMatchingData().getSize());
             long startTime = System.currentTimeMillis();
 
             NondominatedPopulation results = solveProblem(problem,
@@ -67,18 +70,21 @@ public class StableMatchingSolverRBO {
                     request.getMaxTime(),
                     request.getDistributedCores());
 
-
             assert results != null;
+//            Testing tester = new Testing((Matches) results.get(0).getAttribute("matches"),
+//                    problem.getMatchingData(), problem.getMatchingData().getCapacities());
+//            System.out.println("[Testing] Solution has duplicate: " + tester.hasDuplicate());
             long endTime = System.currentTimeMillis();
 
             double runtime = ((double) (endTime - startTime) / 1000);
             runtime = (runtime * 1000.0);
-            log.info("[Service] Runtime: " + runtime + " Millisecond(s).");
-
+            log.info("Runtime: {} Millisecond(s).", runtime);
+            //problem.printIndividuals();
+            //System.out.println(problem.printPreferenceLists());
             String algorithm = request.getAlgorithm();
 
             MatchingSolution matchingSolution = formatSolution(algorithm, results, runtime);
-            matchingSolution.setSetSatisfactions(problem.getAllSatisfactions((Matches) results
+            matchingSolution.setSetSatisfactions(problem.getMatchesSatisfactions((Matches) results
                     .get(0)
                     .getAttribute("matches")));
 
@@ -123,7 +129,7 @@ public class StableMatchingSolverRBO {
     }
 
 
-    private NondominatedPopulation solveProblem(StableMatchingRBOProblem problem,
+    private NondominatedPopulation solveProblem(Problem problem,
                                                 String algorithm,
                                                 int populationSize,
                                                 int generation,
@@ -161,7 +167,7 @@ public class StableMatchingSolverRBO {
                         .distributeOn(numberOfCores)
                         .run();
             }
-            log.info("[Service] Stable Matching: Problem solved successfully!");
+            //log.info("[Service] Stable Matching: Problem solved successfully!");
             return result;
         } catch (Exception e) {
             log.error("[Service] Stable Matching: Error solving the problem {}", e.getMessage(), e);
@@ -169,30 +175,27 @@ public class StableMatchingSolverRBO {
         }
     }
 
-    public ResponseEntity<Response> getProblemResultInsights(NewStableMatchingProblemDTO request,
-                                                             String sessionCode) {
-//		String[] algorithms = {"NSGAII", "NSGAIII", "eMOEA", "PESA2", "VEGA", "MOEAD"};
-        String[] algorithms = {"NSGAII", "NSGAIII", "eMOEA", "PESA2", "VEGA"};
-
+    public ResponseEntity<Response> getInsights(NewStableMatchingProblemDTO request,
+                                                String sessionCode) {
+        String[] algorithms = MatchingConst.ALLOWED_INSIGHT_ALGORITHMS;
         simpMessagingTemplate.convertAndSendToUser(sessionCode,
                 "/progress",
                 createProgressMessage("Initializing the problem..."));
-        StableMatchingRBOProblem problem = new StableMatchingRBOProblem();
-        problem.setEvaluateFunctionForSet1(request.getEvaluateFunction()[0]);
-        problem.setEvaluateFunctionForSet2(request.getEvaluateFunction()[1]);
-        problem.setPopulation(request);
-        problem.setFitnessFunction(request.getFitnessFunction());
+        MTMProblem problem = StableMatchingProblemMapper.toMTM(request);
+
+        log.info("Start benchmarking {} session code {}", problem.getName(), sessionCode);
 
         MatchingSolutionInsights matchingSolutionInsights = initMatchingSolutionInsights(algorithms);
 
         int runCount = 1;
         int maxRunCount = algorithms.length * RUN_COUNT_PER_ALGORITHM;
+        // solve the problem with different algorithms and then evaluate the performance of the algorithms
+//        log.info("Start benchmarking the algorithms...");
         simpMessagingTemplate.convertAndSendToUser(sessionCode,
                 "/progress",
                 createProgressMessage("Start benchmarking the algorithms..."));
 
         for (String algorithm : algorithms) {
-//            log.info("Running algorithm: " + algorithm + "...");
             for (int i = 0; i < RUN_COUNT_PER_ALGORITHM; i++) {
                 System.out.println("Iteration: " + i);
                 long start = System.currentTimeMillis();
@@ -205,7 +208,7 @@ public class StableMatchingSolverRBO {
                         request.getDistributedCores());
 
                 long end = System.currentTimeMillis();
-
+                assert results != null;
                 double runtime = (double) (end - start) / 1000;
                 double fitnessValue = getFitnessValue(results);
 
@@ -224,7 +227,7 @@ public class StableMatchingSolverRBO {
             }
 
         }
-//        log.info("Benchmarking finished!");
+        log.info("Benchmark finished! {} session code {}", problem.getName(), sessionCode);
         simpMessagingTemplate.convertAndSendToUser(sessionCode,
                 "/progress",
                 createProgressMessage("Benchmarking finished!"));
@@ -281,6 +284,20 @@ public class StableMatchingSolverRBO {
     private double getFitnessValue(NondominatedPopulation result) {
         Solution solution = result.get(0);
         return solution.getObjective(0);
+    }
+
+
+    private MatchingSolution formatSolutionOTO(String algorithm,
+                                               NondominatedPopulation result,
+                                               double Runtime) {
+        Solution solution = result.get(0);
+        MatchingSolution matchingSolution = new MatchingSolution();
+        double fitnessValue = solution.getObjective(0);
+        matchingSolution.setMatches(((MatchesOTO) solution.getAttribute("matches")).toMatches());
+        matchingSolution.setFitnessValue(-fitnessValue);
+        matchingSolution.setAlgorithm(algorithm);
+        matchingSolution.setRuntime(Runtime);
+        return matchingSolution;
     }
 
 }

@@ -22,13 +22,18 @@ import java.util.concurrent.CompletableFuture;
 @RequestMapping("/api")
 @CrossOrigin(origins = "*", maxAge = 3600)
 public class HomeController {
+
     private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
+
     @Autowired
     private GameTheorySolver gameTheorySolver;
+
     @Autowired
     private StableMatchingSolver stableMatchingSolver;
+
     @Autowired
     private StableMatchingSolverRBO stableMatchingSolverRBO;
+
     @Autowired
     private OTMStableMatchingSolver stableMatchingOTMProblemDTO;
 
@@ -40,17 +45,16 @@ public class HomeController {
     @Async("taskExecutor")
     @PostMapping("/stable-matching-solver")
     public CompletableFuture<ResponseEntity<Response>> solveStableMatching(@RequestBody StableMatchingProblemDTO object) {
-        return CompletableFuture.completedFuture(stableMatchingSolver.solve(object));
+        return CompletableFuture.completedFuture(stableMatchingSolver.solveStableMatching(object));
     }
 
     /*
-    * Đây là phần chạy RBO (Request Body Optimization) để giải Stable Matching Problem
-    * */
+     * Đây là phần chạy RBO (Request Body Optimization) để giải Stable Matching Problem
+     * */
     @Async("taskExecutor")
     @PostMapping("/stable-matching-rbo-solver")
-    public CompletableFuture<ResponseEntity<Response>> solveStableMatching(
-            @RequestBody NewStableMatchingProblemDTO object) {
-        return CompletableFuture.completedFuture(stableMatchingSolverRBO.solveStableMatching(object));
+    public CompletableFuture<ResponseEntity<Response>> solveStableMatching(@RequestBody NewStableMatchingProblemDTO object) {
+        return CompletableFuture.completedFuture(stableMatchingSolverRBO.solve(object));
     }
 
 //    @Async("taskExecutor")
@@ -62,7 +66,8 @@ public class HomeController {
     @Async("taskExecutor")
     @PostMapping("/stable-matching-otm-solver")
     public CompletableFuture<ResponseEntity<Response>> solveStableMatchingOTM(@RequestBody StableMatchingOTMProblemDTO object) {
-        return CompletableFuture.completedFuture(stableMatchingOTMProblemDTO.solveStableMatching(object));
+        return CompletableFuture.completedFuture(stableMatchingOTMProblemDTO.solveStableMatching(
+                object));
     }
 
     @Async("taskExecutor")
@@ -84,8 +89,7 @@ public class HomeController {
     @PostMapping("/matching-problem-result-insights/{sessionCode}")
     public CompletableFuture<ResponseEntity<Response>> getMatchingResultInsights(@RequestBody StableMatchingProblemDTO object,
                                                                                  @PathVariable String sessionCode) {
-        return CompletableFuture.completedFuture(stableMatchingSolver.getInsights(
-                object,
+        return CompletableFuture.completedFuture(stableMatchingSolver.getProblemResultInsights(object,
                 sessionCode));
     }
 
@@ -93,7 +97,7 @@ public class HomeController {
     @PostMapping("/rbo-matching-problem-result-insights/{sessionCode}")
     public CompletableFuture<ResponseEntity<Response>> getMatchingResultInsights(@RequestBody NewStableMatchingProblemDTO object,
                                                                                  @PathVariable String sessionCode) {
-        return CompletableFuture.completedFuture(stableMatchingSolverRBO.getProblemResultInsights(
+        return CompletableFuture.completedFuture(stableMatchingSolverRBO.getInsights(
                 object,
                 sessionCode));
     }
@@ -102,7 +106,7 @@ public class HomeController {
     @Async("taskExecutor")
     @PostMapping("/otm-matching-problem-result-insights/{sessionCode}")
     public CompletableFuture<ResponseEntity<Response>> getOTMMatchingResultInsights(@RequestBody StableMatchingOTMProblemDTO object,
-                                                                                 @PathVariable String sessionCode) {
+                                                                                    @PathVariable String sessionCode) {
         return CompletableFuture.completedFuture(stableMatchingOTMProblemDTO.getProblemResultInsights(
                 object,
                 sessionCode));

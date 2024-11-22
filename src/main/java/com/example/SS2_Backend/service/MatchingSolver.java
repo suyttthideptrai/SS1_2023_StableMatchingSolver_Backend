@@ -1,5 +1,6 @@
 package com.example.SS2_Backend.service;
 
+import com.example.SS2_Backend.dto.request.NewStableMatchingProblemDTO;
 import com.example.SS2_Backend.dto.request.StableMatchingProblemDTO;
 import com.example.SS2_Backend.dto.response.Response;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +19,7 @@ public interface MatchingSolver {
      * @param problem StableMatchingProblemDTO
      * @return ResponseEntity<Response>
      */
-    ResponseEntity<Response>  solve(StableMatchingProblemDTO problem);
+    ResponseEntity<Response>  solve(NewStableMatchingProblemDTO problem);
 
     /**
      * getInsights
@@ -27,5 +28,5 @@ public interface MatchingSolver {
      * @param sessionCode String
      * @return ResponseEntity<Response>
      */
-    ResponseEntity<Response>  getInsights(StableMatchingProblemDTO problem, String sessionCode);
+    ResponseEntity<Response>  getInsights(NewStableMatchingProblemDTO problem, String sessionCode);
 }

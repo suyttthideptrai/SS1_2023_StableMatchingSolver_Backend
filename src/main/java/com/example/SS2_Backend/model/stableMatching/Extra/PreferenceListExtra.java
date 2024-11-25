@@ -2,7 +2,10 @@ package com.example.SS2_Backend.model.stableMatching.Extra;
 
 import lombok.AccessLevel;
 import lombok.Data;
+import lombok.Getter;
 import lombok.experimental.FieldDefaults;
+
+import java.util.Map;
 
 /**
  * This class manages the preferences for both providers and consumers in a one-to-many or many-to-one matching problem.
@@ -163,6 +166,19 @@ public class PreferenceListExtra {
             System.err.println("Rank " + rank + " not found: " + e.getMessage());
             return -1;
         }
+    }
+
+    public int[] getPreferenceForSpecificSet(int currentSet,int setNumber, Map<Integer, Integer> setSizes) {
+        int startIndex = 0;
+        for (int i = 1; i < setNumber; i++) {
+            if (setSizes.containsKey(i) && i !=currentSet) {
+                startIndex += setSizes.get(i);
+            }
+        }
+        int setLength = setSizes.getOrDefault(setNumber, 0);
+        int[] result = new int[setLength];
+        System.arraycopy(positions, startIndex, result, 0, setLength);
+        return result;
     }
 
     // String representation of the preference list

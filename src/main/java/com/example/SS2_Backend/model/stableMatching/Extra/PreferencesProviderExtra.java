@@ -14,6 +14,7 @@ public class PreferencesProviderExtra {
     private IndividualListExtra individuals;
     private int numberOfIndividuals;
     private PreferenceListExtra preferenceList;
+    @Getter
     private final Map<Integer, Integer> setSizes;
 
     @Getter

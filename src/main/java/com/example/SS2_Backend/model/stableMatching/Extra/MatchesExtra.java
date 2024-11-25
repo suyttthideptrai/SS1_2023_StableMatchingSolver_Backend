@@ -84,6 +84,22 @@ public class MatchesExtra implements Serializable {
         return allMatches;
     }
 
+    public void addMatchForGroup(List<Integer> nodes) {
+        for (int i = 0; i < nodes.size(); i++) {
+            int currentNode = nodes.get(i);
+            for (int j = 0; j < nodes.size(); j++) {
+                if (i != j) { // Prevent matching a node with itself
+                    addMatch(currentNode, nodes.get(j));
+                }
+            }
+        }
+    }      public Collection<Integer> getMatchesAndTarget(int target) {
+        Collection<Integer> nodesToRemove = new HashSet<>();
+        nodesToRemove.add(target);
+        nodesToRemove.addAll(getSet(target));
+        return nodesToRemove;
+    }
+
     public void disMatch(int target, Collection<Integer> nodeToRemove) {
         matches
                 .get(target)

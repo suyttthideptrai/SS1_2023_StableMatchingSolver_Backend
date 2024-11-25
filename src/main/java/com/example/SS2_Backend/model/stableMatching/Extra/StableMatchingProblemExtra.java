@@ -14,6 +14,7 @@ import org.moeaframework.core.variable.Permutation;
 import java.util.*;
 import java.util.function.DoubleUnaryOperator;
 import java.util.stream.DoubleStream;
+import java.util.stream.IntStream;
 
 import static com.example.SS2_Backend.util.StringExpressionEvaluator.*;
 
@@ -252,7 +253,7 @@ public class StableMatchingProblemExtra implements Problem {
             //Get pref List of LeftNode
             PreferenceListExtra nodePreference = preferenceLists.get(newNode);
 //			int padding = individuals.getPaddingOf(Node);
-            //Loop through LeftNode's preference list to find a Match
+            //Loop through MiddleNode's preference list to find a Match
             for (int i = 0; i < nodePreference.size(); i++) {
                 //Next Match (RightNode) is found on the list
                 int preferNode = nodePreference.getIndexByPosition(i);
@@ -305,6 +306,121 @@ public class StableMatchingProblemExtra implements Problem {
         }
         return matches;
     }
+
+
+    public MatchesExtra matchingTriplet(Variable var) {
+        MatchesExtra matches = new MatchesExtra(individuals.getNumberOfIndividual());
+
+        Set<Integer> matchedNodes = new HashSet<>();
+
+        Queue<Integer> unmatchedNodes = initializeUnmatchedQueue(var);
+
+        while (!unmatchedNodes.isEmpty()) {
+            int newNode = unmatchedNodes.poll();
+
+            if (matchedNodes.contains(newNode)) continue;
+
+            int currentSet = individuals.getSetOf(newNode);
+            int[] otherSets = getOtherSets(currentSet); // danh sách những set khác sẽ ghép với
+
+            PreferenceListExtra nodePreferences = preferenceLists.get(newNode);
+            // danh sách ưu tiên của 1 cá thể với các set, ví dụ (1):       4 5 6     7 8 9
+
+            List<Integer> matchedGroup = new ArrayList<>();   // chứa những cá thể ghép với nhau trong lượt ghép
+            matchedGroup.add(newNode);
+
+            for (int targetSet : otherSets) {    // ghép với từng set khác
+                matchedGroup.addAll(matchWithTargetSet(newNode, targetSet, nodePreferences, matches, unmatchedNodes));
+            }
+
+            matches.addMatchForGroup(matchedGroup);
+            matchedNodes.addAll(matchedGroup);
+        }
+
+        return matches;
+    }
+
+    private Queue<Integer> initializeUnmatchedQueue(Variable var) {
+        Queue<Integer> queue = new LinkedList<>();
+
+        int[] decodeVar = ((Permutation) var).toArray();
+
+        for (int val : decodeVar) queue.add(val);
+
+        return queue;
+    }
+
+    private int[] getOtherSets(int currentSet) {
+        int numberOfSets = getNumberOfSets();
+
+        return IntStream.rangeClosed(1, numberOfSets)
+                .filter(set -> set != currentSet)
+                .toArray();
+    }
+
+    private List<Integer> matchWithTargetSet(int newNode, int targetSet, PreferenceListExtra nodePreferences,
+                                             MatchesExtra matches, Queue<Integer> unmatchedNodes) {
+        List<Integer> result = new ArrayList<>();
+
+        int[] targetPreferences = nodePreferences.getPreferenceForSpecificSet(
+                individuals.getSetOf(newNode), targetSet, preferencesProviderExtra.getSetSizes()); // set 1 với set 2
+
+        for (int preferNode : targetPreferences) {     // ghép với 1 cá thể trong preferList
+            Collection<Integer> gsResult = processGaleShapley(newNode, preferNode, matches, unmatchedNodes);
+
+            if (gsResult != null && !gsResult.isEmpty()) {
+                result.add(preferNode);   // ghép thành công với preferNode thì dừng vòng lặp
+                break;
+            }
+        }
+
+        return result;
+    }
+
+    private Collection<Integer> processGaleShapley(int newNode, int preferNode, MatchesExtra matches, Queue<Integer> unmatchedNodes) {
+        PreferenceListExtra preferNodePrefs = preferenceLists.get(preferNode);
+
+        int[] preferList = preferNodePrefs.getPreferenceForSpecificSet(
+                individuals.getSetOf(preferNode), individuals.getSetOf(newNode), preferencesProviderExtra.getSetSizes());
+        // 2 đối với 1
+
+        // nếu cá thể được chọn chưa được ghép trước đó,
+        if (!matches.isFull(preferNode, individuals.getCapacityOf(preferNode))) {
+            return List.of(newNode);
+        }
+
+        Integer[] individualMatches = matches.getIndividualMatches(preferNode);
+        // các cá thể mà preferNode đã ghép với trước đó
+        for (int currentNode : individualMatches) {    // ví dụ 1 ghép với 4, 4 đã có [2,8] ghép với --> 1 so với 2
+            if (individuals.getSetOf(currentNode) == individuals.getSetOf(newNode)) { // so sánh 2 cá thể cùng set
+                if (isPreferredOver(newNode, currentNode, preferNode)) {
+                    Collection<Integer> allMatched = matches.getMatchesAndTarget(preferNode);
+
+                    for (int matched : allMatched) {
+                        matches.disMatch(matched, allMatched);    // hủy ghép cặp cũ nếu chọn cá thể mới
+                        if(matched != preferNode) unmatchedNodes.add(matched);
+                    }
+
+                    return allMatched;
+                }
+            }
+        }
+
+
+        int leastPreferred = getLeastScoreNode(preferNode, newNode, matches.getIndividualMatches(preferNode));
+
+        if (leastPreferred == newNode) {
+            if (getLastChoiceOf(newNode) == preferNode) {
+                matches.addLeftOver(leastPreferred);
+                return null;
+            }
+        }
+        return null ;
+    }
+
+
+
+
 
     // Stable Matching Algorithm Component: isPreferredOver
     private boolean isPreferredOver(int newNode, int currentNode, int SelectorNode) {
@@ -540,7 +656,7 @@ public class StableMatchingProblemExtra implements Problem {
                 this.individuals.getNumberOfIndividual() + "\nNumber Of Properties: " +
                 individuals.getNumberOfProperties() + "\nFitness Function: " + fnStatus +
                 "\nEvaluate Function For Set 1: " + this.evaluateFunctionForSetN +
-               "\n" +
+                "\n" +
                 individuals;
     }
 

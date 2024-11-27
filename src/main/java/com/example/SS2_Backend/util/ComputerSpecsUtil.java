@@ -1,6 +1,7 @@
 package com.example.SS2_Backend.util;
 
 import com.example.SS2_Backend.dto.response.ComputerSpecs;
+import lombok.extern.slf4j.Slf4j;
 import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;
 import oshi.hardware.GlobalMemory;
@@ -8,6 +9,7 @@ import oshi.hardware.HardwareAbstractionLayer;
 import oshi.software.os.OperatingSystem;
 import oshi.util.FormatUtil;
 
+@Slf4j
 public class ComputerSpecsUtil {
     public static ComputerSpecs getComputerSpecs() {
         ComputerSpecs computerSpecs;
@@ -45,7 +47,7 @@ public class ComputerSpecsUtil {
             return computerSpecs;
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Error while getting computer specs", e);
             computerSpecs = ComputerSpecs.builder()
                     .osFamily("Unknown")
                     .osManufacturer("Unknown")

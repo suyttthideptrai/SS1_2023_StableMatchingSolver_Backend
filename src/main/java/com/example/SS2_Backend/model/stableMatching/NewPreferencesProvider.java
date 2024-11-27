@@ -1,6 +1,7 @@
 package com.example.SS2_Backend.model.stableMatching;
 
 import com.example.SS2_Backend.model.stableMatching.Requirement.Requirement;
+import com.example.SS2_Backend.model.stableMatching.Requirement.RequirementDecoder;
 import lombok.Getter;
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
@@ -147,7 +148,7 @@ public class NewPreferencesProvider {
                 case "R":
                     for (Integer value : values) {
                         double val = PropertyRequirement.setRequirement(
-                                MatchingHelperFunctions.decodeInputRequirement(individualRequirements[idx1][value - 1])
+                                RequirementDecoder.decodeInputRequirement(individualRequirements[idx1][value - 1])
                         ).getValueForFunction();
                         variablesValues.put(key + value, val);
                     }
@@ -202,7 +203,7 @@ public class NewPreferencesProvider {
                 for (int j = 0; j < numberOfProperties; j++) {
                     double PropertyValue = individualProperties[i][j];
                     Requirement requirement = PropertyRequirement.setRequirement(
-                            MatchingHelperFunctions.decodeInputRequirement(individualRequirements[index][j])
+                            RequirementDecoder.decodeInputRequirement(individualRequirements[index][j])
                     );
                     double PropertyWeight = individualWeights[i][j];
                     totalScore += getDefaultScaling(requirement, PropertyValue) * PropertyWeight;
@@ -215,9 +216,8 @@ public class NewPreferencesProvider {
                 double totalScore = 0;
                 for (int j = 0; j < numberOfProperties; j++) {
                     double PropertyValue = individualProperties[i][j];
-                    // TODO
                     Requirement requirement = PropertyRequirement.setRequirement(
-                            MatchingHelperFunctions.decodeInputRequirement(individualRequirements[index][j])
+                            RequirementDecoder.decodeInputRequirement(individualRequirements[index][j])
                     );
                     double PropertyWeight = individualWeights[i][j];
                     totalScore += getDefaultScaling(requirement, PropertyValue) * PropertyWeight;

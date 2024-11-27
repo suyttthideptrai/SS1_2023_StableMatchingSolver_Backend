@@ -12,13 +12,11 @@ import lombok.NoArgsConstructor;
 @Builder
 public class MatchingSolution {
 
-    private Matches matches;
+    private Object matches;
     private double fitnessValue;
     private double runtime;
     private ComputerSpecs computerSpecs;
     private String algorithm;
-    //private List<OldPreferenceListImpl> Preferences;
-    //private List<Individual> individuals;
     private double[] setSatisfactions;
 
 }

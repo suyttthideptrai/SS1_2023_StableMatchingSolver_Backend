@@ -2,7 +2,7 @@ package com.example.SS2_Backend.ss.smt.evaluator.impl;
 
 import com.example.SS2_Backend.ss.smt.MatchingData;
 import com.example.SS2_Backend.ss.smt.evaluator.FitnessEvaluator;
-import com.example.SS2_Backend.util.EvaluationUtils;
+import com.example.SS2_Backend.util.EvaluatorUtils;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import net.objecthunter.exp4j.Expression;
@@ -42,7 +42,7 @@ public class TwoSetFitnessEvaluator implements FitnessEvaluator {
                         throw new RuntimeException("Missing '{' after Sigma function");
                     } else {
                         int expressionStartIndex = c + 6;
-                        int expressionLength = EvaluationUtils
+                        int expressionLength = EvaluatorUtils
                                 .getSigmaFunctionExpressionLength(fitnessFunction, expressionStartIndex);
                         String expression = fitnessFunction.substring(expressionStartIndex,
                                 expressionStartIndex + expressionLength);

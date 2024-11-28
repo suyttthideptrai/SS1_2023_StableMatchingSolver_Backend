@@ -176,7 +176,7 @@ public class StableMatchingSolverRBO implements MatchingSolver{
 
     public ResponseEntity<Response> getInsights(NewStableMatchingProblemDTO request,
                                                 String sessionCode) {
-        String[] algorithms = MatchingConst.ALLOWED_INSIGHT_ALGORITHMS;
+        String[] algorithms = MatchingConst.INSIGHT_ALGORITHMS;
         simpMessagingTemplate.convertAndSendToUser(sessionCode,
                 "/progress",
                 createProgressMessage("Initializing the problem..."));

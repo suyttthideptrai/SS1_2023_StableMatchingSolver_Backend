@@ -30,9 +30,27 @@ public class StableMatchingProblemMapper {
     }
 
 
-    public static OTMProblem toOTM(NewStableMatchingProblemDTO dto) {
-        //TODO: implement OTM map logic
-        return null;
+    public static OTMProblem toOTM(NewStableMatchingProblemDTO request) {
+        Requirement[][] requirements = RequirementDecoder.decode(request.getIndividualRequirements());
+        MatchingData data = new MatchingData(request.getNumberOfIndividuals(),
+                request.getNumberOfProperty(),
+                request.getIndividualSetIndices(),
+                request.getIndividualCapacities(),
+                request.getIndividualProperties(),
+                request.getIndividualWeights(),
+                requirements);
+        data.setExcludedPairs(request.getExcludedPairs());
+        PreferenceBuilder builder = new TwoSetPreferenceProvider(data,
+                request.getEvaluateFunctions());
+        PreferenceListWrapper preferenceLists = builder.toListWrapper();
+        FitnessEvaluator fitnessEvaluator = new TwoSetFitnessEvaluator(data);
+        return new OTMProblem(request.getProblemName(),
+                request.getNumberOfIndividuals(),
+                request.getNumberOfSets(),
+                data,
+                preferenceLists,
+                request.getFitnessFunction(),
+                fitnessEvaluator);
     }
 
     public static MTMProblem toMTM(NewStableMatchingProblemDTO request) {

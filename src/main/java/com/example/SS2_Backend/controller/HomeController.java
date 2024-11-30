@@ -65,9 +65,8 @@ public class HomeController {
 
     @Async("taskExecutor")
     @PostMapping("/stable-matching-otm-solver")
-    public CompletableFuture<ResponseEntity<Response>> solveStableMatchingOTM(@RequestBody StableMatchingOTMProblemDTO object) {
-        return CompletableFuture.completedFuture(stableMatchingOTMProblemDTO.solveStableMatching(
-                object));
+    public CompletableFuture<ResponseEntity<Response>> solveStableMatchingOTM(@RequestBody NewStableMatchingProblemDTO object) {
+        return CompletableFuture.completedFuture(stableMatchingOTMProblemDTO.solve(object));
     }
 
     @Async("taskExecutor")
@@ -105,9 +104,9 @@ public class HomeController {
 
     @Async("taskExecutor")
     @PostMapping("/otm-matching-problem-result-insights/{sessionCode}")
-    public CompletableFuture<ResponseEntity<Response>> getOTMMatchingResultInsights(@RequestBody StableMatchingOTMProblemDTO object,
+    public CompletableFuture<ResponseEntity<Response>> getOTMMatchingResultInsights(@RequestBody NewStableMatchingProblemDTO object,
                                                                                     @PathVariable String sessionCode) {
-        return CompletableFuture.completedFuture(stableMatchingOTMProblemDTO.getProblemResultInsights(
+        return CompletableFuture.completedFuture(stableMatchingOTMProblemDTO.getInsights(
                 object,
                 sessionCode));
     }

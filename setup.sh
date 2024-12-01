@@ -1,25 +1,52 @@
-#prerequisite
-sudo apt upgrade
-sudo apt update
-sudo apt -y install maven
-sudo apt -y install git
+#require sudo privilege
+if ![ $? -eq 0 ]; then
+  echo "Please run with sudo privilege"
+  exit 1
+fi
 
-TEMP_DIR="$HOME/tmpProject/"
+#Get user home dir
+USER_HOME_DIR=$(getent passwd $USER | cut -d: -f6)
+TEMP_DIR="$USER_HOME_DIR/.tmpProject00001/"
 
 #create tmp directory for lib installation
-sudo mkdir TEMP_DIR
-cd TEMP_DIR || echo "Create temp directory failed. Setup exiting ..." && exit
-sudo git clone https://github.com/suyttthideptrai/MOEAFramework_tweak.git .
+echo "Downloading source to a temp directory: $TEMP_DIR ..."
+rm -rf "$TEMP_DIR"
+mkdir -p "$TEMP_DIR"
+cd "$TEMP_DIR" || (echo "Create temp directory failed. Setup exiting ..." && exit)
+git clone --depth 1 https://github.com/suyttthideptrai/MOEAFramework_tweak.git .
+ls
 
 #build from source, install mvn dependency locally
-sudo mvn compile
-sudo mvn install:install-file \
-    -Dfile=/dist/MOEAFramework-4.5.jar \
-    -DgroupId=org.moeaframework \
-    -DartifactId=moeaframework \
-    -Dversion=4.5 \
-    -Dpackaging=jar
+echo "Compiling moeaframework-4.5.jar lib from source ..."
+ant build-maven
+cd build
+mvn clean package -Dmaven.test.skip=true
+
+TARGET_DIR="build/target/moeaframework-4.5.jar"
+G_ID="org.moeaframework"
+A_ID="moeaframework"
+VER_NAME="4.5-CUSTOM"
+
+if [ -f "$TEMP_DIR$TARGET_DIR" ]; then
+  echo "Installing dependency to local maven repository"
+  mvn install:install-file \
+      -Dfile="$TEMP_DIR$TARGET_DIR" \
+      -DgroupId="$G_ID" \
+      -DartifactId="$A_ID" \
+      -Dversion="$VER_NAME" \
+      -Dpackaging=jar
+  echo "Lib installation success!"
+else
+  echo "File not found: $TEMP_DIR$TARGET_DIR"
+  echo "list files inside build dir: "
+  VAR1="dist"
+  ls "$TEMP_DIR"
+  ls "$TEMP_DIR$VAR1"
+  echo "Lib installation failed!"
+fi
+
 
 #remove tmp dir
-cd ~ || echo "Delete temp directory failed, you might need to remove $TEMP_DIR manually." && exit
-sudo rm -rf TEMP_DIR
+echo "Removing temp directory ..."
+cd ~ || (echo "Delete temp directory failed, you might need to remove $TEMP_DIR manually." && exit)
+rm -rf "$TEMP_DIR"

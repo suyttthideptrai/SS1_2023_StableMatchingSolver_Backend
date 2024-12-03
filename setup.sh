@@ -1,5 +1,5 @@
 #require sudo privilege
-if ![ $? -eq 0 ]; then
+if ! [ $? -eq 0 ]; then
   echo "Please run with sudo privilege"
   exit 1
 fi
@@ -19,7 +19,7 @@ ls
 #build from source, install mvn dependency locally
 echo "Compiling moeaframework-4.5.jar lib from source ..."
 ant build-maven
-cd build
+cd build || (echo "Build failed. Setup exiting ..." && exit)
 mvn clean package -Dmaven.test.skip=true
 
 TARGET_DIR="build/target/moeaframework-4.5.jar"

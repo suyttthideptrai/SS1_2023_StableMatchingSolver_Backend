@@ -148,7 +148,6 @@ public class OTMProblem implements MatchingProblem {
             }
 
             PreferenceList consumerPreference = getPreferenceLists().get(consumer);
-            boolean matched = false;
 
             // Try to match with each preferred provider
             for (int i = 0; i < consumerPreference.size(UNUSED_VAL); i++) {
@@ -163,7 +162,6 @@ public class OTMProblem implements MatchingProblem {
                 if (!matches.isFull(provider, matchingData.getCapacityOf(provider))) {
                     matches.addMatchBi(provider, consumer);
                     matchedNode.add(consumer);
-                    matched = true;
                     break;
                 } else {
                     // Provider is at capacity - check if current consumer is preferred over existing matches
@@ -183,29 +181,16 @@ public class OTMProblem implements MatchingProblem {
 
                         matches.addMatchBi(provider, consumer);
                         matchedNode.add(consumer);
-                        matched = true;
                         break;
                     } else if (preferenceLists.getLastChoiceOf(UNUSED_VAL, consumer) == provider) {
                         // If this was consumer's last choice and they weren't preferred, add to leftovers
-                        matches.addLeftOver(consumer);
                         break;
                     }
                 }
             }
-
-            if (!matched && !matches.getLeftOvers().contains(consumer)) {
-                matches.addLeftOver(consumer);
-            }
         }
 
         // Add any remaining unmatched providers to leftovers
-        while (!unmatchedProviders.isEmpty()) {
-            int provider = unmatchedProviders.poll();
-            if (matches.getSetOf(provider).isEmpty()) {
-                matches.addLeftOver(provider);
-            }
-        }
-
         return matches;
     }
 

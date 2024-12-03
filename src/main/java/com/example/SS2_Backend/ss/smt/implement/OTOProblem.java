@@ -173,11 +173,6 @@ public class OTOProblem implements MatchingProblem {
                     }
 
                     if (foundMatch) break;
-
-                    // If reached end of preference list without finding match
-                    if (i == prefLen - 1) {
-                        matches.addLeftOver(a);
-                    }
                 }
             }
         }

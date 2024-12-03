@@ -164,7 +164,6 @@ public class MTMProblem implements MatchingProblem {
 
                     if (loser == newNode) {
                         if (preferenceLists.getLastChoiceOf(UNUSED_VAL, newNode) == preferNode) {
-                            matches.addLeftOver(loser);
                             break;
                         }
                         //Or else Loser go back to UnMatched Queue & Waiting for it's Matching Procedure

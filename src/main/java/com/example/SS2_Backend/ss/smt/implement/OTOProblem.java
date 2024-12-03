@@ -131,11 +131,9 @@ public class OTOProblem implements MatchingProblem {
         int[] order = ((Permutation) var).toArray();
         Queue<Integer> singleQueue = Arrays.stream(order).boxed().collect(Collectors.toCollection(LinkedList::new));
         Matches matches = new Matches(getProblemSize());
-        Set<Integer> matched = new HashSet<>();
 
         while (!singleQueue.isEmpty()) {
             int a = singleQueue.poll();
-            if (matched.contains(a)) continue;
 
             PreferenceList aPreference = getPreferenceLists().get(a);
             int prefLen = aPreference.size(0);
@@ -147,12 +145,9 @@ public class OTOProblem implements MatchingProblem {
                 // If already matched to each other, skip
                 if (matches.isMatched(a, b)) break;
 
-                if (!matched.contains(b)) {
+                if (!matches.isMatched(b)) {
                     // Case 1: b is unmatched
-                    matched.add(a);
-                    matched.add(b);
                     matches.addMatchBi(a, b);
-                    foundMatch = true;
                     break;
                 } else {
                     // Case 2: b is already matched
@@ -163,9 +158,7 @@ public class OTOProblem implements MatchingProblem {
                     for (int bPartner : bPartners) {
                         if (bLikeAMore(a, b, bPartner)) {
                             singleQueue.add(bPartner);
-                            matched.remove(bPartner);
                             matches.removeMatchBi(b, bPartner);
-                            matched.add(a);
                             matches.addMatchBi(a, b);
                             foundMatch = true;
                             break;

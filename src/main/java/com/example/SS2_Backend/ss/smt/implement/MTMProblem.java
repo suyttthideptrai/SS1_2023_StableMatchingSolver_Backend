@@ -15,6 +15,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.moeaframework.core.Solution;
 import org.moeaframework.core.Variable;
+import org.moeaframework.core.variable.EncodingUtils;
 import org.moeaframework.core.variable.Permutation;
 
 import java.util.HashSet;
@@ -117,9 +118,7 @@ public class MTMProblem implements MatchingProblem {
     public Matches stableMatching(Variable var) {
 
         Matches matches = new Matches(matchingData.getSize());
-        Set<Integer> matchedNode = new HashSet<>();
-        Permutation castVar = (Permutation) var;
-        int[] decodeVar = castVar.toArray();
+        int[] decodeVar = EncodingUtils.getPermutation(var);
         Queue<Integer> unMatchedNode = new LinkedList<>();
 
         for (int val : decodeVar) {
@@ -127,52 +126,49 @@ public class MTMProblem implements MatchingProblem {
         }
 
         while (!unMatchedNode.isEmpty()) {
-            int newNode;
-            newNode = unMatchedNode.poll();
+            int leftNode = unMatchedNode.poll();
 
-            if (matchedNode.contains(newNode)) {
+            if (matches.isMatched(leftNode)) {
                 continue;
             }
 
             //Get preference list of proposing node
-            PreferenceList nodePreference = preferenceLists.get(newNode);
+            PreferenceList nodePreference = preferenceLists.get(leftNode);
 
             //Loop through LeftNode's preference list to find a Match
             for (int i = 0; i < nodePreference.size(UNUSED_VAL); i++) {
                 //Next Match (RightNode) is found on the list
-                int preferNode = nodePreference.getPositionByRank(UNUSED_VAL, i);
-                if (matches.isMatched(preferNode, newNode)) {
-                    break;
+                int rightNode = nodePreference.getPositionByRank(UNUSED_VAL, i);
+
+                if (matches.isMatched(rightNode, leftNode)) {
+                    continue;
                 }
 
                 //If the RightNode Capacity is not full -> create connection between LeftNode - RightNode
-                if (!matches.isFull(preferNode, this.matchingData.getCapacityOf(preferNode))) {
-                    matches.addMatch(preferNode, newNode);
-                    matches.addMatch(newNode, preferNode);
-                    matchedNode.add(preferNode);
+                if (!matches.isFull(rightNode, this.matchingData.getCapacityOf(rightNode))) {
+                    matches.addMatchBi(leftNode, rightNode);
                     break;
+
                 } else {
                     //If the RightNode's Capacity is Full then Left Node will Compete with Nodes that are inside RightNode
                     //Loser will be the return value
 
                     int loser = preferenceLists.getLeastScoreNode(
                             UNUSED_VAL,
-                            preferNode,
-                            newNode,
-                            matches.getSetOf(preferNode),
-                            matchingData.getCapacityOf(preferNode));
+                            rightNode,
+                            leftNode,
+                            matches.getSetOf(rightNode),
+                            matchingData.getCapacityOf(rightNode));
 
-                    if (loser == newNode) {
-                        if (preferenceLists.getLastChoiceOf(UNUSED_VAL, newNode) == preferNode) {
+                    if (loser == leftNode) {
+                        if (preferenceLists.getLastChoiceOf(UNUSED_VAL, leftNode) == rightNode) {
                             break;
                         }
                         //Or else Loser go back to UnMatched Queue & Waiting for it's Matching Procedure
                     } else {
-                        matches.removeMatchBi(preferNode, loser);
+                        matches.removeMatchBi(rightNode, loser);
                         unMatchedNode.add(loser);
-                        matchedNode.remove(loser);
-                        matches.addMatchBi(preferNode, newNode);
-                        matchedNode.add(newNode);
+                        matches.addMatchBi(rightNode, leftNode);
                         break;
                     }
                 }

@@ -2,7 +2,7 @@ package com.example.SS2_Backend.model.stableMatching;
 
 import lombok.Getter;
 
-import static com.example.SS2_Backend.util.Utils.formatDouble;
+import static com.example.SS2_Backend.util.NumberUtils.formatDouble;
 
 /**
  * {rank,  score}, {r, s}, {r, s}, ...
@@ -156,7 +156,7 @@ public class PreferenceList {
 
 
 //    public static void main(String[] args) {
-//        PreferenceList pref = new PreferenceList(3);
+//        OldPreferenceListImpl pref = new OldPreferenceListImpl(3);
 //        pref.add(12.4);
 //        pref.add(100.4);
 //        pref.add(8.4);

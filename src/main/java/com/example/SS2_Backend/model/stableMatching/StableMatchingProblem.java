@@ -50,11 +50,14 @@ import static com.example.SS2_Backend.util.StringExpressionEvaluator.*;
 @Data
 public class StableMatchingProblem implements Problem {
 
+    private String problemName;
+
     private IndividualList individuals;
 
     private String evaluateFunctionForSet1;
 
     private String evaluateFunctionForSet2;
+
     int [][] excludedPairs;
     /**
      * Preference List of each individual/object inside this whole population
@@ -68,7 +71,6 @@ public class StableMatchingProblem implements Problem {
     private boolean f2Status = false;
     private boolean fnfStatus = false;
 
-    private String problemName;
 
     private static final List<String> VALID_EVALUATE_FUNCTION_KEYWORDS = Arrays.asList("P", "W", "R");
 

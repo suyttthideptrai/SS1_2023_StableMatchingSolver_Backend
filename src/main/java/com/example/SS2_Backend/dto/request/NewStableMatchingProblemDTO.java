@@ -1,76 +1,154 @@
 package com.example.SS2_Backend.dto.request;
+
+import com.example.SS2_Backend.constants.MessageConst.ErrMessage;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import net.objecthunter.exp4j.Expression;
+import net.objecthunter.exp4j.ExpressionBuilder;
+import net.objecthunter.exp4j.ValidationResult;
+import org.springframework.validation.BindingResult;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-
 public class NewStableMatchingProblemDTO {
+
+    @Size(max = 255, message = ErrMessage.PROBLEM_NAME)
     private String problemName;
+
+    @Min(value = 2, message = ErrMessage.MES_001)
     private int numberOfSets;
+
+    @Min(value = 3, message = ErrMessage.MES_002)
     private int numberOfIndividuals;
-    private String[] allPropertyNames;
 
-    /* Các phần Array mới có độ dài bằng nhau được tách ra từ Individual gốc
-     * LƯU Ý: Nếu bạn không phải là Maintainer cũ thì không cần đọc Documentation này. Phần này
-     * sẽ để giải thích cách hoạt động của phần mới và thực hiện những thay đổi khác
-     *
-     * Thay vì sử dụng IndividualList và Deserializer Class như StableMatchingProblemDTO
-     * thì trong NewStableMatchingProblemDTO sẽ thay bằng
-     * Mỗi một Individual bao gồm những phần sẽ được xử lý ở Backend:
-     * - SetIndex
-     * - Capacity
-     *
-     * Những thành phần sau đây được chuyển đổi từ List<Property>, mỗi một Property bao gồm:
-     * - Requirement -> individualRequirements
-     * - Weight -> individualWeights
-     * - Value -> individualProperties
-     *
-     * Ở đây sử dụng 2D Array cho 3 phần này vì:
-     * Trong mỗi một Individual sẽ có ít nhất 1 Property trở lên.
-     *
-     * Ví dụ: individualProperties (Cấu trúc của các 2D Array khác cũng tương tự)
-     * [ (3 số trong một Array nhỏ ([0, 0, 0]) ở đây đại diện cho 3 Property cho mỗi Individual, độ dài bằng nhau cho từng Individual)
-     *  [0, 0, 0], -> Số các Property Value thuộc Individual 1 gốc
-     *  [0, 0, 0], -> Số các Property Value thuộc Individual 2 gốc
-     *  [0, 0, 0] -> Số các Property Value thuộc Individual 3 gốc
-     * ] -> Danh sách này chứa toàn bộ cho cả IndividualList
-     * */
+    @Min(value = 1, message = ErrMessage.MES_003)
+    private int numberOfProperty;
+
+    @Size(min = 1, message = ErrMessage.MES_004)
     private int[] individualSetIndices;
-    private int[] individualCapacities;
-    private List<List<String>> individualRequirements;
-    private List<List<Double>> individualWeights;
-    private List<List<Double>> individualProperties;
 
-    private String[] evaluateFunction;
+    @Size(min = 1, message = ErrMessage.MES_004)
+    private int[] individualCapacities;
+
+    @Size(min = 3, message = ErrMessage.MES_002)
+    private String[][] individualRequirements;
+
+    @Size(min = 3, message = ErrMessage.MES_002)
+    private double[][] individualWeights;
+
+    @Size(min = 3, message = ErrMessage.MES_002)
+    private double[][] individualProperties;
+
+    private String[] evaluateFunctions;
+
+    @NotBlank(message = ErrMessage.NOT_BLANK)
     private String fitnessFunction;
+
+    private int [][] excludedPairs;
+
+    @Max(value = 1000, message = ErrMessage.POPULATION_SIZE)
     private int populationSize;
+
+    @Max(value = 100, message = ErrMessage.GENERATION)
     private int generation;
+
     private int maxTime;
+
+    @NotEmpty(message = ErrMessage.NOT_BLANK)
     private String algorithm;
+
     private String distributedCores;
 
-    public String toString() {
-        return "Matching_Theory_Problem {" + "\n" +
-                " ProblemName = " + problemName + "\n" +
-                ", NumberOfSets = " + numberOfSets + "\n" +
-                ", NumberOfIndividuals = " + numberOfIndividuals + "\n" +
-                ", IndividualSetIndices = " + Arrays.toString(individualSetIndices) + "\n" +
-                ", IndividualCapacities = " + Arrays.toString(individualCapacities) + "\n" +
-                ", AllPropertyName = " + Arrays.toString(allPropertyNames) +
-                ", fitnessFunction = '" + fitnessFunction + "\n" +
-                ", PopulationSize = " + populationSize + "\n" +
-                ", Generation = " +generation + "\n" +
-                ", individualRequirements: " + Arrays.deepToString(individualRequirements.toArray()) + "\n" +
-                ", individualWeights: " + Arrays.deepToString(individualWeights.toArray()) + "\n" +
-                ", individualProperties: " + Arrays.deepToString(individualProperties.toArray()) + "\n" +
-                "}";
+    public void isEvaluateFunctionValid(BindingResult bindingResult) {
+        ArrayList<Boolean> validEvalFunc = new ArrayList<>();
+        for (String evaluateFunction: this.getEvaluateFunctions()) {
+            if (evaluateFunction.isEmpty()) {
+                bindingResult.rejectValue("evaluateFunction", "", "Empty evaluateFunction(s)");
+                return;
+            }
+
+            ExpressionBuilder e = new ExpressionBuilder(evaluateFunction);
+            for (int i = 1; i <= this.getNumberOfProperty(); i++) {
+                e.variable(String.format("P%d", i)).variable(String.format("W%d", i));
+            }
+
+            Expression expressionValidator = e.build();
+            ValidationResult res = expressionValidator.validate();
+            validEvalFunc.add(res.isValid());
+            // Log.debug("[Evaluate Function] " + evaluateFunction + "validation result: " + res.isValid());
+        }
+        if (!validEvalFunc.stream().allMatch(e -> true)) {
+            bindingResult.rejectValue("evaluateFunction", "",
+                    "Invalid evaluation function(s). Rejected.");
+        }
+
     }
+
+//    public void is2DArrayValid(BindingResult bindingResult) {
+//
+//        if (!bindingResult.hasFieldErrors("individualRequirements")
+//                && individualRequirements.size() != numberOfIndividuals) {
+//            bindingResult.rejectValue("individualRequirements", ErrCode.INVALID_LENGTH, ErrMessage.INVALID_ARR_SIZE);
+//        }
+//
+//        if (!bindingResult.hasFieldErrors("individualWeights")
+//                && individualWeights.size() != numberOfIndividuals) {
+//            bindingResult.rejectValue("individualWeights", ErrCode.INVALID_LENGTH, ErrMessage.INVALID_ARR_SIZE);
+//        }
+//
+//        if (!bindingResult.hasFieldErrors("individualProperties")
+//                && individualProperties.size() != numberOfIndividuals) {
+//            bindingResult.rejectValue("individualProperties", ErrCode.INVALID_LENGTH, ErrMessage.INVALID_ARR_SIZE);
+//        }
+//
+//        if (!bindingResult.hasFieldErrors("individualSetIndices")
+//                && individualSetIndices.length != numberOfIndividuals) {
+//            bindingResult.rejectValue("individualSetIndices", ErrCode.INVALID_LENGTH, ErrMessage.INVALID_ARR_SIZE);
+//        }
+//
+//        if (!bindingResult.hasFieldErrors("individualCapacities")
+//                && individualCapacities.length != numberOfIndividuals) {
+//            bindingResult.rejectValue("individualCapacities", ErrCode.INVALID_LENGTH, ErrMessage.INVALID_ARR_SIZE);
+//        }
+//
+//    }
+
+//    public void valid2dArraysDimension(BindingResult bindingResult) {
+//        // không check thêm nếu có lỗi trước đó
+//        if (!bindingResult.hasFieldErrors("individualRequirements")
+//                || !bindingResult.hasFieldErrors("individualWeights")
+//                || !bindingResult.hasFieldErrors("individualProperties")) {
+//            return;
+//        }
+//
+//        boolean isValid = true;
+//
+//        //TODO: tại sao không loop qua list mà phải map về array?
+//        //TODO: loop qua 3 List<List<T>>, bỏ 2 hàm static đi NẾU không cần thiết phải map về array
+//        // REPLY: Em cần phải chuyển nó về 2D Array để xử lý trong bài toán
+//        // (Có thể em sẽ thử đưa lại về dạng List<List<T>> xem nếu em xong phần Test)
+//        for (int i = 0; isValid && i < individualProperties.size(); ++i) {
+//            isValid = (individualProperties.get(i).size() == individualWeights.get(i).size())
+//                    && (individualProperties.get(i).size() == individualRequirements.get(i).size());
+//        }
+//
+//        if (!isValid) {
+//            bindingResult.rejectValue("individualRequirements", "", "");
+//            bindingResult.rejectValue("individualWeights", "", "");
+//            bindingResult.rejectValue("individualProperties", "", "");
+//        }
+//    }
 
     public static String[][] fromListToStringArray(List<List<String>> list) {
         String[][] array = new String[list.size()][];
@@ -87,5 +165,22 @@ public class NewStableMatchingProblemDTO {
             array[i] = list.get(i).stream().mapToDouble(Double::doubleValue).toArray();
         }
         return array;
+    }
+
+    @Override
+    public String toString() {
+        return "StableMatchingProblemDTO{" + "problemName='" + problemName + '\'' +
+                ", numberOfSets=" + numberOfSets + ", numberOfIndividuals=" + numberOfIndividuals +
+                ", numberOfProperty=" + numberOfProperty + ", individualSetIndices=" +
+                Arrays.toString(individualSetIndices) + ", individualCapacities=" +
+                Arrays.toString(individualCapacities) + ", individualRequirements=" +
+                Arrays.toString(individualRequirements) + ", individualWeights=" +
+                Arrays.toString(individualWeights) + ", individualProperties=" +
+                Arrays.toString(individualProperties) + ", evaluateFunctions=" +
+                Arrays.toString(evaluateFunctions) + ", fitnessFunction='" + fitnessFunction +
+                '\'' + ", excludedPairs=" + Arrays.toString(excludedPairs) + ", populationSize=" +
+                populationSize + ", generation=" + generation + ", maxTime=" + maxTime +
+                ", algorithm='" + algorithm + '\'' + ", distributedCores='" + distributedCores +
+                '\'' + '}';
     }
 }

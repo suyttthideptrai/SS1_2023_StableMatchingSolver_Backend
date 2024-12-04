@@ -8,6 +8,41 @@ import net.objecthunter.exp4j.ExpressionBuilder;
 
 import java.util.*;
 
+/**
+ * This class is responsible for generating preference lists for each individual based on
+ * customizable evaluation functions, which account for multiple attributes, weights, and requirements.
+ * preference lists for matching providers and consumers in a one-to-many stable matching scenario.
+ *
+ * <p>It evaluates each individual's preferences using provider and consumer evaluation expressions. These
+ * expressions allow flexibility in calculating preference scores by referencing specific properties,
+ * weights, and requirements of both providers and consumers.
+ *
+ * <p>Attributes:
+ * <ul>
+ *     <li>{@code individuals} - List of individuals with their properties, roles, and requirements.</li>
+ *     <li>{@code totalIndividuals} - Total number of individuals in the system.</li>
+ *     <li>{@code providerCount} - Number of providers in the matching setup.</li>
+ *     <li>{@code propertiesPerIndividual} - Number of properties each individual has.</li>
+ *     <li>{@code providerEvaluateExpression} - Expression for evaluating providers' preferences.</li>
+ *     <li>{@code consumerEvaluateExpression} - Expression for evaluating consumers' preferences.</li>
+ *     <li>{@code providerVariables} - Variables required in the provider's evaluation expression.</li>
+ *     <li>{@code consumerVariables} - Variables required in the consumer's evaluation expression.</li>
+ * </ul>
+ *
+ * <p>Methods:
+ * <ul>
+ *     <li>{@code setProviderEvaluateFunction(String evaluateFunction)} - Sets and parses the provider's evaluation expression.</li>
+ *     <li>{@code setConsumerEvaluateFunction(String evaluateFunction)} - Sets and parses the consumer's evaluation expression.</li>
+ *     <li>{@code convertMapToSet(Map<String, Set<Integer>> varMap)} - Converts a map of variables to a set of variable names.</li>
+ *     <li>{@code filterVariable(String evaluateFunction)} - Filters variables based on an evaluation function's syntax.</li>
+ *     <li>{@code getNextIndexToken(String evaluateFunction, int currentIndex)} - Gets the next token index in an evaluation expression.</li>
+ *     <li>{@code getVariableValues(int indexOfEvaluator, int indexOfEvaluated, boolean isProviderEvaluating)} - Retrieves values of variables for a given evaluator-evaluated pair.</li>
+ *     <li>{@code getPreferenceListByFunction(int indexOfIndividual)} - Generates a preference list for an individual based on the evaluation function.</li>
+ *     <li>{@code getPreferenceListByDefault(int indexOfIndividual)} - Generates a default preference list using attribute scaling for the individual.</li>
+ *     <li>{@code getDefaultScaling(Requirement requirement, double propertyValue)} - Provides scaling for attributes based on their requirement type.</li>
+ * </ul>
+ *
+ */
 @Data
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
 public class PreferenceProvider {
@@ -134,7 +169,7 @@ public class PreferenceProvider {
     }
 
     public PreferenceList getPreferenceListByFunction(int indexOfIndividual) {
-        boolean isProvider = individuals.getRoleOfParticipant(indexOfIndividual) == 0;
+        boolean isProvider = individuals.getRoleOfIndividual(indexOfIndividual) == 0;
         Expression evaluateExpression = isProvider ? providerEvaluateExpression : consumerEvaluateExpression;
 
         int otherSetSize = isProvider ? totalIndividuals - providerCount : providerCount;
@@ -145,7 +180,7 @@ public class PreferenceProvider {
         }
 
         for (int i = 0; i < totalIndividuals; i++) {
-            if (individuals.getRoleOfParticipant(i) != individuals.getRoleOfParticipant(indexOfIndividual)) {
+            if (individuals.getRoleOfIndividual(i) != individuals.getRoleOfIndividual(indexOfIndividual)) {
                 evaluateExpression.setVariables(getVariableValues(indexOfIndividual, i, isProvider));
                 double score = evaluateExpression.evaluate();
                 preferenceList.add(score, i);
@@ -157,12 +192,12 @@ public class PreferenceProvider {
     }
 
     public PreferenceList getPreferenceListByDefault(int indexOfIndividual) {
-        boolean isProvider = individuals.getRoleOfParticipant(indexOfIndividual) == 0;
+        boolean isProvider = individuals.getRoleOfIndividual(indexOfIndividual) == 0;
         int otherSetSize = isProvider ? totalIndividuals - providerCount : providerCount;
         PreferenceList preferenceList = new PreferenceList(otherSetSize, isProvider ? providerCount : 0);
 
         for (int i = 0; i < totalIndividuals; i++) {
-            if (individuals.getRoleOfParticipant(i) != individuals.getRoleOfParticipant(indexOfIndividual)) {
+            if (individuals.getRoleOfIndividual(i) != individuals.getRoleOfIndividual(indexOfIndividual)) {
                 double totalScore = 0;
                 for (int j = 0; j < propertiesPerIndividual; j++) {
                     double propertyValue = individuals.getAttributeValueOf(i, j);

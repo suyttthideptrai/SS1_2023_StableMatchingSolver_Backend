@@ -86,9 +86,9 @@ public class StableMatchingRBOProblem implements Problem {
      */
 
     public void setPopulation(NewStableMatchingProblemDTO request) {
-        this.individualRequirements = NewStableMatchingProblemDTO.fromListToStringArray(request.getIndividualRequirements());
-        this.individualWeights = NewStableMatchingProblemDTO.fromListToDoubleArray(request.getIndividualWeights());
-        this.individualProperties = NewStableMatchingProblemDTO.fromListToDoubleArray(request.getIndividualProperties());
+//        this.individualRequirements = NewStableMatchingProblemDTO.fromListToStringArray(request.getIndividualRequirements());
+//        this.individualWeights = NewStableMatchingProblemDTO.fromListToDoubleArray(request.getIndividualWeights());
+//        this.individualProperties = NewStableMatchingProblemDTO.fromListToDoubleArray(request.getIndividualProperties());
         this.individualSetIndices = request.getIndividualSetIndices();
         this.numberOfIndividuals = request.getNumberOfIndividuals();
         this.individualCapacities = request.getIndividualCapacities();
@@ -355,9 +355,7 @@ public class StableMatchingRBOProblem implements Problem {
     }
 
     private double defaultFitnessEvaluation(double[] Satisfactions) {
-        return Arrays
-                .stream(Satisfactions)
-                .sum();
+        return Arrays.stream(Satisfactions).sum();
     }
 
     /**

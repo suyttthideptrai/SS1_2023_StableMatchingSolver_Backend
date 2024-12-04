@@ -1,14 +1,18 @@
-package com.example.SS2_Backend.model.stableMatching;
+package com.example.SS2_Backend.model.stableMatching.Requirement;
 
-import java.util.Arrays;
-import static com.example.SS2_Backend.util.Utils.isDouble;
-import static com.example.SS2_Backend.util.Utils.isInteger;
+import static com.example.SS2_Backend.util.NumberUtils.isDouble;
+import static com.example.SS2_Backend.util.NumberUtils.isInteger;
+import static com.example.SS2_Backend.util.StringUtils.findFirstNonNumericCharIndex;
 
-public class MatchingHelperFunctions {
+/**
+ * Decoder for requirement
+ */
+public class RequirementDecoder {
+
     public static String[] decodeInputRequirement(String item) {
         item = item.trim();
         String[] result = new String[2];
-        int index = findFirstNonNumericIndex(item);
+        int index = findFirstNonNumericCharIndex(item);
         if (index == -1) {
             if (isInteger(item)) {
                 try {
@@ -51,20 +55,5 @@ public class MatchingHelperFunctions {
         }
         return result;
     }
-
-    private static int findFirstNonNumericIndex(String s) {
-        s = s.trim();
-        int index = 0;
-        while (index < s.length() &&
-                (Character.isDigit(s.charAt(index)) || s.charAt(index) == '.')) {
-            index++;
-        }
-        if (index < s.length()) {
-            return index;
-        } else {
-            return -1;
-        }
-    }
-
 
 }

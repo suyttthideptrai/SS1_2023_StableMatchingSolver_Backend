@@ -82,4 +82,54 @@ public class TripletPreferenceList implements PreferenceList {
     public double getScore(int position) {
         return 0;
     }
+
+    public void sortDescendingByScores() {
+        double[] cloneScores = scores.clone(); // Copy to a new array
+        int size = cloneScores.length;
+
+        for (int i = size / 2 - 1; i >= 0; i--) {
+            heapify(cloneScores, size, i);
+        }
+
+        for (int i = size - 1; i > 0; i--) {
+            double temp = cloneScores[0];
+            int tempPos = positions[0];
+
+            cloneScores[0] = cloneScores[i];
+            positions[0] = positions[i];
+
+            cloneScores[i] = temp;
+            positions[i] = tempPos;
+
+            heapify(cloneScores, i, 0);
+        }
+    }
+
+    // Heapify the array to maintain the sorting order
+    private void heapify(double[] array, int heapSize, int rootIndex) {
+        int largestIndex = rootIndex; // Initialize largest as root
+        int leftChildIndex = 2 * rootIndex + 1; // left = 2*rootIndex + 1
+        int rightChildIndex = 2 * rootIndex + 2; // right = 2*rootIndex + 2
+
+        if (leftChildIndex < heapSize && array[leftChildIndex] > array[largestIndex]) {
+            largestIndex = leftChildIndex;
+        }
+
+        if (rightChildIndex < heapSize && array[rightChildIndex] > array[largestIndex]) {
+            largestIndex = rightChildIndex;
+        }
+
+        if (largestIndex != rootIndex) {
+            double swap = array[rootIndex];
+            int posSwap = positions[rootIndex];
+
+            array[rootIndex] = array[largestIndex];
+            positions[rootIndex] = positions[largestIndex];
+
+            array[largestIndex] = swap;
+            positions[largestIndex] = posSwap;
+
+            heapify(array, heapSize, largestIndex);
+        }
+    }
 }

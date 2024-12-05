@@ -2,6 +2,7 @@ package com.example.SS2_Backend.ss.smt.preference.impl.provider;
 
 import com.example.SS2_Backend.model.stableMatching.Extra.IndividualListExtra;
 import com.example.SS2_Backend.model.stableMatching.Extra.PreferenceListExtra;
+import com.example.SS2_Backend.ss.smt.requirement.Requirement;
 import com.example.SS2_Backend.ss.smt.MatchingData;
 import com.example.SS2_Backend.ss.smt.preference.PreferenceBuilder;
 import com.example.SS2_Backend.ss.smt.preference.PreferenceList;
@@ -191,8 +192,55 @@ public class TripletPreferenceProvider implements PreferenceBuilder {
 
     @Override
     public PreferenceList getPreferenceListByDefault(int index) {
-        return null;
+        int set = individuals.getSetNoOf(index);
+        int numberOfProperties = individuals.getPropertyNum();
+        TripletPreferenceList a = new TripletPreferenceList(0, 0);
+        int size = 0;
+
+        if (setSizes.containsKey(set)) {
+            for (int setNumber : setSizes.keySet()) {
+                if (setNumber != set) {
+                    size += setSizes.get(set);
+                }
+            }
+            if(set == 1) {
+                a = new TripletPreferenceList(size, setSizes.get(1));    // khởi tạo preferlist với size = 2 set còn lại + vào
+            } else {
+                a = new TripletPreferenceList(size, 0);
+            }
+
+            int tempIndex = 0;
+            for (int otherSet : setSizes.keySet()) {
+                if (otherSet != set) {
+                    int setSize = setSizes.get(otherSet);
+                    double[] tempScores = new double[setSize];
+                    int[] tempPositions = new int[setSize];
+
+                    for (int i = 0; i < numberOfIndividuals; i++) {
+                        if (individuals.getSetNoOf(i) == otherSet) {
+                            double totalScore = 0;
+                            for (int j = 0; j < numberOfProperties; j++) {
+                                double propertyValue = individuals.getPropertyValueOf(i, j);
+                                Requirement requirement = individuals.getRequirementOf(index, j);
+                                double propertyWeight = individuals.getPropertyWeightOf(index, j);
+                                totalScore += requirement.getDefaultScaling( propertyValue) * propertyWeight;
+                            }
+                            tempScores[i] = totalScore;
+                            tempPositions[i] = tempIndex;
+                        }
+                    }
+
+                    sortDescendingByScores(tempScores, tempPositions);
+
+                    a.addArray(tempScores, tempPositions);
+                }
+            }
+
+        }
+        a.sortDescendingByScores();
+        return a;
     }
+
 
     @Override
     public PreferenceListWrapper toListWrapper() {

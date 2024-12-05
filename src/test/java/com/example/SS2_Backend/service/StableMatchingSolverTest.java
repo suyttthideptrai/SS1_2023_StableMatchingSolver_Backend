@@ -1,30 +1,48 @@
 package com.example.SS2_Backend.service;
 
+import com.example.SS2_Backend.dto.request.NewStableMatchingProblemDTO;
 import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
 
 public class StableMatchingSolverTest {
-    @Test
-    public void testStableMatchingSolver() {
-        StableMatchingSolverRBO solver = new StableMatchingSolverRBO();
-        // Set up the problem
-        solver.setNumberOfIndividuals(10);
-        solver.setEvaluateFunctionForSet2("P");
-        solver.setFitnessFunction("S");
-        // Run the solver
-        solver.solveStableMatching();
-        // No need to assert anything, just make sure it runs without errors
+    NewStableMatchingProblemDTO newStableMatchingProblemDTO = new NewStableMatchingProblemDTO();
+
+    @BeforeEach
+    public void setUp() {
+        String[][] individualRequirements = {
+                {"0.15", "0.15"},
+                {"0.15", "0.15"},
+                {"0.15", "0.15"},
+                {"0.15", "0.15"},
+                {"0.15", "0.15"}
+        };
+        double[][] individualWeights = {
+                {0.5, 0.5},
+                {0.4, 0.6},
+                {0.3, 0.7},
+                {0.6, 0.4},
+                {0.7, 0.3}
+        };
+        double[][] individualProperties = {
+                {10, 5},
+                {8, 6},
+                {12, 4},
+                {9, 7},
+                {11, 3}
+        };
+        int[] individualSetIndices = {0, 1, 1, 1, 1};
+        newStableMatchingProblemDTO.setNumberOfIndividuals(5);
+        newStableMatchingProblemDTO.setIndividualProperties(individualProperties);
+        newStableMatchingProblemDTO.setIndividualWeights(individualWeights);
+        newStableMatchingProblemDTO.setIndividualRequirements(individualRequirements);
+        newStableMatchingProblemDTO.setIndividualSetIndices(individualSetIndices);
     }
 
     @Test
-    public void testStableMatchingSolverWithCustomFunctions() {
-        StableMatchingSolverRBO solver = new StableMatchingSolverRBO();
-        // Set up the problem
-        solver.setNumberOfIndividuals(10);
-        solver.setEvaluateFunctionForSet1("M");
-        solver.setEvaluateFunctionForSet2("W");
-        solver.setFitnessFunction("SIGMA{S1}");
+    public void testStableMatchingSolver() {
+        // Set up the solver
+        StableMatchingSolverRBO solver = new StableMatchingSolverRBO(null);
         // Run the solver
-        solver.solveStableMatching();
-        // No need to assert anything, just make sure it runs without errors
+        solver.solve(newStableMatchingProblemDTO);
     }
 }

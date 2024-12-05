@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class StableMatchingRBOTest {
 
-    private StableMatchingRBOProblem newStableMatchingRBOProblem;
+    private final StableMatchingRBOProblem newStableMatchingRBOProblem = new StableMatchingRBOProblem();
 
     @BeforeEach
     public void setUp() {
@@ -41,8 +41,10 @@ public class StableMatchingRBOTest {
                 {11, 3}
         };
         int[] individualSetIndices = {0, 1, 1, 1, 1};
-
-        newStableMatchingRBOProblem = new StableMatchingRBOProblem();
+        newStableMatchingRBOProblem.setIndividualProperties(individualProperties);
+        newStableMatchingRBOProblem.setIndividualWeights(individualWeights);
+        newStableMatchingRBOProblem.setIndividualRequirements(individualRequirements);
+        newStableMatchingRBOProblem.setIndividualSetIndices(individualSetIndices);
     }
 
     @Test

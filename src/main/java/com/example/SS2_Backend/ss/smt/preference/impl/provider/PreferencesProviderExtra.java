@@ -1,6 +1,6 @@
 package com.example.SS2_Backend.ss.smt.preference.impl.provider;
 
-import com.example.SS2_Backend.ss.smt.preference.IndividualListExtra;
+import com.example.SS2_Backend.ss.smt.IndividualListExtra;
 import com.example.SS2_Backend.model.stableMatching.Requirement.Requirement;
 import com.example.SS2_Backend.ss.smt.preference.PreferencesProvider;
 import com.example.SS2_Backend.ss.smt.preference.impl.list.PreferenceListExtra;

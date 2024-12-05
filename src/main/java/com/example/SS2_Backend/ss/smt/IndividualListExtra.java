@@ -1,4 +1,4 @@
-package com.example.SS2_Backend.ss.smt.preference;
+package com.example.SS2_Backend.ss.smt;
 
 import com.example.SS2_Backend.model.stableMatching.Extra.Individual;
 import com.example.SS2_Backend.model.stableMatching.Extra.IndividualList;

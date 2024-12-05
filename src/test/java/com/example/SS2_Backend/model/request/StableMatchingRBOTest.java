@@ -1,4 +1,4 @@
-package com.example.SS2_Backend.model;
+package com.example.SS2_Backend.model.request;
 
 import com.example.SS2_Backend.model.stableMatching.StableMatchingRBOProblem;
 import org.junit.jupiter.api.BeforeEach;

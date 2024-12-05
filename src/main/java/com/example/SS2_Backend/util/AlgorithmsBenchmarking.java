@@ -10,6 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.FastDateFormat;
 import org.moeaframework.Executor;
 import org.moeaframework.core.NondominatedPopulation;
 import org.moeaframework.core.Problem;
@@ -58,6 +60,8 @@ public class AlgorithmsBenchmarking {
         double runtime = ((double) (endTime - startTime) / 1000);
         runtime = Math.round(runtime * 100.0) / 100.0;
 
+        log.info(result.iterator().next().toString());
+
 //        // Process and print the results
 //        for (Solution solution : result) {
 //            Matches matches = (Matches) solution.getAttribute("matches");
@@ -88,11 +92,29 @@ public class AlgorithmsBenchmarking {
 //        StableMatchingProblem problem = generator.generate();
 //        String logFileName = "smt_log";
 
-        String problemFilePath = ".data/gt_data.ser";
+        String problemSerializedFilePath = ".data/gt_data.ser";
         String logFileName = "gt_log";
         GameTheoryProblem problem = (GameTheoryProblem) ProblemUtils.readProblemFromFile(
-                problemFilePath);
+                problemSerializedFilePath);
 
+
+        double runtime = run(problem, "OMOPSO");
+
+        log.info("{}", runtime);
+//        AlgorithmsBenchmarking algo = new AlgorithmsBenchmarking();
+//        algo.start(problem, logFileName);
+
+    }
+
+    public void start(Problem problem) {
+        String logFileName = "log";
+        FastDateFormat dateFormat = FastDateFormat.getInstance("MMddHHss");
+        String currentTimestamp = dateFormat.format(System.currentTimeMillis());
+        logFileName = StringUtils.join(new String[]{logFileName, currentTimestamp}, "_");
+        start(problem, logFileName);
+    }
+
+    public void start(Problem problem, String logFileName) {
         String[] algorithms = AppConst.SUPPORTED_ALGOS;
         List<AlgorithmRunResult> runResults = new ArrayList<>();
 
@@ -133,6 +155,7 @@ public class AlgorithmsBenchmarking {
                 .stream()
                 .map(AlgorithmRunResult::toDataPoint)
                 .toArray(String[][]::new);
+
         String logFilePath = SimpleFileUtils.getFilePath(AppConst.LOG_DIR,
                 logFileName,
                 AppConst.TSV_EXT);

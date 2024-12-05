@@ -1,5 +1,6 @@
 package com.example.SS2_Backend.service;
 
+import com.example.SS2_Backend.constants.AppConst;
 import com.example.SS2_Backend.dto.request.GameTheoryProblemDTO;
 import com.example.SS2_Backend.dto.response.Progress;
 import com.example.SS2_Backend.dto.response.Response;
@@ -7,8 +8,12 @@ import com.example.SS2_Backend.model.gameTheory.GameSolution;
 import com.example.SS2_Backend.model.gameTheory.GameSolutionInsights;
 import com.example.SS2_Backend.model.gameTheory.GameTheoryProblem;
 import com.example.SS2_Backend.model.gameTheory.NormalPlayer;
+import com.example.SS2_Backend.util.ProblemUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.SerializationUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.moeaframework.Executor;
 import org.moeaframework.core.NondominatedPopulation;
 import org.moeaframework.core.Solution;
@@ -17,6 +22,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,6 +43,7 @@ public class GameTheorySolver {
 
     public ResponseEntity<Response> solveGameTheory(GameTheoryProblemDTO request) {
 
+    try {
         log.info("Received request: " + request);
         GameTheoryProblem problem = new GameTheoryProblem();
         problem.setDefaultPayoffFunction(request.getDefaultPayoffFunction());
@@ -41,6 +52,14 @@ public class GameTheorySolver {
         problem.setNormalPlayers(request.getNormalPlayers());
         problem.setConflictSet(request.getConflictSet());
         problem.setMaximizing(request.isMaximizing());
+
+//        log.info("start writing {} problem to file", problem.getName());
+//        boolean result = ProblemUtils.writeProblemToFile(problem, "gt_data");
+//        if (result) {
+//            log.info("finished writing {} problem to file", problem.getName());
+//        } else {
+//            log.info("failed writing {} problem to file", problem.getName());
+//        }
 
         long startTime = System.currentTimeMillis();
         log.info("Running algorithm: " + request.getAlgorithm() + "...");
@@ -71,6 +90,15 @@ public class GameTheorySolver {
                         .data(gameSolution)
                         .build()
         );
+        } catch (Exception e) {
+            log.error("Error ", e);
+            return ResponseEntity.ok().body(
+                    Response.builder()
+                            .status(500)
+                            .message("Failed")
+                            .build()
+            );
+        }
     }
 
     private NondominatedPopulation solveProblem(GameTheoryProblem problem,

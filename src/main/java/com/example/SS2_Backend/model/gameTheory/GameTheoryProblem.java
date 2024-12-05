@@ -5,6 +5,7 @@ import org.moeaframework.core.Solution;
 import org.moeaframework.core.variable.BinaryIntegerVariable;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -49,7 +50,7 @@ import static com.example.SS2_Backend.util.StringExpressionEvaluator.*;
         q = 1/3
 */
 
-public class GameTheoryProblem implements Problem {
+public class GameTheoryProblem implements Problem, Serializable {
     private SpecialPlayer specialPlayer;
     private List<NormalPlayer> normalPlayers;
     private List<NormalPlayer> oldNormalPlayers = new ArrayList<>(); // this is for problem with dynamic data

@@ -4,12 +4,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class SpecialPlayer {
+public class SpecialPlayer implements Serializable {
     private int numberOfProperties;
     private final List<Double> properties = new ArrayList<>();
     private final List<Double> weights = new ArrayList<>();

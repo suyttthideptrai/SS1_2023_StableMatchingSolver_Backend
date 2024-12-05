@@ -169,7 +169,6 @@ public class StableMatchingProblem implements Problem {
 
     // Evaluate
     public void evaluate(Solution solution) {
-        log.info("Evaluating ... "); // Start matching & collect result
         Matches result = StableMatchingExtra(solution.getVariable(0));
         // check excluded pairs here
         // first check the first pair of the 2d array, the first element is the index of the individual, the second element is the index of the individual that the first individual is matched with
@@ -194,7 +193,7 @@ public class StableMatchingProblem implements Problem {
         }
         solution.setAttribute("matches", result);
         solution.setObjective(0, -fitnessScore);
-        log.info("Score: {}", convertToStringWithoutScientificNotation(fitnessScore));
+//        log.info("Score: {}", convertToStringWithoutScientificNotation(fitnessScore));
     }
 
     @Override

@@ -1,11 +1,11 @@
 package com.example.SS2_Backend.ss.smt.preference.impl.provider;
 
-import com.example.SS2_Backend.model.stableMatching.Extra.IndividualListExtra;
-import com.example.SS2_Backend.model.stableMatching.Requirement.Requirement;
+import com.example.SS2_Backend.ss.smt.MatchingData;
+import com.example.SS2_Backend.ss.smt.requirement.Requirements;
 import com.example.SS2_Backend.ss.smt.preference.PreferencesProvider;
 import com.example.SS2_Backend.ss.smt.preference.impl.list.PreferenceListExtra;
 import lombok.Data;
-import lombok.Getter;
+
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
 
@@ -13,7 +13,7 @@ import java.util.*;
 @Data
 public class PreferencesProviderExtra implements PreferencesProvider {
 
-    private IndividualListExtra individuals;
+    private MatchingData individuals;
     private int numberOfIndividuals;
     private PreferenceListExtra preferenceList;
 
@@ -23,7 +23,7 @@ public class PreferencesProviderExtra implements PreferencesProvider {
     private final Map<Integer, Map<String, Set<Integer>>> variables;
     private int numberOfSets;
 
-    public PreferencesProviderExtra(IndividualListExtra individuals, int numberOfSets) {
+    public PreferencesProviderExtra(MatchingData individuals, int numberOfSets) {
         this.individuals = individuals;
         this.setSizes = new HashMap<>();
         this.expressions = new HashMap<>();
@@ -31,7 +31,7 @@ public class PreferencesProviderExtra implements PreferencesProvider {
         this.numberOfSets = numberOfSets;
 
         for (int i = 0; i < numberOfIndividuals; i++) {
-            int set = individuals.getSetOf(i);
+            int set = individuals.getSetNoOf(i);
             setSizes.put(set, setSizes.getOrDefault(set, 0) + 1);
         }
     }
@@ -146,7 +146,7 @@ public class PreferencesProviderExtra implements PreferencesProvider {
 
     @Override
     public PreferenceListExtra getPreferenceListByFunction(int index) {
-        int set = individuals.getSetOf(index);
+        int set = individuals.getSetNoOf(index);
         com.example.SS2_Backend.ss.smt.preference.impl.list.PreferenceListExtra a = new com.example.SS2_Backend.ss.smt.preference.impl.list.PreferenceListExtra(0, 0);
         Expression e;
         int size = 0;
@@ -180,7 +180,7 @@ public class PreferencesProviderExtra implements PreferencesProvider {
                     int[] tempPositions = new int[setSize];
 
                     for (int i = 0; i < numberOfIndividuals; i++) {
-                        if (individuals.getSetOf(i) == otherSet) {
+                        if (individuals.getSetNoOf(i) == otherSet) {
                             e.setVariables(this.getVariableValuesForSet(set, index, i));
                             tempScores[i] = e.evaluate();
                             tempPositions[i] = tempIndex;
@@ -260,8 +260,8 @@ public class PreferencesProviderExtra implements PreferencesProvider {
 
     @Override
     public PreferenceListExtra getPreferenceListByDefault(int index) {
-        int set = individuals.getSetOf(index);
-        int numberOfProperties = individuals.getNumberOfProperties();
+        int set = individuals.getSetNoOf(index);
+        int numberOfProperties = individuals.getNumberOfSets();
         com.example.SS2_Backend.ss.smt.preference.impl.list.PreferenceListExtra a = new com.example.SS2_Backend.ss.smt.preference.impl.list.PreferenceListExtra(0, 0);
         int size = 0;
 
@@ -285,11 +285,11 @@ public class PreferencesProviderExtra implements PreferencesProvider {
                     int[] tempPositions = new int[setSize];
 
                     for (int i = 0; i < numberOfIndividuals; i++) {
-                        if (individuals.getSetOf(i) == otherSet) {
+                        if (individuals.getSetNoOf(i) == otherSet) {
                             double totalScore = 0;
                             for (int j = 0; j < numberOfProperties; j++) {
                                 double propertyValue = individuals.getPropertyValueOf(i, j);
-                                Requirement requirement = individuals.getRequirementOf(index, j);
+                                Requirements requirement = individuals.getRequirementOf(index, j);
                                 double propertyWeight = individuals.getPropertyWeightOf(index, j);
                                 totalScore += getDefaultScaling(requirement, propertyValue) * propertyWeight;
                             }
@@ -309,7 +309,7 @@ public class PreferencesProviderExtra implements PreferencesProvider {
         return a;
     }
     @Override
-    public double getDefaultScaling(Requirement requirement, double propertyValue) {
+    public double getDefaultScaling(Requirements requirement, double propertyValue) {
         int type = requirement.getType();
         // Case: Scale
         if (type == 0) {

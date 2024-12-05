@@ -2,6 +2,7 @@ package com.example.SS2_Backend.ss.smt.preference;
 
 import com.example.SS2_Backend.model.stableMatching.Requirement.Requirement;
 import com.example.SS2_Backend.ss.smt.preference.impl.list.PreferenceListExtra;
+import com.example.SS2_Backend.ss.smt.requirement.Requirements;
 import net.objecthunter.exp4j.Expression;
 
 import java.util.Map;
@@ -27,7 +28,7 @@ public interface PreferencesProvider {
 
     PreferenceListExtra getPreferenceListByDefault(int index);
 
-    double getDefaultScaling(Requirement requirement, double propertyValue);
+    double getDefaultScaling(Requirements requirement, double propertyValue);
     void sortDescendingByScores(double[] tempScores, int[] tempPositions);
     void heapify(double[] tempScores, int[] tempPositions, int heapSize, int rootIndex);
 

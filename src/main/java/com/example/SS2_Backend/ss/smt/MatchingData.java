@@ -1,6 +1,6 @@
 package com.example.SS2_Backend.ss.smt;
 
-import com.example.SS2_Backend.ss.smt.requirement.Requirement;
+import com.example.SS2_Backend.ss.smt.requirement.Requirements;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -39,7 +39,7 @@ public class MatchingData {
     /** characteristic data */
     private final double[][] propertyValues;
     private final double[][] weights;
-    private final Requirement[][] requirements;
+    private final Requirements[][] requirements;
 
 
     public MatchingData(int size,
@@ -48,7 +48,7 @@ public class MatchingData {
                         int[] capacities,
                         double[][] propertyValues,
                         double[][] weights,
-                        Requirement[][] requirements) {
+                        Requirements[][] requirements) {
 
         Map<Integer, Integer> setNums = new HashMap<>();
         for (int set : sets) {
@@ -135,7 +135,7 @@ public class MatchingData {
      * @param indexOfProperty position of property
      * @return Requirement
      */
-    public Requirement getRequirementOf(int idx, int indexOfProperty) {
+    public Requirements getRequirementOf(int idx, int indexOfProperty) {
         return this.requirements[idx][indexOfProperty];
     }
 
@@ -190,6 +190,5 @@ public class MatchingData {
     public String toString() {
         return this.toStringBuilder().toString();
     }
-
 }
 

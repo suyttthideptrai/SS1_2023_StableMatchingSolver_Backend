@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 @Slf4j
@@ -69,7 +70,16 @@ public class StableMatchingSolverRBO implements MatchingSolver{
                     request.getMaxTime(),
                     request.getDistributedCores());
 
-            assert results != null;
+            if(Objects.isNull(results)){
+                return ResponseEntity
+                        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(Response
+                                .builder()
+                                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                                .message("Error solving stable matching problem.")
+                                .data(null)
+                                .build());
+            }
 //            Testing tester = new Testing((Matches) results.get(0).getAttribute("matches"),
 //                    problem.getMatchingData(), problem.getMatchingData().getCapacities());
 //            System.out.println("[Testing] Solution has duplicate: " + tester.hasDuplicate());

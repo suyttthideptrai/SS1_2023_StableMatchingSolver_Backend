@@ -79,7 +79,7 @@ public class MTMProblem implements MatchingProblem {
         int[][] excludedPairs = this.matchingData.getExcludedPairs();
         if (Objects.nonNull(excludedPairs)) {
             for (int[] excludedPair : excludedPairs) {
-                if (result.getSetOf(excludedPair[0]).contains(excludedPair[1])) {
+                if (result.isMatched(excludedPair[0], excludedPair[1])) {
                     solution.setObjective(0, Double.MAX_VALUE);
                     return;
                 }

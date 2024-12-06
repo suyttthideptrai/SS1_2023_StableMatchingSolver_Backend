@@ -141,6 +141,7 @@ public class MTMProblem implements MatchingProblem {
 
                 boolean rightIsFull = matches.isFull(rightNode, this.matchingData.getCapacityOf(rightNode));
                 boolean leftIsFull = matches.isFull(leftNode, this.matchingData.getCapacityOf(leftNode));
+
                 // Both nodes are not full
                 if (!rightIsFull && !leftIsFull) {
                     matches.addMatchBi(leftNode, rightNode);
@@ -186,10 +187,6 @@ public class MTMProblem implements MatchingProblem {
     public String getMatchingTypeName() {
         return "Many to Many";
     }
-
-    /**
-     * MOEA Framework Problem implements
-     */
 
     @Override
     public String getName() {

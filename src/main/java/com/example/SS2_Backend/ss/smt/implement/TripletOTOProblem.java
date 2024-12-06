@@ -8,6 +8,7 @@ import com.example.SS2_Backend.ss.smt.MatchingProblem;
 import com.example.SS2_Backend.ss.smt.evaluator.FitnessEvaluator;
 import com.example.SS2_Backend.ss.smt.Matches;
 import com.example.SS2_Backend.ss.smt.preference.PreferenceListWrapper;
+import com.example.SS2_Backend.ss.smt.preference.impl.list.TripletPreferenceList;
 import com.example.SS2_Backend.util.StringUtils;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -163,7 +164,7 @@ public class TripletOTOProblem implements MatchingProblem {
         // -1 is not find yet
         int result = -1;
 
-        int[] preferPartForTargetSet = nodePreferences.getPreferenceForSpecificSet(
+        int[] preferPartForTargetSet = nodePreferences.getPreferenceForSpecificSet(  // error
                 matchingData.getSetNoOf(newNode), targetSet, matchingData.getSetNums());
 
         for (int preferNode : preferPartForTargetSet) {     // ghép với 1 cá thể trong preferList

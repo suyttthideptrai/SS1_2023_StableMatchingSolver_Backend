@@ -106,7 +106,6 @@ public class MTMProblem implements MatchingProblem {
         return StringUtils.isEmptyOrNull(this.fitnessFunction);
     }
 
-
     public double[] getMatchesSatisfactions(Matches matches) {
         return this.preferenceLists.getMatchesSatisfactions(matches, matchingData);
     }
@@ -116,7 +115,6 @@ public class MTMProblem implements MatchingProblem {
      */
     @Override
     public Matches stableMatching(Variable var) {
-
         Matches matches = new Matches(matchingData.getSize());
         int[] decodeVar = EncodingUtils.getPermutation(var);
         Queue<Integer> unMatchedNode = new LinkedList<>();
@@ -126,11 +124,8 @@ public class MTMProblem implements MatchingProblem {
         }
 
         while (!unMatchedNode.isEmpty()) {
-            int leftNode = unMatchedNode.poll();
-
-            if (matches.isMatched(leftNode)) {
-                continue;
-            }
+            int leftNode;
+            leftNode = unMatchedNode.poll();
 
             //Get preference list of proposing node
             PreferenceList nodePreference = preferenceLists.get(leftNode);
@@ -144,34 +139,44 @@ public class MTMProblem implements MatchingProblem {
                     continue;
                 }
 
-                //If the RightNode Capacity is not full -> create connection between LeftNode - RightNode
-                if (!matches.isFull(rightNode, this.matchingData.getCapacityOf(rightNode))) {
+                boolean rightIsFull = matches.isFull(rightNode, this.matchingData.getCapacityOf(rightNode));
+                boolean leftIsFull = matches.isFull(leftNode, this.matchingData.getCapacityOf(leftNode));
+                // Both nodes are not full
+                if (!rightIsFull && !leftIsFull) {
                     matches.addMatchBi(leftNode, rightNode);
-                    break;
-
-                } else {
-                    //If the RightNode's Capacity is Full then Left Node will Compete with Nodes that are inside RightNode
-                    //Loser will be the return value
-
-                    int loser = preferenceLists.getLeastScoreNode(
-                            UNUSED_VAL,
-                            rightNode,
-                            leftNode,
-                            matches.getSetOf(rightNode),
-                            matchingData.getCapacityOf(rightNode));
-
-                    if (loser == leftNode) {
-                        if (preferenceLists.getLastChoiceOf(UNUSED_VAL, leftNode) == rightNode) {
-                            break;
-                        }
-                        //Or else Loser go back to UnMatched Queue & Waiting for it's Matching Procedure
-                    } else {
-                        matches.removeMatchBi(rightNode, loser);
-                        unMatchedNode.add(loser);
-                        matches.addMatchBi(rightNode, leftNode);
-                        break;
-                    }
+                    continue;
                 }
+
+                int rightLoser =  preferenceLists.getLeastScoreNode(
+                    UNUSED_VAL,
+                    rightNode,
+                    leftNode,
+                    matches.getSetOf(rightNode),
+                    matchingData.getCapacityOf(rightNode));
+
+                int leftLoser = preferenceLists.getLeastScoreNode(
+                    UNUSED_VAL,
+                    leftNode,
+                    rightNode,
+                    matches.getSetOf(leftNode),
+                    matchingData.getCapacityOf(leftNode));
+
+                // If neither leftNode and rightNode like the other
+                if ((rightLoser == leftNode) || (leftLoser == rightNode)) {
+                    continue;
+                }
+
+                // Unmatch right from loser if full
+                if (rightIsFull) {
+                    matches.removeMatchBi(rightNode, rightLoser);
+                }
+
+                // Unmatch leftNode from loser if full
+                if (leftIsFull) {
+                    matches.removeMatchBi(leftNode, leftLoser);
+                }
+
+                matches.addMatchBi(leftNode, rightNode);
             }
         }
         return matches;

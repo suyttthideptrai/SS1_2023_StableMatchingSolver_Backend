@@ -104,4 +104,8 @@ public class PreferenceListWrapper {
         return pref.getPositionByRank(set, pref.size(set) - 1);
     }
 
+    public double getPreferenceScore(int target, int option) {
+        return lists.get(target).getScore(option);
+    }
+
 }

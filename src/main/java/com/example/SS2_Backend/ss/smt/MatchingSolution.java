@@ -1,4 +1,4 @@
-package com.example.SS2_Backend.model.stableMatching.oneToMany;
+package com.example.SS2_Backend.ss.smt;
 
 import com.example.SS2_Backend.dto.response.ComputerSpecs;
 import lombok.AllArgsConstructor;
@@ -17,8 +17,6 @@ public class MatchingSolution {
     private double runtime;
     private ComputerSpecs computerSpecs;
     private String algorithm;
-    //private List<OldPreferenceListImpl> Preferences;
-    //private List<Individual> individuals;
     private double[] setSatisfactions;
 
 }

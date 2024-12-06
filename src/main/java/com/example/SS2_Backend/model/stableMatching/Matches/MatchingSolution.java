@@ -15,8 +15,8 @@ public class MatchingSolution {
     private Object matches;
     private double fitnessValue;
     private double runtime;
-    private ComputerSpecs computerSpecs;
     private String algorithm;
     private double[] setSatisfactions;
+    private ComputerSpecs computerSpecs;
 
 }

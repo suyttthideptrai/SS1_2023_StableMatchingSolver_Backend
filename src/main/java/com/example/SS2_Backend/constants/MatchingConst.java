@@ -13,4 +13,9 @@ public class MatchingConst {
         int TWO_BOUND = 2;
         int TIME_SLOT = 3;
     }
+
+    public interface InsightConfig {
+        int POPULATION_SIZE = 50;
+        int GENERATIONS = 100;
+    }
 }

@@ -19,6 +19,8 @@ import com.example.SS2_Backend.ss.smt.preference.impl.provider.TwoSetPreferenceP
 import com.example.SS2_Backend.ss.smt.requirement.Requirement;
 import com.example.SS2_Backend.ss.smt.requirement.RequirementDecoder;
 
+import java.util.Arrays;
+
 /**
  * Mapper layer, xử lý các công việc sau đối với từng loại matching problem:
  * 1. map problem data từ dto vào StableMatchingProblem
@@ -60,26 +62,46 @@ public class StableMatchingProblemMapper {
                 fitnessEvaluator);
     }
     public static TripletOTOProblem tripletOTO(NewStableMatchingProblemDTO request) {
-        Requirement[][] requirements = RequirementDecoder.decode(request.getIndividualRequirements());
-        MatchingData data = new MatchingData(request.getNumberOfIndividuals(),
+        // Kiểm tra kích thước mảng
+        if (request.getIndividualSetIndices().length != request.getNumberOfIndividuals() ||
+                request.getIndividualCapacities().length != request.getNumberOfIndividuals()) {
+            throw new IllegalArgumentException("Size mismatch: Arrays in request do not match number of individuals.");
+        }
+
+        Requirement[][] requirements;
+        try {
+            requirements = RequirementDecoder.decode(request.getIndividualRequirements());
+        } catch (Exception e) {
+            log.error("Error decoding individualRequirements: {}", Arrays.deepToString(request.getIndividualRequirements()), e);
+            throw new IllegalArgumentException("Invalid individual requirements format.");
+        }
+
+        MatchingData data = new MatchingData(
+                request.getNumberOfIndividuals(),
                 request.getNumberOfProperty(),
                 request.getIndividualSetIndices(),
                 request.getIndividualCapacities(),
                 request.getIndividualProperties(),
                 request.getIndividualWeights(),
-                requirements);
-        data.setExcludedPairs(request.getExcludedPairs());
-        PreferenceBuilder builder = new TripletPreferenceProvider(data,
-                request.getEvaluateFunctions());
+                requirements
+        );
+
+        data.setExcludedPairs(request.getExcludedPairs() != null ? request.getExcludedPairs() : new int[0][0]);
+
+        PreferenceBuilder builder = new TripletPreferenceProvider(data, request.getNumberOfSets());
         PreferenceListWrapper preferenceLists = builder.toListWrapper();
+
         FitnessEvaluator fitnessEvaluator = new TwoSetFitnessEvaluator(data);
-        return new TripletOTOProblem(request.getProblemName(),
+
+        return new TripletOTOProblem(
+                request.getProblemName(),
                 request.getNumberOfIndividuals(),
                 request.getNumberOfSets(),
                 data,
                 preferenceLists,
                 request.getFitnessFunction(),
-                fitnessEvaluator);
+                fitnessEvaluator
+        );
     }
 
 

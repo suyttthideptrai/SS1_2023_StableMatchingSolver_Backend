@@ -38,11 +38,11 @@ public class SampleDataGenerator {
      */
     public static void main(String[] args) {
 
-        SampleDataGenerator generator = new SampleDataGenerator(10, 10);
+        SampleDataGenerator generator = new SampleDataGenerator(20, 2000);
         String[] propNames = {"Prop1", "Prop2", "Prop3", "Prop4"};
         generator.setPropNames(propNames);
-        generator.setSet1Cap(20);
-        generator.setSet2Cap(1000);
+        generator.setSet1Cap(1);
+        generator.setSet2Cap(100);
         generator.setRandCapSet1(false);
         generator.setRandCapSet2(false);
         generator.setF1("none");
@@ -51,7 +51,7 @@ public class SampleDataGenerator {
         // Generate the StableMatchingProblem instance
         StableMatchingProblem problem = generator.generate();
 
-        String algo = "PESA2";
+        String algo = "IBEA";
 
         // Run the algorithm
         long startTime = System.currentTimeMillis();

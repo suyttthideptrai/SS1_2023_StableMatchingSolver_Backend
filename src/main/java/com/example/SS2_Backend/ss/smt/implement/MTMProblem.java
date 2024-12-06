@@ -1,11 +1,11 @@
 package com.example.SS2_Backend.ss.smt.implement;
 
 import com.example.SS2_Backend.constants.MatchingConst;
-import com.example.SS2_Backend.ss.smt.preference.PreferenceList;
+import com.example.SS2_Backend.ss.smt.Matches;
 import com.example.SS2_Backend.ss.smt.MatchingData;
 import com.example.SS2_Backend.ss.smt.MatchingProblem;
 import com.example.SS2_Backend.ss.smt.evaluator.FitnessEvaluator;
-import com.example.SS2_Backend.ss.smt.Matches;
+import com.example.SS2_Backend.ss.smt.preference.PreferenceList;
 import com.example.SS2_Backend.ss.smt.preference.PreferenceListWrapper;
 import com.example.SS2_Backend.util.StringUtils;
 import lombok.AccessLevel;
@@ -18,11 +18,9 @@ import org.moeaframework.core.Variable;
 import org.moeaframework.core.variable.EncodingUtils;
 import org.moeaframework.core.variable.Permutation;
 
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Objects;
 import java.util.Queue;
-import java.util.Set;
 
 @Slf4j
 @Getter

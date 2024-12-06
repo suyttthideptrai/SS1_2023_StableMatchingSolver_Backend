@@ -212,7 +212,7 @@ public class StableMatchingProblem implements Problem {
 
     @Override
     public int getNumberOfConstraints() {
-        return 1;
+        return 0;
     }
 
     public void close() {

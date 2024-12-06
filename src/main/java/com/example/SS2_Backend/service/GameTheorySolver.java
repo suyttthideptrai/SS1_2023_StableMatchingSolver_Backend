@@ -7,12 +7,19 @@ import com.example.SS2_Backend.model.gameTheory.GameSolution;
 import com.example.SS2_Backend.model.gameTheory.GameSolutionInsights;
 import com.example.SS2_Backend.model.gameTheory.GameTheoryProblem;
 import com.example.SS2_Backend.model.gameTheory.NormalPlayer;
+import com.example.SS2_Backend.ss.gt.GTProblem;
+import com.example.SS2_Backend.ss.gt.implement.PSOCompatibleGTProblem;
+import com.example.SS2_Backend.util.NumberUtils;
+import com.example.SS2_Backend.util.ProblemUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.moeaframework.Executor;
 import org.moeaframework.core.NondominatedPopulation;
 import org.moeaframework.core.Solution;
+import org.moeaframework.core.Variable;
 import org.moeaframework.core.variable.BinaryIntegerVariable;
+import org.moeaframework.core.variable.EncodingUtils;
+import org.moeaframework.core.variable.RealVariable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -33,14 +40,31 @@ public class GameTheorySolver {
 
     public ResponseEntity<Response> solveGameTheory(GameTheoryProblemDTO request) {
 
+
+
+    try {
         log.info("Received request: " + request);
-        GameTheoryProblem problem = new GameTheoryProblem();
+        GTProblem problem;
+        String algorithm = request.getAlgorithm();
+        if (List.of("OMOPSO", "SMPSO").contains(algorithm)) {
+            problem = new PSOCompatibleGTProblem();
+        } else {
+            problem = new GameTheoryProblem();
+        }
         problem.setDefaultPayoffFunction(request.getDefaultPayoffFunction());
         problem.setFitnessFunction(request.getFitnessFunction());
         problem.setSpecialPlayer(request.getSpecialPlayer());
         problem.setNormalPlayers(request.getNormalPlayers());
         problem.setConflictSet(request.getConflictSet());
         problem.setMaximizing(request.isMaximizing());
+
+        log.info("start writing {} problem to file", problem.getName());
+        boolean result = ProblemUtils.writeProblemToFile(problem, "gt_data_1");
+        if (result) {
+            log.info("finished writing {} problem to file", problem.getName());
+        } else {
+            log.info("failed writing {} problem to file", problem.getName());
+        }
 
         long startTime = System.currentTimeMillis();
         log.info("Running algorithm: " + request.getAlgorithm() + "...");
@@ -71,9 +95,18 @@ public class GameTheorySolver {
                         .data(gameSolution)
                         .build()
         );
+        } catch (Exception e) {
+            log.error("Error ", e);
+            return ResponseEntity.ok().body(
+                    Response.builder()
+                            .status(500)
+                            .message("Failed")
+                            .build()
+            );
+        }
     }
 
-    private NondominatedPopulation solveProblem(GameTheoryProblem problem,
+    private NondominatedPopulation solveProblem(GTProblem problem,
                                                 String algorithm,
                                                 Integer generation,
                                                 Integer populationSize,
@@ -135,7 +168,7 @@ public class GameTheorySolver {
 
         }
     }
-        private GameSolution formatSolution (GameTheoryProblem problem, NondominatedPopulation result){
+        public static GameSolution formatSolution (GTProblem problem, NondominatedPopulation result){
             Solution solution = result.get(0);
             GameSolution gameSolution = new GameSolution();
 
@@ -146,16 +179,25 @@ public class GameTheorySolver {
             List<NormalPlayer> players = problem.getNormalPlayers();
             List<GameSolution.Player> gameSolutionPlayers = new ArrayList<>();
 
+            int chosenStratIdx;
             // loop through all players and get the strategy chosen by each player
             for (int i = 0; i < solution.getNumberOfVariables(); i++) {
                 NormalPlayer normalPlayer = players.get(i);
 
-                //get the index of the strategy chosen by the player
-                BinaryIntegerVariable chosenStrategyIndex = (BinaryIntegerVariable) solution.getVariable(i);
-                double strategyPayoff = normalPlayer.getStrategyAt(chosenStrategyIndex.getValue()).getPayoff();
+                Variable var = solution.getVariable(i);
+                if (var instanceof RealVariable) {
+                    chosenStratIdx = NumberUtils.toInteger((RealVariable) var);
+                } else if (var instanceof BinaryIntegerVariable) {
+                    chosenStratIdx = EncodingUtils.getInt(var);
+                } else {
+                    // :v
+                    chosenStratIdx = EncodingUtils.getInt(var);
+                }
+
+                double strategyPayoff = normalPlayer.getStrategyAt(chosenStratIdx).getPayoff();
 
                 String playerName = getPlayerName(normalPlayer, i);
-                String strategyName = getStrategyName(chosenStrategyIndex.getValue(), normalPlayer, i);
+                String strategyName = getStrategyName(chosenStratIdx, normalPlayer, i);
 
                 GameSolution.Player gameSolutionPlayer = GameSolution.Player.builder()
                         .playerName(playerName)
@@ -276,7 +318,7 @@ public class GameTheorySolver {
         }
 
 
-        public String getPlayerName (NormalPlayer normalPlayer,int index){
+        public static String getPlayerName (NormalPlayer normalPlayer,int index){
             String playerName = normalPlayer.getName();
             if (playerName == null) {
                 playerName = String.format("Player %d", index);
@@ -285,7 +327,7 @@ public class GameTheorySolver {
             return playerName;
         }
 
-        public String getStrategyName ( int chosenStrategyIndex, NormalPlayer normalPlayer,int index){
+        public static String getStrategyName ( int chosenStrategyIndex, NormalPlayer normalPlayer,int index){
             String strategyName = normalPlayer.getStrategies().get(chosenStrategyIndex).getName();
             if (strategyName == null) {
                 strategyName = String.format("Strategy %d", index);
@@ -298,8 +340,7 @@ public class GameTheorySolver {
         private static double getFitnessValue (NondominatedPopulation result){
 
             Solution solution = result.get(0);
-            double fitnessValue = solution.getObjective(0);
-            return fitnessValue;
+            return solution.getObjective(0);
 
         }
 

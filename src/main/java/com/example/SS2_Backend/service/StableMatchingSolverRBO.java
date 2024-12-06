@@ -5,12 +5,12 @@ import com.example.SS2_Backend.dto.mapper.StableMatchingProblemMapper;
 import com.example.SS2_Backend.dto.request.NewStableMatchingProblemDTO;
 import com.example.SS2_Backend.dto.response.Progress;
 import com.example.SS2_Backend.dto.response.Response;
-import com.example.SS2_Backend.model.stableMatching.Matches.MatchesOTO;
 import com.example.SS2_Backend.model.stableMatching.Matches.MatchingSolution;
 import com.example.SS2_Backend.model.stableMatching.Matches.MatchingSolutionInsights;
 import com.example.SS2_Backend.ss.smt.Matches;
 import com.example.SS2_Backend.ss.smt.MatchingProblem;
 import com.example.SS2_Backend.ss.smt.implement.MTMProblem;
+import com.example.SS2_Backend.util.ComputerSpecsUtil;
 import com.example.SS2_Backend.util.ValidationUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 @Slf4j
@@ -69,7 +70,16 @@ public class StableMatchingSolverRBO implements MatchingSolver{
                     request.getMaxTime(),
                     request.getDistributedCores());
 
-            assert results != null;
+            if(Objects.isNull(results)){
+                return ResponseEntity
+                        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(Response
+                                .builder()
+                                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                                .message("Error solving stable matching problem.")
+                                .data(null)
+                                .build());
+            }
 //            Testing tester = new Testing((Matches) results.get(0).getAttribute("matches"),
 //                    problem.getMatchingData(), problem.getMatchingData().getCapacities());
 //            System.out.println("[Testing] Solution has duplicate: " + tester.hasDuplicate());
@@ -123,6 +133,7 @@ public class StableMatchingSolverRBO implements MatchingSolver{
         matchingSolution.setMatches(matches);
         matchingSolution.setAlgorithm(algorithm);
         matchingSolution.setRuntime(Runtime);
+        matchingSolution.setComputerSpecs(ComputerSpecsUtil.getComputerSpecs());
 
         return matchingSolution;
     }
@@ -166,10 +177,10 @@ public class StableMatchingSolverRBO implements MatchingSolver{
                         .distributeOn(numberOfCores)
                         .run();
             }
-            //log.info("[Service] Stable Matching: Problem solved successfully!");
+            log.info("Problem {} solved successfully!", problem.getName());
             return result;
         } catch (Exception e) {
-            log.error("[Service] Stable Matching: Error solving the problem {}", e.getMessage(), e);
+            log.error("Error solving {}, {}", problem.getName(), e.getMessage(), e);
             return null;
         }
     }
@@ -201,8 +212,8 @@ public class StableMatchingSolverRBO implements MatchingSolver{
 
                 NondominatedPopulation results = solveProblem(problem,
                         algorithm,
-                        request.getPopulationSize(),
-                        request.getGeneration(),
+                        MatchingConst.InsightConfig.POPULATION_SIZE,
+                        MatchingConst.InsightConfig.GENERATIONS,
                         request.getMaxTime(),
                         request.getDistributedCores());
 
@@ -246,6 +257,7 @@ public class StableMatchingSolverRBO implements MatchingSolver{
 
         matchingSolutionInsights.setFitnessValues(fitnessValueMap);
         matchingSolutionInsights.setRuntimes(runtimeMap);
+        matchingSolutionInsights.setComputerSpecs(ComputerSpecsUtil.getComputerSpecs());
 
         for (String algorithm : algorithms) {
             fitnessValueMap.put(algorithm, new ArrayList<>());
@@ -283,20 +295,6 @@ public class StableMatchingSolverRBO implements MatchingSolver{
     private double getFitnessValue(NondominatedPopulation result) {
         Solution solution = result.get(0);
         return solution.getObjective(0);
-    }
-
-
-    private MatchingSolution formatSolutionOTO(String algorithm,
-                                               NondominatedPopulation result,
-                                               double Runtime) {
-        Solution solution = result.get(0);
-        MatchingSolution matchingSolution = new MatchingSolution();
-        double fitnessValue = solution.getObjective(0);
-        matchingSolution.setMatches(((MatchesOTO) solution.getAttribute("matches")).toMatches());
-        matchingSolution.setFitnessValue(-fitnessValue);
-        matchingSolution.setAlgorithm(algorithm);
-        matchingSolution.setRuntime(Runtime);
-        return matchingSolution;
     }
 
 }

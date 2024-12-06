@@ -8,6 +8,7 @@ import lombok.experimental.FieldDefaults;
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
 
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.DoubleUnaryOperator;
 import java.util.stream.DoubleStream;
@@ -25,7 +26,7 @@ public class TwoSetFitnessEvaluator implements FitnessEvaluator {
 
     @Override
     public double defaultFitnessEvaluation(double[] satisfactions) {
-        return 0;
+        return Arrays.stream(satisfactions).sum();
     }
 
     @Override

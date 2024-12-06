@@ -25,28 +25,44 @@ import java.util.*;
 @AllArgsConstructor
 public class OTMProblem implements MatchingProblem {
 
-    /** problem name */
+    /**
+     * problem name
+     */
     final String problemName;
 
-    /** problem size (number of individuals in matching problem */
+    /**
+     * problem size (number of individuals in matching problem
+     */
     final int problemSize;
 
-    /** number of set in matching problem */
+    /**
+     * number of set in matching problem
+     */
     final int setNum;
 
-    /** Matching data */
+    /**
+     * Matching data
+     */
     final MatchingData matchingData;
 
-    /** preference list  */
+    /**
+     * preference list
+     */
     final PreferenceListWrapper preferenceLists;
 
-    /** problem fitness function */
+    /**
+     * problem fitness function
+     */
     final String fitnessFunction;
 
-    /** fitness evaluator */
+    /**
+     * fitness evaluator
+     */
     final FitnessEvaluator fitnessEvaluator;
 
-    /** will not be used */
+    /**
+     * will not be used
+     */
     final int UNUSED_VAL = MatchingConst.UNUSED_VALUE;
 
     @Override
@@ -142,15 +158,11 @@ public class OTMProblem implements MatchingProblem {
         // Process all unmatched consumers
         while (!unmatchedConsumers.isEmpty()) {
             int consumer = unmatchedConsumers.poll();
-
             // Skip if already matched
             if (matchedConsumers.contains(consumer)) {
                 continue;
             }
-
             PreferenceList consumerPreference = getPreferenceLists().get(consumer);
-            boolean matched = false;
-
             // Try to match with each preferred provider
             for (int i = 0; i < consumerPreference.size(UNUSED_VAL); i++) {
                 int provider = consumerPreference.getPositionByRank(UNUSED_VAL, i);
@@ -200,24 +212,9 @@ public class OTMProblem implements MatchingProblem {
                 // If provider has available capacity or we've made space
                 matches.addMatchBi(provider, consumer);
                 matchedConsumers.add(consumer);
-                matched = true;
                 break;
             }
-
-            // If no match found, add to leftovers
-            if (!matched) {
-                matches.addLeftOver(consumer);
-            }
         }
-
-        // Add any remaining unmatched providers to leftovers
-        while (!unmatchedProviders.isEmpty()) {
-            int provider = unmatchedProviders.poll();
-            if (matches.getSetOf(provider).isEmpty()) {
-                matches.addLeftOver(provider);
-            }
-        }
-
         return matches;
     }
 

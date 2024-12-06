@@ -3,10 +3,11 @@ package com.example.SS2_Backend.util;
 import com.example.SS2_Backend.model.stableMatching.Individual;
 import com.example.SS2_Backend.model.stableMatching.Matches.Matches;
 import com.example.SS2_Backend.model.stableMatching.StableMatchingProblem;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.moeaframework.Executor;
 import org.moeaframework.core.NondominatedPopulation;
 import org.moeaframework.core.Solution;
-import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +17,7 @@ import java.util.Random;
  * Stable Matching Problem Testing Space.
  */
 @Data
+@Slf4j
 public class SampleDataGenerator {
 
     // Configuration parameters
@@ -30,36 +32,32 @@ public class SampleDataGenerator {
     private String f2 = "none";  // Evaluation function for set 2
     private String fnf = "none"; // Fitness function
     private static final Random RANDOM = new Random(); // Random generator
+
     /**
      * Main method to demonstrate usage.
      */
     public static void main(String[] args) {
-        // Create an instance of SampleDataGenerator
-        SampleDataGenerator generator = new SampleDataGenerator(10, 10);
-        generator.setSet1Cap(10);
-        generator.setSet2Cap(10);
+
+        SampleDataGenerator generator = new SampleDataGenerator(20, 2000);
+        String[] propNames = {"Prop1", "Prop2", "Prop3", "Prop4"};
+        generator.setPropNames(propNames);
+        generator.setSet1Cap(1);
+        generator.setSet2Cap(100);
         generator.setRandCapSet1(false);
         generator.setRandCapSet2(false);
         generator.setF1("none");
         generator.setF2("none");
         generator.setFnf("none");
-
         // Generate the StableMatchingProblem instance
         StableMatchingProblem problem = generator.generate();
 
-        // Print the randomly generated population
-        System.out.println("\n[ Randomly Generated Population ]\n");
-        problem.printIndividuals();
-
-        System.out.println("Number Of Individuals: " + problem.getIndividuals().getNumberOfIndividual());
-
-        System.out.println("\n[ Algorithm Output Solution ]\n");
+        String algo = "IBEA";
 
         // Run the algorithm
         long startTime = System.currentTimeMillis();
         NondominatedPopulation result = new Executor()
                 .withProblem(problem)
-                .withAlgorithm("PESA2")
+                .withAlgorithm(algo)
                 .withMaxEvaluations(100)
                 .withProperty("populationSize", 1000)
                 .distributeOnAllCores()
@@ -71,14 +69,16 @@ public class SampleDataGenerator {
         // Process and print the results
         for (Solution solution : result) {
             Matches matches = (Matches) solution.getAttribute("matches");
-            System.out.println("Output Matches (by Gale Shapley):\n" + matches.toString());
-            System.out.println("Randomized Individuals Input Order (by MOEA): " + solution.getVariable(0).toString());
+//            System.out.println("Output Matches (by Gale Shapley):\n" + matches.toString());
+//            System.out.println("Randomized Individuals Input Order (by MOEA): " + solution.getVariable(0).toString());
             System.out.println("Fitness Score: " + -solution.getObjective(0));
-            Testing tester = new Testing(matches, problem.getIndividuals().getNumberOfIndividual(), problem.getIndividuals().getCapacities());
+            Testing tester = new Testing(matches,
+                    problem.getIndividuals().getNumberOfIndividual(),
+                    problem.getIndividuals().getCapacities());
             System.out.println("Solution has duplicate individual? : " + tester.hasDuplicate());
         }
+        System.out.println("\nExecution time: " + runtime + " Second(s) with Algorithm: " + algo);
 
-        System.out.println("\nExecution time: " + runtime + " Second(s) with Algorithm: PESA2");
     }
     /**
      * Constructor for configuring generator with required sets.
@@ -100,24 +100,19 @@ public class SampleDataGenerator {
         // Generate the individual population
         ArrayList<Individual> individuals = generateIndividualsWithCapacity();
 
-        // Define excluded pairs
-        int[][] excludedPairs = {
-                {0, 3},
-                {1, 2},
-                {0, 2},
-                {1, 3}
-        };
-
-        // Define property names
-        String[] propNames = {"Prop1", "Prop2", "Prop3", "Prop4"};
-
+//        // Define excluded pairs
+//        int[][] excludedPairs = {
+//                {0, 3},
+//                {1, 2},
+//                {0, 2},
+//                {1, 3}
+//        };
         // Create and configure the StableMatchingProblem instance
         StableMatchingProblem problem = new StableMatchingProblem();
         problem.setEvaluateFunctionForSet1(f1);
         problem.setEvaluateFunctionForSet2(f2);
         problem.setFitnessFunction(fnf);
-        problem.setPopulation(individuals, propNames, excludedPairs);
-
+        problem.setPopulation(individuals, this.propNames, null);
         return problem;
     }
 

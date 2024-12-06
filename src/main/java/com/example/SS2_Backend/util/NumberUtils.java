@@ -1,5 +1,8 @@
 package com.example.SS2_Backend.util;
 
+import org.moeaframework.core.variable.EncodingUtils;
+import org.moeaframework.core.variable.RealVariable;
+
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
@@ -36,6 +39,17 @@ public class NumberUtils {
         DecimalFormat df = new DecimalFormat("#.##", symbols);
         String formattedValue = df.format(val);
         return Double.parseDouble(formattedValue);
+    }
+
+    /**
+     * floor real variable, parse int & return
+     *
+     * @param variable Framework shi
+     * @return int
+     */
+    public static int toInteger(RealVariable variable) {
+        double rawValue = EncodingUtils.getReal(variable);
+        return (int) Math.floor(rawValue);
     }
 
 }

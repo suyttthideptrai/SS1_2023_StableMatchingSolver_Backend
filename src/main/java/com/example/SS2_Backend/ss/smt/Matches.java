@@ -187,4 +187,8 @@ public class Matches implements Serializable {
         nodesToRemove.addAll(getSetOf(target));
         return nodesToRemove;
     }
+
+    public void disMatch(int target, Collection<Integer> nodeToRemove) {
+        matches[target].removeAll(nodeToRemove);
+    }
 }

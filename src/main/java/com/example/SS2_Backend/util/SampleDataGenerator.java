@@ -72,10 +72,10 @@ public class SampleDataGenerator {
 //            System.out.println("Output Matches (by Gale Shapley):\n" + matches.toString());
 //            System.out.println("Randomized Individuals Input Order (by MOEA): " + solution.getVariable(0).toString());
             System.out.println("Fitness Score: " + -solution.getObjective(0));
-            Testing tester = new Testing(matches,
-                    problem.getIndividuals().getNumberOfIndividual(),
-                    problem.getIndividuals().getCapacities());
-            System.out.println("Solution has duplicate individual? : " + tester.hasDuplicate());
+//            Testing tester = new Testing(matches,
+//                    problem.getIndividuals().getNumberOfIndividual(),
+//                    problem.getIndividuals().getCapacities());
+//            System.out.println("Solution has duplicate individual? : " + tester.hasDuplicate());
         }
         System.out.println("\nExecution time: " + runtime + " Second(s) with Algorithm: " + algo);
 

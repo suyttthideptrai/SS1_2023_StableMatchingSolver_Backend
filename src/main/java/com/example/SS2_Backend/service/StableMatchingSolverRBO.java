@@ -11,6 +11,7 @@ import com.example.SS2_Backend.ss.smt.Matches;
 import com.example.SS2_Backend.ss.smt.MatchingProblem;
 import com.example.SS2_Backend.ss.smt.implement.MTMProblem;
 import com.example.SS2_Backend.util.ComputerSpecsUtil;
+import com.example.SS2_Backend.util.Testing;
 import com.example.SS2_Backend.util.ValidationUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +27,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
+import sun.misc.Unsafe;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -57,6 +60,18 @@ public class StableMatchingSolverRBO implements MatchingSolver{
             log.info("Building preference list...");
 
             MatchingProblem problem = StableMatchingProblemMapper.toMTM(request);
+//            Unsafe unsafe;
+//            try {
+//                Field field = Unsafe.class.getDeclaredField("theUnsafe");
+//                field.setAccessible(true);
+//                unsafe = (Unsafe) field.get(null);
+//            } catch (Exception e) {
+//                throw new AssertionError(e);
+//            }
+//            long requestAddress = getAddress(unsafe, request.getIndividualCapacities());
+//            long problemAddress = getAddress(unsafe, problem.getMatchingData().getCapacities());
+//            log.info("req cap {}, pro cap {}, equality {}", requestAddress, problemAddress,
+//                    Objects.equals(requestAddress, problemAddress));
             log.info("Start solving: {}, problem name: {}, problem size: {}",
                     problem.getMatchingTypeName(),
                     problem.getName(),
@@ -81,7 +96,7 @@ public class StableMatchingSolverRBO implements MatchingSolver{
                                 .build());
             }
 //            Testing tester = new Testing((Matches) results.get(0).getAttribute("matches"),
-//                    problem.getMatchingData(), problem.getMatchingData().getCapacities());
+//                    problem.getMatchingData().getSize(), problem.getMatchingData().getCapacities());
 //            System.out.println("[Testing] Solution has duplicate: " + tester.hasDuplicate());
             long endTime = System.currentTimeMillis();
 
@@ -137,6 +152,12 @@ public class StableMatchingSolverRBO implements MatchingSolver{
 
         return matchingSolution;
     }
+
+//    private static long getAddress(Unsafe unsafe, Object obj) {
+//        Object[] array = new Object[]{obj};
+//        long baseOffset = unsafe.arrayBaseOffset(Object[].class);
+//        return unsafe.getLong(array, baseOffset);
+//    }
 
 
     private NondominatedPopulation solveProblem(Problem problem,

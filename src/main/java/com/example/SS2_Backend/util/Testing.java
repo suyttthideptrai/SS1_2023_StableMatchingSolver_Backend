@@ -1,6 +1,6 @@
 package com.example.SS2_Backend.util;
 
-import com.example.SS2_Backend.model.stableMatching.Matches.Matches;
+import com.example.SS2_Backend.ss.smt.Matches;
 
 import java.util.*;
 
@@ -26,7 +26,7 @@ public class Testing {
         int[] checkArr = capacities;
         int sz = matches.size();
         for (int i = 0; i < sz; i++) {
-            Set<Integer> matchSet = matches.getSet(i);
+            Set<Integer> matchSet = matches.getSetOf(i);
             for (int elm : matchSet) {
                 checkArr[elm]--;
                 if (checkArr[elm] < 0) return true;
@@ -57,9 +57,9 @@ public class Testing {
         matches.addMatch(2, 11);
 
 
-        matches.addLeftOver(11);
-        matches.addLeftOver(10);
-        matches.addLeftOver(9);
+//        matches.addLeftOver(11);
+//        matches.addLeftOver(10);
+//        matches.addLeftOver(9);
 
     }
 

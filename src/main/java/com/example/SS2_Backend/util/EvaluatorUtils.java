@@ -1,5 +1,6 @@
 package com.example.SS2_Backend.util;
 
+import com.example.SS2_Backend.constants.MatchingConst;
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
 
@@ -100,6 +101,22 @@ public class EvaluatorUtils {
             }
         }
         return setSatisfactions;
+    }
+
+
+    /**
+     * temp
+     * @param func
+     * @return
+     */
+    public static String getValidEvaluationFunction(String func) {
+        if (StringUtils.isEmptyOrNull(func) || MatchingConst.DEFAULT_EVALUATE_FUNC.equals(func)) {
+            return "";
+        }
+        if (func.matches(MatchingConst.DEFAULT_EVALUATE_FUNC)) {
+            return func;
+        }
+        return "";
     }
 
 }

@@ -61,7 +61,7 @@ public class StableMatchingProblemMapper {
                 request.getFitnessFunction(),
                 fitnessEvaluator);
     }
-    public static TripletOTOProblem tripletOTO(NewStableMatchingProblemDTO request) {
+    public static TripletOTOProblem toTripletOTO(NewStableMatchingProblemDTO request) {
         // Kiểm tra kích thước mảng
         if (request.getIndividualSetIndices().length != request.getNumberOfIndividuals() ||
                 request.getIndividualCapacities().length != request.getNumberOfIndividuals()) {

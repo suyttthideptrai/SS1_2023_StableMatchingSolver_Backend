@@ -132,7 +132,7 @@ public class TripletOTOProblem implements MatchingProblem {
             int currentSet = matchingData.getSetNoOf(newNode);
             int[] otherSets = getOtherSets(currentSet);
 
-            PreferenceList nodePreference = preferenceLists.get(newNode);
+            TripletPreferenceList nodePreference = (TripletPreferenceList) preferenceLists.get(newNode);
             List<Integer> matchedGroup = new ArrayList<>();   // chứa những cá thể ghép với nhau trong lượt ghép
             matchedGroup.add(newNode);
 
@@ -158,7 +158,7 @@ public class TripletOTOProblem implements MatchingProblem {
 
 
     private int matchWithTargetSet(int newNode, int targetSet,
-                                   PreferenceList nodePreferences,
+                                   TripletPreferenceList nodePreferences,
                                    Matches matches,
                                    Queue<Integer> unmatchedNodes) {
         // -1 is not find yet

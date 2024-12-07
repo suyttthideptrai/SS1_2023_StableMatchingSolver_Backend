@@ -8,14 +8,16 @@ import com.example.SS2_Backend.ss.smt.preference.PreferenceBuilder;
 import com.example.SS2_Backend.ss.smt.preference.PreferenceList;
 import com.example.SS2_Backend.ss.smt.preference.PreferenceListWrapper;
 import com.example.SS2_Backend.ss.smt.preference.impl.list.TripletPreferenceList;
+import com.example.SS2_Backend.util.PreferenceProviderUtils;
 import lombok.Getter;
 import net.objecthunter.exp4j.Expression;
+import net.objecthunter.exp4j.ExpressionBuilder;
 
 import java.util.*;
 
 public class TripletPreferenceProvider implements PreferenceBuilder {
 
-    private MatchingData individuals;
+    private final MatchingData individuals;
     private int numberOfIndividuals;
     private PreferenceListExtra preferenceList;
     @Getter
@@ -24,21 +26,32 @@ public class TripletPreferenceProvider implements PreferenceBuilder {
     @Getter
     private final Map<Integer, Expression> expressions;
     private final Map<Integer, Map<String, Set<Integer>>> variables;
-    private int numberOfSets ;      // new
 
-    public TripletPreferenceProvider (MatchingData individuals, int numberOfSets) {
+    public TripletPreferenceProvider(MatchingData individuals, String[] evaluationFunctions) {
         this.individuals = individuals;
         this.setSizes = new HashMap<>();
         this.expressions = new HashMap<>();
         this.variables = new HashMap<>();
-        this.numberOfSets = numberOfSets;  // new
+        this.numberOfIndividuals = individuals.getSize();
 
-        // Initialize set sizes
+        // Xác định kích thước từng tập hợp từ dữ liệu
         for (int i = 0; i < numberOfIndividuals; i++) {
             int set = individuals.getSetNoOf(i);
             setSizes.put(set, setSizes.getOrDefault(set, 0) + 1);
         }
+
+        // Xây dựng biểu thức và các biến cho từng tập hợp
+        for (int set = 0; set < evaluationFunctions.length; set++) {
+            String evalFunction = evaluationFunctions[set];
+            Map<String, Set<Integer>> vars = PreferenceProviderUtils.filterVariable(evalFunction);
+            Expression expr = new ExpressionBuilder(evalFunction)
+                    .variables(PreferenceProviderUtils.convertMapToSet(vars))
+                    .build();
+            variables.put(set, vars);
+            expressions.put(set, expr);
+        }
     }
+
     @Override
     public PreferenceList getPreferenceListByFunction(int index) {
         int set = individuals.getSetNoOf(index);

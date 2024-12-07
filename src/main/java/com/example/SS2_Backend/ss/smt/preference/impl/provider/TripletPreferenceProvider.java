@@ -60,7 +60,7 @@ public class TripletPreferenceProvider implements PreferenceBuilder {
         if (setSizes.containsKey(set)) {          // 1 2 3 4 5   6 7 8 9 10
             for (int setNumber : setSizes.keySet()) {
                 if (setNumber != set) {
-                    size += setSizes.get(set);
+                    size += setSizes.get(setNumber);
                 }
             }
             if(set == 1) {
@@ -86,11 +86,13 @@ public class TripletPreferenceProvider implements PreferenceBuilder {
                     double[] tempScores = new double[setSize];
                     int[] tempPositions = new int[setSize];
 
+                    int currentIndex = 0 ;
                     for (int i = 0; i < numberOfIndividuals; i++) {
                         if (individuals.getSetNoOf(i) == otherSet) {
                             e.setVariables(this.getVariableValuesForSet(set, index, i));
-                            tempScores[i] = e.evaluate();
-                            tempPositions[i] = tempIndex;
+                            tempScores[currentIndex] = e.evaluate();
+                            tempPositions[currentIndex] = tempIndex;
+                            currentIndex++;
                             tempIndex++;
                         }
                     }

@@ -18,15 +18,9 @@ public class MatchingData {
 
     /** number of individuals */
     private final int size;
-    public int getSize(){
-        return this.size;
-    }
 
     /** number of properties */
     private final int propertyNum;
-    public int getPropertyNum(){
-        return this.propertyNum;
-    }
 
     /** individual set */
     private final int[] sets;
@@ -69,7 +63,6 @@ public class MatchingData {
         this.propertyValues = propertyValues;
         this.weights = weights;
         this.requirements = requirements;
-
     }
 
     /**

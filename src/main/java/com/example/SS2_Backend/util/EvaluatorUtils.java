@@ -119,4 +119,16 @@ public class EvaluatorUtils {
         return "";
     }
 
+    /**
+     * temp
+     * @param func
+     * @return
+     */
+    public static String getValidFitnessFunction(String func) {
+        if (StringUtils.isEmptyOrNull(func) || MatchingConst.DEFAULT_FITNESS_FUNC.equals(func)) {
+            return "";
+        }
+        return func;
+    }
+
 }

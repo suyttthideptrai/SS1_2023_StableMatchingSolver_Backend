@@ -2,7 +2,7 @@ package com.example.SS2_Backend.model.stableMatching.Timestamp;
 
 import lombok.Getter;
 
-import static com.example.SS2_Backend.util.Utils.formatDouble;
+import static com.example.SS2_Backend.util.NumberUtils.formatDouble;
 
 /**
  * {rank,  score}, {r, s}, {r, s}, ...

@@ -72,6 +72,12 @@ public class HomeController {
     }
 
     @Async("taskExecutor")
+    @PostMapping("/solve-triplet-matching")
+    public CompletableFuture<ResponseEntity<Response>> solveTripletMatching(@RequestBody NewStableMatchingProblemDTO object) {
+        return CompletableFuture.completedFuture(tripletProblemRBO.solve(object));
+    }
+
+    @Async("taskExecutor")
     @PostMapping("/game-theory-solver")
     public CompletableFuture<ResponseEntity<Response>> solveGameTheory(@RequestBody GameTheoryProblemDTO gameTheoryProblem) {
         return CompletableFuture.completedFuture(gameTheorySolver.solveGameTheory(gameTheoryProblem));
@@ -116,7 +122,7 @@ public class HomeController {
     @Async("taskExecutor")
     @PostMapping("/rbo-triplet-problem-result-insights/{sessionCode}")
     public CompletableFuture<ResponseEntity<Response>> getTripletMatchingResultInsights(@RequestBody NewStableMatchingProblemDTO object,
-                                                                                 @PathVariable String sessionCode) {
+                                                                                        @PathVariable String sessionCode) {
         return CompletableFuture.completedFuture(tripletProblemRBO.getInsights(
                 object,
                 sessionCode));

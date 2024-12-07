@@ -6,8 +6,8 @@ import lombok.Getter;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.example.SS2_Backend.util.Utils.fillWithChar;
-import static com.example.SS2_Backend.util.Utils.formatDouble;
+import static com.example.SS2_Backend.util.StringUtils.fillWithChar;
+import static com.example.SS2_Backend.util.NumberUtils.formatDouble;
 
 @Getter
 public class IndividualList {

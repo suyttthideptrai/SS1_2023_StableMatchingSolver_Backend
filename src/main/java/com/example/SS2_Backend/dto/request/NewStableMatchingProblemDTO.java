@@ -52,7 +52,6 @@ public class NewStableMatchingProblemDTO {
 
     private String[] evaluateFunctions;
 
-    @NotBlank(message = ErrMessage.NOT_BLANK)
     private String fitnessFunction;
 
     private int [][] excludedPairs;

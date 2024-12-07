@@ -5,11 +5,8 @@ import com.example.SS2_Backend.dto.request.NewStableMatchingProblemDTO;
 import com.example.SS2_Backend.dto.request.StableMatchingOTMProblemDTO;
 import com.example.SS2_Backend.dto.request.StableMatchingProblemDTO;
 import com.example.SS2_Backend.dto.response.Response;
+import com.example.SS2_Backend.service.*;
 import org.springframework.http.ResponseEntity;
-import com.example.SS2_Backend.service.GameTheorySolver;
-import com.example.SS2_Backend.service.OTMStableMatchingSolver;
-import com.example.SS2_Backend.service.StableMatchingSolver;
-import com.example.SS2_Backend.service.StableMatchingSolverRBO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +33,10 @@ public class HomeController {
 
     @Autowired
     private OTMStableMatchingSolver stableMatchingOTMProblemDTO;
+
+    @Autowired
+    private TripletProblemRBO tripletProblemRBO;
+
 
     @GetMapping("/")
     public String home() {
@@ -108,6 +109,15 @@ public class HomeController {
     public CompletableFuture<ResponseEntity<Response>> getOTMMatchingResultInsights(@RequestBody StableMatchingOTMProblemDTO object,
                                                                                     @PathVariable String sessionCode) {
         return CompletableFuture.completedFuture(stableMatchingOTMProblemDTO.getProblemResultInsights(
+                object,
+                sessionCode));
+    }
+
+    @Async("taskExecutor")
+    @PostMapping("/rbo-triplet-problem-result-insights/{sessionCode}")
+    public CompletableFuture<ResponseEntity<Response>> getTripletMatchingResultInsights(@RequestBody NewStableMatchingProblemDTO object,
+                                                                                 @PathVariable String sessionCode) {
+        return CompletableFuture.completedFuture(tripletProblemRBO.getInsights(
                 object,
                 sessionCode));
     }

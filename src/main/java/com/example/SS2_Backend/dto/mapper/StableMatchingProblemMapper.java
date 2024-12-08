@@ -16,6 +16,7 @@ import com.example.SS2_Backend.ss.smt.preference.PreferenceListWrapper;
 import com.example.SS2_Backend.ss.smt.preference.impl.provider.TwoSetPreferenceProvider;
 import com.example.SS2_Backend.ss.smt.requirement.Requirement;
 import com.example.SS2_Backend.ss.smt.requirement.RequirementDecoder;
+import com.example.SS2_Backend.util.EvaluatorUtils;
 
 /**
  * Mapper layer, xử lý các công việc sau đối với từng loại matching problem:
@@ -67,12 +68,13 @@ public class StableMatchingProblemMapper {
                 request.getEvaluateFunctions());
         PreferenceListWrapper preferenceLists = builder.toListWrapper();
         FitnessEvaluator fitnessEvaluator = new TwoSetFitnessEvaluator(data);
+        String fitnessFunction = EvaluatorUtils.getValidFitnessFunction(request.getFitnessFunction());
         return new MTMProblem(request.getProblemName(),
                 request.getNumberOfIndividuals(),
                 request.getNumberOfSets(),
                 data,
                 preferenceLists,
-                request.getFitnessFunction(),
+                fitnessFunction,
                 fitnessEvaluator);
     }
 

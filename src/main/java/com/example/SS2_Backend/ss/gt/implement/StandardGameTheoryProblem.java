@@ -1,6 +1,10 @@
-package com.example.SS2_Backend.model.gameTheory;
+package com.example.SS2_Backend.ss.gt.implement;
 
-import com.example.SS2_Backend.ss.gt.GTProblem;
+import com.example.SS2_Backend.ss.gt.Conflict;
+import com.example.SS2_Backend.ss.gt.GameTheoryProblem;
+import com.example.SS2_Backend.ss.gt.NormalPlayer;
+import com.example.SS2_Backend.ss.gt.SpecialPlayer;
+import com.example.SS2_Backend.ss.gt.Strategy;
 import org.moeaframework.core.Solution;
 import org.moeaframework.core.variable.BinaryIntegerVariable;
 
@@ -21,7 +25,7 @@ import static com.example.SS2_Backend.util.StringExpressionEvaluator.*;
  **/
 //--------------------------------------------------------------------------
 /* *
- * WARNING: DO NOT CHANGE ORDER OF GTProblem CONSTRUCTOR
+ * WARNING: DO NOT CHANGE ORDER OF StandardGameTheoryProblem CONSTRUCTOR
  * PRECAUTION: THIS WOULD ONLY SOLVE PROBLEM FOR COORDINATING PROBLEMS
 
  *  We will try to solve to equations of type : ( find p and q )
@@ -50,7 +54,7 @@ import static com.example.SS2_Backend.util.StringExpressionEvaluator.*;
         q = 1/3
 */
 
-public class GameTheoryProblem implements GTProblem, Serializable {
+public class StandardGameTheoryProblem implements GameTheoryProblem, Serializable {
     private SpecialPlayer specialPlayer;
     private List<NormalPlayer> normalPlayers;
     private List<NormalPlayer> oldNormalPlayers = new ArrayList<>(); // this is for problem with dynamic data
@@ -64,10 +68,10 @@ public class GameTheoryProblem implements GTProblem, Serializable {
     int[] bestResponses = new int[4];
 
 
-    public GameTheoryProblem() {
+    public StandardGameTheoryProblem() {
     }
 
-    public GameTheoryProblem(String path, int startRow) throws IOException {
+    public StandardGameTheoryProblem(String path, int startRow) throws IOException {
         super();
 
         if (Objects.equals(path, "")) {

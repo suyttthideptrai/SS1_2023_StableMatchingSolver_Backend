@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 
+@Deprecated
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

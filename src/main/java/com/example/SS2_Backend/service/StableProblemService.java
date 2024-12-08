@@ -5,8 +5,8 @@ import com.example.SS2_Backend.dto.mapper.StableMatchingProblemMapper;
 import com.example.SS2_Backend.dto.request.NewStableMatchingProblemDTO;
 import com.example.SS2_Backend.dto.response.Progress;
 import com.example.SS2_Backend.dto.response.Response;
-import com.example.SS2_Backend.model.stableMatching.Matches.MatchingSolution;
-import com.example.SS2_Backend.model.stableMatching.Matches.MatchingSolutionInsights;
+import com.example.SS2_Backend.ss.smt.result.MatchingSolution;
+import com.example.SS2_Backend.ss.smt.result.MatchingSolutionInsights;
 import com.example.SS2_Backend.ss.smt.Matches;
 import com.example.SS2_Backend.ss.smt.MatchingProblem;
 import com.example.SS2_Backend.ss.smt.implement.MTMProblem;
@@ -15,10 +15,7 @@ import com.example.SS2_Backend.util.ValidationUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.moeaframework.Executor;
-import org.moeaframework.core.NondominatedPopulation;
-import org.moeaframework.core.Problem;
-import org.moeaframework.core.Solution;
-import org.moeaframework.core.TerminationCondition;
+import org.moeaframework.core.*;
 import org.moeaframework.core.termination.MaxFunctionEvaluations;
 import org.moeaframework.util.TypedProperties;
 import org.springframework.http.HttpStatus;
@@ -27,16 +24,12 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class StableMatchingSolverRBO implements MatchingSolver{
+public class StableProblemService implements ProblemService {
 
     private static final int RUN_COUNT_PER_ALGORITHM = 10;
     private final SimpMessagingTemplate simpMessagingTemplate;
@@ -57,6 +50,18 @@ public class StableMatchingSolverRBO implements MatchingSolver{
             log.info("Building preference list...");
 
             MatchingProblem problem = StableMatchingProblemMapper.toMTM(request);
+//            Unsafe unsafe;
+//            try {
+//                Field field = Unsafe.class.getDeclaredField("theUnsafe");
+//                field.setAccessible(true);
+//                unsafe = (Unsafe) field.get(null);
+//            } catch (Exception e) {
+//                throw new AssertionError(e);
+//            }
+//            long requestAddress = getAddress(unsafe, request.getIndividualCapacities());
+//            long problemAddress = getAddress(unsafe, problem.getMatchingData().getCapacities());
+//            log.info("req cap {}, pro cap {}, equality {}", requestAddress, problemAddress,
+//                    Objects.equals(requestAddress, problemAddress));
             log.info("Start solving: {}, problem name: {}, problem size: {}",
                     problem.getMatchingTypeName(),
                     problem.getName(),
@@ -81,7 +86,7 @@ public class StableMatchingSolverRBO implements MatchingSolver{
                                 .build());
             }
 //            Testing tester = new Testing((Matches) results.get(0).getAttribute("matches"),
-//                    problem.getMatchingData(), problem.getMatchingData().getCapacities());
+//                    problem.getMatchingData().getSize(), problem.getMatchingData().getCapacities());
 //            System.out.println("[Testing] Solution has duplicate: " + tester.hasDuplicate());
             long endTime = System.currentTimeMillis();
 
@@ -127,7 +132,7 @@ public class StableMatchingSolverRBO implements MatchingSolver{
         Solution solution = result.get(0);
         MatchingSolution matchingSolution = new MatchingSolution();
         double fitnessValue = solution.getObjective(0);
-        Matches matches = (Matches) solution.getAttribute("matches");
+        com.example.SS2_Backend.ss.smt.Matches matches = (Matches) solution.getAttribute("matches");
 
         matchingSolution.setFitnessValue(-fitnessValue);
         matchingSolution.setMatches(matches);
@@ -137,6 +142,12 @@ public class StableMatchingSolverRBO implements MatchingSolver{
 
         return matchingSolution;
     }
+
+//    private static long getAddress(Unsafe unsafe, Object obj) {
+//        Object[] array = new Object[]{obj};
+//        long baseOffset = unsafe.arrayBaseOffset(Object[].class);
+//        return unsafe.getLong(array, baseOffset);
+//    }
 
 
     private NondominatedPopulation solveProblem(Problem problem,

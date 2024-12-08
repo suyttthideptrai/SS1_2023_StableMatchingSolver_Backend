@@ -101,7 +101,7 @@ public class MTMProblem implements MatchingProblem {
      * @return true if exists
      */
     public boolean hasFitnessFunc() {
-        return StringUtils.isEmptyOrNull(this.fitnessFunction);
+        return !StringUtils.isEmptyOrNull(this.fitnessFunction);
     }
 
     public double[] getMatchesSatisfactions(Matches matches) {

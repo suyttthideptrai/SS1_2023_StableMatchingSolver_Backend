@@ -3,12 +3,12 @@ package com.example.SS2_Backend.service;
 import com.example.SS2_Backend.dto.request.GameTheoryProblemDTO;
 import com.example.SS2_Backend.dto.response.Progress;
 import com.example.SS2_Backend.dto.response.Response;
-import com.example.SS2_Backend.model.gameTheory.GameSolution;
-import com.example.SS2_Backend.model.gameTheory.GameSolutionInsights;
-import com.example.SS2_Backend.model.gameTheory.GameTheoryProblem;
-import com.example.SS2_Backend.model.gameTheory.NormalPlayer;
-import com.example.SS2_Backend.ss.gt.GTProblem;
-import com.example.SS2_Backend.ss.gt.implement.PSOCompatibleGTProblem;
+import com.example.SS2_Backend.ss.gt.result.GameSolution;
+import com.example.SS2_Backend.ss.gt.result.GameSolutionInsights;
+import com.example.SS2_Backend.ss.gt.NormalPlayer;
+import com.example.SS2_Backend.ss.gt.GameTheoryProblem;
+import com.example.SS2_Backend.ss.gt.implement.PSOCompatibleGameTheoryProblem;
+import com.example.SS2_Backend.ss.gt.implement.StandardGameTheoryProblem;
 import com.example.SS2_Backend.util.NumberUtils;
 import com.example.SS2_Backend.util.ProblemUtils;
 import lombok.RequiredArgsConstructor;
@@ -40,73 +40,67 @@ public class GameTheorySolver {
 
     public ResponseEntity<Response> solveGameTheory(GameTheoryProblemDTO request) {
 
+        try {
+            log.info("Received request: " + request);
+            GameTheoryProblem problem;
+            String algorithm = request.getAlgorithm();
+            if (List.of("OMOPSO", "SMPSO").contains(algorithm)) {
+                problem = new PSOCompatibleGameTheoryProblem();
+            } else {
+                problem = new StandardGameTheoryProblem();
+            }
+            problem.setDefaultPayoffFunction(request.getDefaultPayoffFunction());
+            problem.setFitnessFunction(request.getFitnessFunction());
+            problem.setSpecialPlayer(request.getSpecialPlayer());
+            problem.setNormalPlayers(request.getNormalPlayers());
+            problem.setConflictSet(request.getConflictSet());
+            problem.setMaximizing(request.isMaximizing());
 
+            log.info("start writing {} problem to file", problem.getName());
+            boolean result = ProblemUtils.writeProblemToFile(problem, "gt_data_1");
+            if (result) {
+                log.info("finished writing {} problem to file", problem.getName());
+            } else {
+                log.info("failed writing {} problem to file", problem.getName());
+            }
 
-    try {
-        log.info("Received request: " + request);
-        GTProblem problem;
-        String algorithm = request.getAlgorithm();
-        if (List.of("OMOPSO", "SMPSO").contains(algorithm)) {
-            problem = new PSOCompatibleGTProblem();
-        } else {
-            problem = new GameTheoryProblem();
-        }
-        problem.setDefaultPayoffFunction(request.getDefaultPayoffFunction());
-        problem.setFitnessFunction(request.getFitnessFunction());
-        problem.setSpecialPlayer(request.getSpecialPlayer());
-        problem.setNormalPlayers(request.getNormalPlayers());
-        problem.setConflictSet(request.getConflictSet());
-        problem.setMaximizing(request.isMaximizing());
+            long startTime = System.currentTimeMillis();
+            log.info("Running algorithm: " + request.getAlgorithm() + "...");
 
-        log.info("start writing {} problem to file", problem.getName());
-        boolean result = ProblemUtils.writeProblemToFile(problem, "gt_data_1");
-        if (result) {
-            log.info("finished writing {} problem to file", problem.getName());
-        } else {
-            log.info("failed writing {} problem to file", problem.getName());
-        }
+            // solve the problem
+            NondominatedPopulation results = solveProblem(problem,
+                    request.getAlgorithm(),
+                    request.getGeneration(),
+                    request.getPopulationSize(),
+                    request.getDistributedCores(),
+                    request.getMaxTime());
+            long endTime = System.currentTimeMillis();
+            double runtime = ((double) (endTime - startTime) / 1000 / 60);
+            runtime = Math.round(runtime * 100.0) / 100.0;
 
-        long startTime = System.currentTimeMillis();
-        log.info("Running algorithm: " + request.getAlgorithm() + "...");
+            log.info("Algorithm: " + request.getAlgorithm() + " finished in " + runtime +
+                    " minutes");
 
-        // solve the problem
-        NondominatedPopulation results = solveProblem(problem,
-                request.getAlgorithm(),
-                request.getGeneration(),
-                request.getPopulationSize(),
-                request.getDistributedCores(),
-                request.getMaxTime()
-        );
-        long endTime = System.currentTimeMillis();
-        double runtime = ((double) (endTime - startTime) / 1000 / 60);
-        runtime = Math.round(runtime * 100.0) / 100.0;
-
-        log.info("Algorithm: " + request.getAlgorithm() + " finished in " + runtime + " minutes");
-
-        // format the output
-        log.info("Preparing the solution ...");
-        GameSolution gameSolution = formatSolution(problem, results);
-        gameSolution.setAlgorithm(request.getAlgorithm());
-        gameSolution.setRuntime(runtime);
-        return ResponseEntity.ok(
-                Response.builder()
-                        .status(200)
-                        .message("Solve game theory problem successfully!")
-                        .data(gameSolution)
-                        .build()
-        );
+            // format the output
+            log.info("Preparing the solution ...");
+            GameSolution gameSolution = formatSolution(problem, results);
+            gameSolution.setAlgorithm(request.getAlgorithm());
+            gameSolution.setRuntime(runtime);
+            return ResponseEntity.ok(Response
+                    .builder()
+                    .status(200)
+                    .message("Solve game theory problem successfully!")
+                    .data(gameSolution)
+                    .build());
         } catch (Exception e) {
             log.error("Error ", e);
-            return ResponseEntity.ok().body(
-                    Response.builder()
-                            .status(500)
-                            .message("Failed")
-                            .build()
-            );
+            return ResponseEntity
+                    .ok()
+                    .body(Response.builder().status(500).message("Failed").build());
         }
     }
 
-    private NondominatedPopulation solveProblem(GTProblem problem,
+    private NondominatedPopulation solveProblem(GameTheoryProblem problem,
                                                 String algorithm,
                                                 Integer generation,
                                                 Integer populationSize,
@@ -119,7 +113,8 @@ public class GameTheorySolver {
                 results = new Executor()
                         .withProblem(problem)
                         .withAlgorithm(algorithm)
-                        .withMaxEvaluations(generation * populationSize) // we are using the number of generations and population size to calculate the number of evaluations
+                        .withMaxEvaluations(generation *
+                                populationSize) // we are using the number of generations and population size to calculate the number of evaluations
                         .withProperty("populationSize", populationSize)
                         .withProperty("maxTime", maxTime)
                         .distributeOnAllCores()
@@ -131,7 +126,8 @@ public class GameTheorySolver {
                 results = new Executor()
                         .withProblem(problem)
                         .withAlgorithm(algorithm)
-                        .withMaxEvaluations(generation * populationSize) // we are using the number of generations and population size to calculate the number of evaluations
+                        .withMaxEvaluations(generation *
+                                populationSize) // we are using the number of generations and population size to calculate the number of evaluations
                         .withProperty("populationSize", populationSize)
                         .withProperty("maxTime", maxTime)
                         .distributeOn(numberOfCores)
@@ -145,7 +141,8 @@ public class GameTheorySolver {
                 results = new Executor()
                         .withProblem(problem)
                         .withAlgorithm(algorithm)
-                        .withMaxEvaluations(generation * populationSize) // we are using the number of generations and population size to calculate the number of evaluations
+                        .withMaxEvaluations(generation *
+                                populationSize) // we are using the number of generations and population size to calculate the number of evaluations
                         .withProperty("populationSize", populationSize)
                         .withProperty("maxTime", maxTime)
                         .distributeOnAllCores()
@@ -157,7 +154,8 @@ public class GameTheorySolver {
                 results = new Executor()
                         .withProblem(problem)
                         .withAlgorithm(algorithm)
-                        .withMaxEvaluations(generation * populationSize) // we are using the number of generations and population size to calculate the number of evaluations
+                        .withMaxEvaluations(generation *
+                                populationSize) // we are using the number of generations and population size to calculate the number of evaluations
                         .withProperty("populationSize", populationSize)
                         .withProperty("maxTime", maxTime)
                         .distributeOn(numberOfCores)
@@ -168,180 +166,197 @@ public class GameTheorySolver {
 
         }
     }
-        public static GameSolution formatSolution (GTProblem problem, NondominatedPopulation result){
-            Solution solution = result.get(0);
-            GameSolution gameSolution = new GameSolution();
 
-            double fitnessValue = solution.getObjective(0);
-            gameSolution.setFitnessValue(fitnessValue);
+    public static GameSolution formatSolution(GameTheoryProblem problem, NondominatedPopulation result) {
+        Solution solution = result.get(0);
+        GameSolution gameSolution = new GameSolution();
+
+        double fitnessValue = solution.getObjective(0);
+        gameSolution.setFitnessValue(fitnessValue);
 
 
-            List<NormalPlayer> players = problem.getNormalPlayers();
-            List<GameSolution.Player> gameSolutionPlayers = new ArrayList<>();
+        List<NormalPlayer> players = problem.getNormalPlayers();
+        List<GameSolution.Player> gameSolutionPlayers = new ArrayList<>();
 
-            int chosenStratIdx;
-            // loop through all players and get the strategy chosen by each player
-            for (int i = 0; i < solution.getNumberOfVariables(); i++) {
-                NormalPlayer normalPlayer = players.get(i);
+        int chosenStratIdx;
+        // loop through all players and get the strategy chosen by each player
+        for (int i = 0; i < solution.getNumberOfVariables(); i++) {
+            NormalPlayer normalPlayer = players.get(i);
 
-                Variable var = solution.getVariable(i);
-                if (var instanceof RealVariable) {
-                    chosenStratIdx = NumberUtils.toInteger((RealVariable) var);
-                } else if (var instanceof BinaryIntegerVariable) {
-                    chosenStratIdx = EncodingUtils.getInt(var);
-                } else {
-                    // :v
-                    chosenStratIdx = EncodingUtils.getInt(var);
-                }
-
-                double strategyPayoff = normalPlayer.getStrategyAt(chosenStratIdx).getPayoff();
-
-                String playerName = getPlayerName(normalPlayer, i);
-                String strategyName = getStrategyName(chosenStratIdx, normalPlayer, i);
-
-                GameSolution.Player gameSolutionPlayer = GameSolution.Player.builder()
-                        .playerName(playerName)
-                        .strategyName(strategyName)
-                        .payoff(strategyPayoff)
-                        .build();
-
-                gameSolutionPlayers.add(gameSolutionPlayer);
-
+            Variable var = solution.getVariable(i);
+            if (var instanceof RealVariable) {
+                chosenStratIdx = NumberUtils.toInteger((RealVariable) var);
+            } else if (var instanceof BinaryIntegerVariable) {
+                chosenStratIdx = EncodingUtils.getInt(var);
+            } else {
+                // :v
+                chosenStratIdx = EncodingUtils.getInt(var);
             }
 
-            gameSolution.setPlayers(gameSolutionPlayers);
+            double strategyPayoff = normalPlayer.getStrategyAt(chosenStratIdx).getPayoff();
 
-            return gameSolution;
-        }
+            String playerName = getPlayerName(normalPlayer, i);
+            String strategyName = getStrategyName(chosenStratIdx, normalPlayer, i);
 
-        public ResponseEntity<Response> getProblemResultInsights (GameTheoryProblemDTO request, String sessionCode){
-            log.info("Received request: " + request);
-            String[] algorithms = {"NSGAII", "NSGAIII", "eMOEA", "PESA2", "VEGA"};
-
-
-            simpMessagingTemplate.convertAndSendToUser(sessionCode, "/progress", createProgressMessage("Initializing the problem..."));
-            GameTheoryProblem problem = new GameTheoryProblem();
-            problem.setSpecialPlayer(request.getSpecialPlayer());
-            problem.setDefaultPayoffFunction(request.getDefaultPayoffFunction());
-            problem.setNormalPlayers(request.getNormalPlayers());
-            problem.setFitnessFunction(request.getFitnessFunction());
-            problem.setConflictSet(request.getConflictSet());
-            problem.setMaximizing(request.isMaximizing());
-
-            GameSolutionInsights gameSolutionInsights = initGameSolutionInsights(algorithms);
-
-            int runCount = 1;
-            int maxRunCount = algorithms.length * RUN_COUNT_PER_ALGORITHM;
-            // solve the problem with different algorithms and then evaluate the performance of the algorithms
-            log.info("Start benchmarking the algorithms...");
-            simpMessagingTemplate.convertAndSendToUser(sessionCode, "/progress", createProgressMessage("Start benchmarking the algorithms..."));
-
-            for (String algorithm : algorithms) {
-                log.info("Running algorithm: " + algorithm + "...");
-                for (int i = 0; i < RUN_COUNT_PER_ALGORITHM; i++) {
-                    System.out.println("Iteration: " + i);
-                    long start = System.currentTimeMillis();
-
-                    NondominatedPopulation results = solveProblem(problem,
-                            algorithm,
-                            request.getGeneration(),
-                            request.getPopulationSize(),
-                            request.getDistributedCores(),
-                            request.getMaxTime()
-                    );
-
-                    long end = System.currentTimeMillis();
-
-                    double runtime = (double) (end - start) / 1000;
-                    double fitnessValue = getFitnessValue(results);
-
-                    // send the progress to the client
-                    String message = "Algorithm " + algorithm + " finished iteration: #" + (i + 1) + "/" + RUN_COUNT_PER_ALGORITHM;
-                    Progress progress = createProgress(message, runtime, runCount, maxRunCount);
-                    System.out.println(progress);
-                    simpMessagingTemplate.convertAndSendToUser(sessionCode, "/progress", progress);
-                    runCount++;
-
-                    // add the fitness value and runtime to the insights
-                    gameSolutionInsights.getFitnessValues().get(algorithm).add(fitnessValue);
-                    gameSolutionInsights.getRuntimes().get(algorithm).add(runtime);
-
-
-                }
-
-            }
-            log.info("Benchmarking finished!");
-            simpMessagingTemplate.convertAndSendToUser(sessionCode, "/progress", createProgressMessage("Benchmarking finished!"));
-
-            return ResponseEntity.ok(
-                    Response.builder()
-                            .status(200)
-                            .message("Get problem result insights successfully!")
-                            .data(gameSolutionInsights)
-                            .build()
-            );
-        }
-
-        private GameSolutionInsights initGameSolutionInsights (String[]algorithms){
-            GameSolutionInsights gameSolutionInsights = new GameSolutionInsights();
-            Map<String, List<Double>> fitnessValueMap = new HashMap<>();
-            Map<String, List<Double>> runtimeMap = new HashMap<>();
-
-            gameSolutionInsights.setFitnessValues(fitnessValueMap);
-            gameSolutionInsights.setRuntimes(runtimeMap);
-
-            for (String algorithm : algorithms) {
-                fitnessValueMap.put(algorithm, new ArrayList<>());
-                runtimeMap.put(algorithm, new ArrayList<>());
-            }
-
-            return gameSolutionInsights;
-        }
-
-        private Progress createProgress (String message, Double runtime, Integer runCount,int maxRunCount){
-            int percent = runCount * 100 / maxRunCount;
-            int minuteLeff = (int) Math.ceil(((maxRunCount - runCount) * runtime) / 60); // runtime is in seconds
-            return Progress.builder()
-                    .inProgress(true) // this object is just to send to the client to show the progress
-                    .message(message)
-                    .runtime(runtime)
-                    .minuteLeft(minuteLeff)
-                    .percentage(percent)
+            GameSolution.Player gameSolutionPlayer = GameSolution.Player
+                    .builder()
+                    .playerName(playerName)
+                    .strategyName(strategyName)
+                    .payoff(strategyPayoff)
                     .build();
+
+            gameSolutionPlayers.add(gameSolutionPlayer);
+
         }
 
-        private Progress createProgressMessage (String message){
-            return Progress.builder()
-                    .inProgress(false) // this object is just to send a message to the client, not to show the progress
-                    .message(message)
-                    .build();
-        }
+        gameSolution.setPlayers(gameSolutionPlayers);
+
+        return gameSolution;
+    }
+
+    public ResponseEntity<Response> getProblemResultInsights(GameTheoryProblemDTO request,
+                                                             String sessionCode) {
+        log.info("Received request: " + request);
+        String[] algorithms = {"NSGAII", "NSGAIII", "eMOEA", "PESA2", "VEGA"};
 
 
-        public static String getPlayerName (NormalPlayer normalPlayer,int index){
-            String playerName = normalPlayer.getName();
-            if (playerName == null) {
-                playerName = String.format("Player %d", index);
+        simpMessagingTemplate.convertAndSendToUser(sessionCode,
+                "/progress",
+                createProgressMessage("Initializing the problem..."));
+        StandardGameTheoryProblem problem = new StandardGameTheoryProblem();
+        problem.setSpecialPlayer(request.getSpecialPlayer());
+        problem.setDefaultPayoffFunction(request.getDefaultPayoffFunction());
+        problem.setNormalPlayers(request.getNormalPlayers());
+        problem.setFitnessFunction(request.getFitnessFunction());
+        problem.setConflictSet(request.getConflictSet());
+        problem.setMaximizing(request.isMaximizing());
+
+        GameSolutionInsights gameSolutionInsights = initGameSolutionInsights(algorithms);
+
+        int runCount = 1;
+        int maxRunCount = algorithms.length * RUN_COUNT_PER_ALGORITHM;
+        // solve the problem with different algorithms and then evaluate the performance of the algorithms
+        log.info("Start benchmarking the algorithms...");
+        simpMessagingTemplate.convertAndSendToUser(sessionCode,
+                "/progress",
+                createProgressMessage("Start benchmarking the algorithms..."));
+
+        for (String algorithm : algorithms) {
+            log.info("Running algorithm: " + algorithm + "...");
+            for (int i = 0; i < RUN_COUNT_PER_ALGORITHM; i++) {
+                System.out.println("Iteration: " + i);
+                long start = System.currentTimeMillis();
+
+                NondominatedPopulation results = solveProblem(problem,
+                        algorithm,
+                        request.getGeneration(),
+                        request.getPopulationSize(),
+                        request.getDistributedCores(),
+                        request.getMaxTime());
+
+                long end = System.currentTimeMillis();
+
+                double runtime = (double) (end - start) / 1000;
+                double fitnessValue = getFitnessValue(results);
+
+                // send the progress to the client
+                String message =
+                        "Algorithm " + algorithm + " finished iteration: #" + (i + 1) + "/" +
+                                RUN_COUNT_PER_ALGORITHM;
+                Progress progress = createProgress(message, runtime, runCount, maxRunCount);
+                System.out.println(progress);
+                simpMessagingTemplate.convertAndSendToUser(sessionCode, "/progress", progress);
+                runCount++;
+
+                // add the fitness value and runtime to the insights
+                gameSolutionInsights.getFitnessValues().get(algorithm).add(fitnessValue);
+                gameSolutionInsights.getRuntimes().get(algorithm).add(runtime);
+
+
             }
 
-            return playerName;
+        }
+        log.info("Benchmarking finished!");
+        simpMessagingTemplate.convertAndSendToUser(sessionCode,
+                "/progress",
+                createProgressMessage("Benchmarking finished!"));
+
+        return ResponseEntity.ok(Response
+                .builder()
+                .status(200)
+                .message("Get problem result insights successfully!")
+                .data(gameSolutionInsights)
+                .build());
+    }
+
+    private GameSolutionInsights initGameSolutionInsights(String[] algorithms) {
+        GameSolutionInsights gameSolutionInsights = new GameSolutionInsights();
+        Map<String, List<Double>> fitnessValueMap = new HashMap<>();
+        Map<String, List<Double>> runtimeMap = new HashMap<>();
+
+        gameSolutionInsights.setFitnessValues(fitnessValueMap);
+        gameSolutionInsights.setRuntimes(runtimeMap);
+
+        for (String algorithm : algorithms) {
+            fitnessValueMap.put(algorithm, new ArrayList<>());
+            runtimeMap.put(algorithm, new ArrayList<>());
         }
 
-        public static String getStrategyName ( int chosenStrategyIndex, NormalPlayer normalPlayer,int index){
-            String strategyName = normalPlayer.getStrategies().get(chosenStrategyIndex).getName();
-            if (strategyName == null) {
-                strategyName = String.format("Strategy %d", index);
-            }
+        return gameSolutionInsights;
+    }
 
-            return strategyName;
+    private Progress createProgress(String message,
+                                    Double runtime,
+                                    Integer runCount,
+                                    int maxRunCount) {
+        int percent = runCount * 100 / maxRunCount;
+        int minuteLeff = (int) Math.ceil(
+                ((maxRunCount - runCount) * runtime) / 60); // runtime is in seconds
+        return Progress
+                .builder()
+                .inProgress(true) // this object is just to send to the client to show the progress
+                .message(message)
+                .runtime(runtime)
+                .minuteLeft(minuteLeff)
+                .percentage(percent)
+                .build();
+    }
+
+    private Progress createProgressMessage(String message) {
+        return Progress
+                .builder()
+                .inProgress(false) // this object is just to send a message to the client, not to show the progress
+                .message(message)
+                .build();
+    }
+
+
+    public static String getPlayerName(NormalPlayer normalPlayer, int index) {
+        String playerName = normalPlayer.getName();
+        if (playerName == null) {
+            playerName = String.format("Player %d", index);
         }
 
+        return playerName;
+    }
 
-        private static double getFitnessValue (NondominatedPopulation result){
-
-            Solution solution = result.get(0);
-            return solution.getObjective(0);
-
+    public static String getStrategyName(int chosenStrategyIndex,
+                                         NormalPlayer normalPlayer,
+                                         int index) {
+        String strategyName = normalPlayer.getStrategies().get(chosenStrategyIndex).getName();
+        if (strategyName == null) {
+            strategyName = String.format("Strategy %d", index);
         }
+
+        return strategyName;
+    }
+
+
+    private static double getFitnessValue(NondominatedPopulation result) {
+
+        Solution solution = result.get(0);
+        return solution.getObjective(0);
 
     }
+
+}

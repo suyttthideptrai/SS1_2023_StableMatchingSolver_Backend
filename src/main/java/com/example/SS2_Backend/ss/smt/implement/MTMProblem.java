@@ -18,9 +18,7 @@ import org.moeaframework.core.Variable;
 import org.moeaframework.core.variable.EncodingUtils;
 import org.moeaframework.core.variable.Permutation;
 
-import java.util.ArrayDeque;
-import java.util.Objects;
-import java.util.Queue;
+import java.util.*;
 
 @Slf4j
 @Getter
@@ -115,13 +113,14 @@ public class MTMProblem implements MatchingProblem {
     public Matches stableMatching(Variable var) {
         Matches matches = new Matches(matchingData.getSize());
         int[] decodeVar = EncodingUtils.getPermutation(var);
-        Queue<Integer> queue = new ArrayDeque<>();
+        Queue<Integer> queue = new LinkedList<>();
 
         for (int val : decodeVar) {
             queue.add(val);
         }
 
-        for (int leftNode : queue) {
+        while (! queue.isEmpty()) {
+            int leftNode = queue.poll();
             if (matches.isMatched(leftNode)) {
                 continue;
             }
@@ -131,7 +130,6 @@ public class MTMProblem implements MatchingProblem {
 
             //Loop through LeftNode's preference list to find a Match
             for (int i = 0; i < nodePreference.size(UNUSED_VAL); i++) {
-                //Next Match (RightNode) is found on the list
                 int rightNode = nodePreference.getPositionByRank(UNUSED_VAL, i);
 
                 if (matches.isMatched(rightNode, leftNode)) {
@@ -167,7 +165,6 @@ public class MTMProblem implements MatchingProblem {
                     break;
                 }
             }
-
         }
 
         return matches;

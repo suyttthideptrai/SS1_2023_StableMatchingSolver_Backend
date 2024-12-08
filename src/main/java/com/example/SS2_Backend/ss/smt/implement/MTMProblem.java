@@ -18,9 +18,7 @@ import org.moeaframework.core.Variable;
 import org.moeaframework.core.variable.EncodingUtils;
 import org.moeaframework.core.variable.Permutation;
 
-import java.util.LinkedList;
-import java.util.Objects;
-import java.util.Queue;
+import java.util.*;
 
 @Slf4j
 @Getter
@@ -115,22 +113,23 @@ public class MTMProblem implements MatchingProblem {
     public Matches stableMatching(Variable var) {
         Matches matches = new Matches(matchingData.getSize());
         int[] decodeVar = EncodingUtils.getPermutation(var);
-        Queue<Integer> unMatchedNode = new LinkedList<>();
+        Queue<Integer> queue = new LinkedList<>();
 
         for (int val : decodeVar) {
-            unMatchedNode.add(val);
+            queue.add(val);
         }
 
-        while (!unMatchedNode.isEmpty()) {
-            int leftNode;
-            leftNode = unMatchedNode.poll();
+        while (! queue.isEmpty()) {
+            int leftNode = queue.poll();
+            if (matches.isMatched(leftNode)) {
+                continue;
+            }
 
             //Get preference list of proposing node
             PreferenceList nodePreference = preferenceLists.get(leftNode);
 
             //Loop through LeftNode's preference list to find a Match
             for (int i = 0; i < nodePreference.size(UNUSED_VAL); i++) {
-                //Next Match (RightNode) is found on the list
                 int rightNode = nodePreference.getPositionByRank(UNUSED_VAL, i);
 
                 if (matches.isMatched(rightNode, leftNode)) {
@@ -138,14 +137,14 @@ public class MTMProblem implements MatchingProblem {
                 }
 
                 boolean rightIsFull = matches.isFull(rightNode, this.matchingData.getCapacityOf(rightNode));
-                boolean leftIsFull = matches.isFull(leftNode, this.matchingData.getCapacityOf(leftNode));
 
-                // Both nodes are not full
-                if (!rightIsFull && !leftIsFull) {
+                if (!rightIsFull) {
                     matches.addMatchBi(leftNode, rightNode);
-                    continue;
+                    break;
                 }
 
+                // The node that rightNode has the least preference considering
+                // its currents matches and leftNode
                 int rightLoser =  preferenceLists.getLeastScoreNode(
                     UNUSED_VAL,
                     rightNode,
@@ -153,31 +152,21 @@ public class MTMProblem implements MatchingProblem {
                     matches.getSetOf(rightNode),
                     matchingData.getCapacityOf(rightNode));
 
-                int leftLoser = preferenceLists.getLeastScoreNode(
-                    UNUSED_VAL,
-                    leftNode,
-                    rightNode,
-                    matches.getSetOf(leftNode),
-                    matchingData.getCapacityOf(leftNode));
-
-                // If neither leftNode and rightNode like the other
-                if ((rightLoser == leftNode) || (leftLoser == rightNode)) {
-                    continue;
-                }
-
-                // Unmatch right from loser if full
-                if (rightIsFull) {
+                // rightNode likes its current matches more than leftNode
+                if (rightLoser == leftNode) {
+                    // if leftNode like rightNode the least
+                    if (preferenceLists.getLastChoiceOf(UNUSED_VAL, leftNode) == rightNode) {
+                        break;
+                    }
+                } else {
                     matches.removeMatchBi(rightNode, rightLoser);
+                    matches.addMatchBi(leftNode, rightNode);
+                    queue.add(rightLoser);
+                    break;
                 }
-
-                // Unmatch leftNode from loser if full
-                if (leftIsFull) {
-                    matches.removeMatchBi(leftNode, leftLoser);
-                }
-
-                matches.addMatchBi(leftNode, rightNode);
             }
         }
+
         return matches;
     }
 

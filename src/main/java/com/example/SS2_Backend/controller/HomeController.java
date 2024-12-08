@@ -2,19 +2,20 @@ package com.example.SS2_Backend.controller;
 
 import com.example.SS2_Backend.dto.request.GameTheoryProblemDTO;
 import com.example.SS2_Backend.dto.request.NewStableMatchingProblemDTO;
-import com.example.SS2_Backend.dto.request.StableMatchingOTMProblemDTO;
-import com.example.SS2_Backend.dto.request.StableMatchingProblemDTO;
 import com.example.SS2_Backend.dto.response.Response;
-import org.springframework.http.ResponseEntity;
 import com.example.SS2_Backend.service.GameTheorySolver;
 import com.example.SS2_Backend.service.OTMStableMatchingSolver;
-import com.example.SS2_Backend.service.StableMatchingSolver;
-import com.example.SS2_Backend.service.StableMatchingSolverRBO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.example.SS2_Backend.service.StableProblemService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -23,16 +24,11 @@ import java.util.concurrent.CompletableFuture;
 @CrossOrigin(origins = "*", maxAge = 3600)
 public class HomeController {
 
-    private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
-
     @Autowired
     private GameTheorySolver gameTheorySolver;
 
     @Autowired
-    private StableMatchingSolver stableMatchingSolver;
-
-    @Autowired
-    private StableMatchingSolverRBO stableMatchingSolverRBO;
+    private StableProblemService stableMatchingSolver;
 
     @Autowired
     private OTMStableMatchingSolver stableMatchingOTMProblemDTO;
@@ -44,17 +40,8 @@ public class HomeController {
 
     @Async("taskExecutor")
     @PostMapping("/stable-matching-solver")
-    public CompletableFuture<ResponseEntity<Response>> solveStableMatching(@RequestBody StableMatchingProblemDTO object) {
-        return CompletableFuture.completedFuture(stableMatchingSolver.solveStableMatching(object));
-    }
-
-    /*
-     * Đây là phần chạy RBO (Request Body Optimization) để giải Stable Matching Problem
-     * */
-    @Async("taskExecutor")
-    @PostMapping("/stable-matching-rbo-solver")
     public CompletableFuture<ResponseEntity<Response>> solveStableMatching(@RequestBody NewStableMatchingProblemDTO object) {
-        return CompletableFuture.completedFuture(stableMatchingSolverRBO.solve(object));
+        return CompletableFuture.completedFuture(stableMatchingSolver.solve(object));
     }
 
 //    @Async("taskExecutor")
@@ -86,21 +73,11 @@ public class HomeController {
 
     @Async("taskExecutor")
     @PostMapping("/matching-problem-result-insights/{sessionCode}")
-    public CompletableFuture<ResponseEntity<Response>> getMatchingResultInsights(@RequestBody StableMatchingProblemDTO object,
-                                                                                 @PathVariable String sessionCode) {
-        return CompletableFuture.completedFuture(stableMatchingSolver.getProblemResultInsights(object,
-                sessionCode));
-    }
-
-    @Async("taskExecutor")
-    @PostMapping("/rbo-matching-problem-result-insights/{sessionCode}")
     public CompletableFuture<ResponseEntity<Response>> getMatchingResultInsights(@RequestBody NewStableMatchingProblemDTO object,
                                                                                  @PathVariable String sessionCode) {
-        return CompletableFuture.completedFuture(stableMatchingSolverRBO.getInsights(
-                object,
+        return CompletableFuture.completedFuture(stableMatchingSolver.getInsights(object,
                 sessionCode));
     }
-
 
     @Async("taskExecutor")
     @PostMapping("/otm-matching-problem-result-insights/{sessionCode}")

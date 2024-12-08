@@ -1,7 +1,6 @@
 package com.example.SS2_Backend.service;
 
 import com.example.SS2_Backend.dto.request.NewStableMatchingProblemDTO;
-import com.example.SS2_Backend.dto.request.StableMatchingProblemDTO;
 import com.example.SS2_Backend.dto.response.Response;
 import org.springframework.http.ResponseEntity;
 
@@ -11,7 +10,7 @@ import org.springframework.http.ResponseEntity;
  * 1. solve
  * 2. getInsights
  */
-public interface MatchingSolver {
+public interface ProblemService {
 
     /**
      * solve

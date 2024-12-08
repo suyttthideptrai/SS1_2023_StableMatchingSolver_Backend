@@ -1,13 +1,10 @@
 package com.example.SS2_Backend.ss.gt;
 
-import com.example.SS2_Backend.model.gameTheory.Conflict;
-import com.example.SS2_Backend.model.gameTheory.NormalPlayer;
-import com.example.SS2_Backend.model.gameTheory.SpecialPlayer;
 import org.moeaframework.core.Problem;
 
 import java.util.List;
 
-public interface GTProblem extends Problem {
+public interface GameTheoryProblem extends Problem {
 
     void setDefaultPayoffFunction(String payoffFunction);
 

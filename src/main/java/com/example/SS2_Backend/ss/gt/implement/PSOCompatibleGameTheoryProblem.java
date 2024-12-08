@@ -1,12 +1,12 @@
 package com.example.SS2_Backend.ss.gt.implement;
 
-import com.example.SS2_Backend.model.gameTheory.Conflict;
-import com.example.SS2_Backend.model.gameTheory.GameSolution;
-import com.example.SS2_Backend.model.gameTheory.NormalPlayer;
-import com.example.SS2_Backend.model.gameTheory.SpecialPlayer;
-import com.example.SS2_Backend.model.gameTheory.Strategy;
+import com.example.SS2_Backend.ss.gt.Conflict;
+import com.example.SS2_Backend.ss.gt.result.GameSolution;
+import com.example.SS2_Backend.ss.gt.NormalPlayer;
+import com.example.SS2_Backend.ss.gt.SpecialPlayer;
+import com.example.SS2_Backend.ss.gt.Strategy;
 import com.example.SS2_Backend.service.GameTheorySolver;
-import com.example.SS2_Backend.ss.gt.GTProblem;
+import com.example.SS2_Backend.ss.gt.GameTheoryProblem;
 import com.example.SS2_Backend.util.NumberUtils;
 import com.example.SS2_Backend.util.ProblemUtils;
 import lombok.Data;
@@ -14,7 +14,6 @@ import lombok.NoArgsConstructor;
 import org.moeaframework.Executor;
 import org.moeaframework.core.NondominatedPopulation;
 import org.moeaframework.core.Solution;
-import org.moeaframework.core.variable.EncodingUtils;
 import org.moeaframework.core.variable.RealVariable;
 
 import java.io.Serializable;
@@ -29,7 +28,7 @@ import static com.example.SS2_Backend.util.StringExpressionEvaluator.*;
 
 @Data
 @NoArgsConstructor
-public class PSOCompatibleGTProblem implements GTProblem, Serializable {
+public class PSOCompatibleGameTheoryProblem implements GameTheoryProblem, Serializable {
 
     int[] bestResponses = new int[4];
     private SpecialPlayer specialPlayer;
@@ -42,7 +41,7 @@ public class PSOCompatibleGTProblem implements GTProblem, Serializable {
     private String defaultPayoffFunction;
     private boolean isMaximizing;
 
-    public PSOCompatibleGTProblem(String path) {
+    public PSOCompatibleGameTheoryProblem(String path) {
         super();
 
         if (Objects.equals(path, "")) {
@@ -55,7 +54,7 @@ public class PSOCompatibleGTProblem implements GTProblem, Serializable {
     }
 
     public static void main(String[] args) {
-        PSOCompatibleGTProblem problem = (PSOCompatibleGTProblem) ProblemUtils.readProblemFromFile(
+        PSOCompatibleGameTheoryProblem problem = (PSOCompatibleGameTheoryProblem) ProblemUtils.readProblemFromFile(
                 ".data/gt_data_1.ser");
         if (Objects.isNull(problem)) {
             return;

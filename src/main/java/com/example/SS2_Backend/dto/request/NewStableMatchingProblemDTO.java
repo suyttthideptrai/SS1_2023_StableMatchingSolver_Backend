@@ -3,7 +3,6 @@ package com.example.SS2_Backend.dto.request;
 import com.example.SS2_Backend.constants.MessageConst.ErrMessage;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -21,7 +20,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class NewStableMatchingProblemDTO {
+public class NewStableMatchingProblemDTO implements ProblemRequestDto {
 
     @Size(max = 255, message = ErrMessage.PROBLEM_NAME)
     private String problemName;

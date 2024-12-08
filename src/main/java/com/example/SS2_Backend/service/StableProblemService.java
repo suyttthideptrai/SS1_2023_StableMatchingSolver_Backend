@@ -5,21 +5,17 @@ import com.example.SS2_Backend.dto.mapper.StableMatchingProblemMapper;
 import com.example.SS2_Backend.dto.request.NewStableMatchingProblemDTO;
 import com.example.SS2_Backend.dto.response.Progress;
 import com.example.SS2_Backend.dto.response.Response;
-import com.example.SS2_Backend.model.stableMatching.Matches.MatchingSolution;
-import com.example.SS2_Backend.model.stableMatching.Matches.MatchingSolutionInsights;
+import com.example.SS2_Backend.ss.smt.result.MatchingSolution;
+import com.example.SS2_Backend.ss.smt.result.MatchingSolutionInsights;
 import com.example.SS2_Backend.ss.smt.Matches;
 import com.example.SS2_Backend.ss.smt.MatchingProblem;
 import com.example.SS2_Backend.ss.smt.implement.MTMProblem;
 import com.example.SS2_Backend.util.ComputerSpecsUtil;
-import com.example.SS2_Backend.util.Testing;
 import com.example.SS2_Backend.util.ValidationUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.moeaframework.Executor;
-import org.moeaframework.core.NondominatedPopulation;
-import org.moeaframework.core.Problem;
-import org.moeaframework.core.Solution;
-import org.moeaframework.core.TerminationCondition;
+import org.moeaframework.core.*;
 import org.moeaframework.core.termination.MaxFunctionEvaluations;
 import org.moeaframework.util.TypedProperties;
 import org.springframework.http.HttpStatus;
@@ -27,19 +23,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
-import sun.misc.Unsafe;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class StableMatchingSolverRBO implements MatchingSolver{
+public class StableProblemService implements ProblemService {
 
     private static final int RUN_COUNT_PER_ALGORITHM = 10;
     private final SimpMessagingTemplate simpMessagingTemplate;
@@ -142,7 +132,7 @@ public class StableMatchingSolverRBO implements MatchingSolver{
         Solution solution = result.get(0);
         MatchingSolution matchingSolution = new MatchingSolution();
         double fitnessValue = solution.getObjective(0);
-        Matches matches = (Matches) solution.getAttribute("matches");
+        com.example.SS2_Backend.ss.smt.Matches matches = (Matches) solution.getAttribute("matches");
 
         matchingSolution.setFitnessValue(-fitnessValue);
         matchingSolution.setMatches(matches);

@@ -1,8 +1,7 @@
 package com.example.SS2_Backend.util;
 
 import com.example.SS2_Backend.constants.AppConst;
-import com.example.SS2_Backend.model.gameTheory.GameTheoryProblem;
-import com.example.SS2_Backend.model.stableMatching.StableMatchingProblem;
+import com.example.SS2_Backend.ss.gt.implement.StandardGameTheoryProblem;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -94,7 +93,7 @@ public class AlgorithmsBenchmarking {
 
         String problemSerializedFilePath = ".data/gt_data.ser";
         String logFileName = "gt_log";
-        GameTheoryProblem problem = (GameTheoryProblem) ProblemUtils.readProblemFromFile(
+        StandardGameTheoryProblem problem = (StandardGameTheoryProblem) ProblemUtils.readProblemFromFile(
                 problemSerializedFilePath);
 
 

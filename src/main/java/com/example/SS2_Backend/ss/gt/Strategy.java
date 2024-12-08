@@ -1,4 +1,4 @@
-package com.example.SS2_Backend.model.gameTheory;
+package com.example.SS2_Backend.ss.gt;
 
 
 import lombok.AllArgsConstructor;

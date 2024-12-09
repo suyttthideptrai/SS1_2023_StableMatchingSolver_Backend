@@ -1,6 +1,6 @@
 package com.example.SS2_Backend.ss.smt.preference.impl.provider;
 
-import com.example.SS2_Backend.model.stableMatching.Extra.PreferenceListExtra;
+
 import com.example.SS2_Backend.ss.smt.requirement.Requirement;
 import com.example.SS2_Backend.ss.smt.MatchingData;
 import com.example.SS2_Backend.ss.smt.preference.PreferenceBuilder;
@@ -18,7 +18,6 @@ public class TripletPreferenceProvider implements PreferenceBuilder {
 
     private final MatchingData individuals;
     private int numberOfIndividuals;
-    private PreferenceListExtra preferenceList;
     @Getter
     private final Map<Integer, Integer> setSizes;
 
@@ -100,7 +99,6 @@ public class TripletPreferenceProvider implements PreferenceBuilder {
                     sortDescendingByScores(tempScores, tempPositions);
                     // Add vào PreferenceList chính
                     a.addArray(tempScores, tempPositions);
-
 
                     currentPosition += setSize; // padding
                 }

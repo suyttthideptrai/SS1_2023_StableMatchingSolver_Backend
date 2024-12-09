@@ -123,7 +123,9 @@ public class EvaluatorUtils {
      * @return
      */
     public static String getValidFitnessFunction(String func) {
-        if (StringUtils.isEmptyOrNull(func) || MatchingConst.DEFAULT_FITNESS_FUNC.equals(func)) {
+        if (StringUtils.isEmptyOrNull(func)
+                || MatchingConst.DEFAULT_FITNESS_FUNC.
+                equalsIgnoreCase(func)) {
             return "";
         }
         return func;

@@ -207,7 +207,7 @@ public class TripletOTOProblem implements MatchingProblem {
 
     private int[] getOtherSets(int currentSet) {
 
-        return IntStream.rangeClosed(1, setNum)
+        return IntStream.rangeClosed(1, setNum-1)     // fix error out of bound number of set
                 .filter(set -> set != currentSet)
                 .toArray();
     }

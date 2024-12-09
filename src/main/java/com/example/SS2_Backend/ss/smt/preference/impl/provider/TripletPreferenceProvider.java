@@ -18,7 +18,6 @@ public class TripletPreferenceProvider implements PreferenceBuilder {
 
     private final MatchingData individuals;
     private int numberOfIndividuals;
-    private PreferenceListExtra preferenceList;
     @Getter
     private final Map<Integer, Integer> setSizes;
 
@@ -63,8 +62,8 @@ public class TripletPreferenceProvider implements PreferenceBuilder {
                     size += setSizes.get(setNumber);
                 }
             }
-            if(set == 1) {
-                a = new TripletPreferenceList(size, setSizes.get(1));    // khởi tạo preferlist với size = 2 set còn lại + vào
+            if(set == 0) {
+                a = new TripletPreferenceList(size, setSizes.get(0));    // khởi tạo preferlist với size = 2 set còn lại + vào
             } else {
                 a = new TripletPreferenceList(size, 0);
             }
@@ -217,8 +216,8 @@ public class TripletPreferenceProvider implements PreferenceBuilder {
                     size += setSizes.get(set);
                 }
             }
-            if(set == 1) {
-                a = new TripletPreferenceList(size, setSizes.get(1));    // khởi tạo preferlist với size = 2 set còn lại + vào
+            if(set == 0) {
+                a = new TripletPreferenceList(size, setSizes.get(0));    // khởi tạo preferlist với size = 2 set còn lại + vào
             } else {
                 a = new TripletPreferenceList(size, 0);
             }
@@ -230,17 +229,20 @@ public class TripletPreferenceProvider implements PreferenceBuilder {
                     double[] tempScores = new double[setSize];
                     int[] tempPositions = new int[setSize];
 
+                    int currentIndex = 0 ;
                     for (int i = 0; i < numberOfIndividuals; i++) {
                         if (individuals.getSetNoOf(i) == otherSet) {
                             double totalScore = 0;
                             for (int j = 0; j < numberOfProperties; j++) {
-                                double propertyValue = individuals.getPropertyValueOf(i, j);
+                                double PropertyValue = individuals.getPropertyValueOf(i, j);
                                 Requirement requirement = individuals.getRequirementOf(index, j);
-                                double propertyWeight = individuals.getPropertyWeightOf(index, j);
-                                totalScore += requirement.getDefaultScaling( propertyValue) * propertyWeight;
+                                double PropertyWeight = individuals.getPropertyWeightOf(index, j);
+                                totalScore += requirement.getDefaultScaling(PropertyValue) * PropertyWeight;
                             }
-                            tempScores[i] = totalScore;
-                            tempPositions[i] = tempIndex;
+                            tempScores[currentIndex] = totalScore;
+                            tempPositions[currentIndex] = tempIndex;
+                            tempIndex++;
+                            currentIndex++;
                         }
                     }
 
@@ -251,7 +253,6 @@ public class TripletPreferenceProvider implements PreferenceBuilder {
             }
 
         }
-        a.sortDescendingByScores();
         return a;
     }
 

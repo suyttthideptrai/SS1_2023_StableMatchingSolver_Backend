@@ -1,4 +1,4 @@
-package com.example.SS2_Backend.ss.smt.implement;
+package com.example.SS2_Backend.service;
 
 import com.example.SS2_Backend.dto.request.NewStableMatchingProblemDTO;
 import org.junit.Test;
@@ -41,7 +41,7 @@ public class MTMStableMatchingSolverTest {
     @Test
     public void testStableMatchingSolver() {
         // Set up the solver
-        StableMatchingSolverRBO solver = new StableMatchingSolverRBO(null);
+        StableProblemService solver = new StableProblemService(null);
         // Run the solver
         solver.solve(newStableMatchingProblemDTO);
     }

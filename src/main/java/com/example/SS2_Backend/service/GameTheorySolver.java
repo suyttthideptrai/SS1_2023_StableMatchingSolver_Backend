@@ -9,6 +9,7 @@ import com.example.SS2_Backend.ss.gt.NormalPlayer;
 import com.example.SS2_Backend.ss.gt.GameTheoryProblem;
 import com.example.SS2_Backend.ss.gt.implement.PSOCompatibleGameTheoryProblem;
 import com.example.SS2_Backend.ss.gt.implement.StandardGameTheoryProblem;
+import com.example.SS2_Backend.util.EvaluatorUtils;
 import com.example.SS2_Backend.util.NumberUtils;
 import com.example.SS2_Backend.util.ProblemUtils;
 import lombok.RequiredArgsConstructor;
@@ -49,20 +50,22 @@ public class GameTheorySolver {
             } else {
                 problem = new StandardGameTheoryProblem();
             }
-            problem.setDefaultPayoffFunction(request.getDefaultPayoffFunction());
-            problem.setFitnessFunction(request.getFitnessFunction());
+            problem.setDefaultPayoffFunction(EvaluatorUtils
+                    .getIfDefaultFunction(request.getDefaultPayoffFunction()));
+            problem.setFitnessFunction(EvaluatorUtils
+                    .getValidFitnessFunction(request.getFitnessFunction()));
             problem.setSpecialPlayer(request.getSpecialPlayer());
             problem.setNormalPlayers(request.getNormalPlayers());
             problem.setConflictSet(request.getConflictSet());
             problem.setMaximizing(request.isMaximizing());
 
-            log.info("start writing {} problem to file", problem.getName());
-            boolean result = ProblemUtils.writeProblemToFile(problem, "gt_data_1");
-            if (result) {
-                log.info("finished writing {} problem to file", problem.getName());
-            } else {
-                log.info("failed writing {} problem to file", problem.getName());
-            }
+//            log.info("start writing {} problem to file", problem.getName());
+//            boolean result = ProblemUtils.writeProblemToFile(problem, "gt_data_1");
+//            if (result) {
+//                log.info("finished writing {} problem to file", problem.getName());
+//            } else {
+//                log.info("failed writing {} problem to file", problem.getName());
+//            }
 
             long startTime = System.currentTimeMillis();
             log.info("Running algorithm: " + request.getAlgorithm() + "...");
@@ -96,7 +99,7 @@ public class GameTheorySolver {
             log.error("Error ", e);
             return ResponseEntity
                     .ok()
-                    .body(Response.builder().status(500).message("Failed").build());
+                    .body(Response.builder().status(500).message(e.getMessage()).build());
         }
     }
 

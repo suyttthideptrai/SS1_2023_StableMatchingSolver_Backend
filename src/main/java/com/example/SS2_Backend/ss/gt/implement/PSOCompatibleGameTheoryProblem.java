@@ -225,7 +225,6 @@ public class PSOCompatibleGameTheoryProblem implements GameTheoryProblem, Serial
                 BigDecimal payoffValue = evaluatePayoffFunctionNoRelative(player
                         .getStrategies()
                         .get(i), payoffFunction);
-                System.out.println("Payoff value: " + payoffValue);
                 payoffValues.add(payoffValue);
             }
             player.setPayoffValues(payoffValues);

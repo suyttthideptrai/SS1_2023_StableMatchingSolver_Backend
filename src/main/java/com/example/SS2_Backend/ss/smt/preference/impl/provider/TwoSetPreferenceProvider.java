@@ -85,19 +85,19 @@ public class TwoSetPreferenceProvider implements PreferenceBuilder {
             String key = entry.getKey();
             Set<Integer> values = entry.getValue();
             switch (key) {
-                case "P":
+                case "p":
                     for (Integer value : values) {
                         double val = matchingData.getPropertyValueOf(idx2, value - 1);
                         variablesValues.put(key + value, val);
                     }
                     break;
-                case "W":
+                case "w":
                     for (Integer value : values) {
                         double val = matchingData.getPropertyWeightOf(idx1, value - 1);
                         variablesValues.put(key + value, val);
                     }
                     break;
-                case "R":
+                case "r":
                     for (Integer value : values) {
                         double val = matchingData
                                 .getRequirementOf(idx1, value - 1)

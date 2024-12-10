@@ -277,7 +277,6 @@ public class StandardGameTheoryProblem implements GameTheoryProblem, Serializabl
             List<BigDecimal> payoffValues = new ArrayList<>();
             for (int i = 0; i < player.getStrategies().size(); ++i) {
                 BigDecimal payoffValue =  evaluatePayoffFunctionNoRelative(player.getStrategies().get(i), payoffFunction);
-                System.out.println("Payoff value: " + payoffValue);
                 payoffValues.add(payoffValue);
             }
             player.setPayoffValues(payoffValues);

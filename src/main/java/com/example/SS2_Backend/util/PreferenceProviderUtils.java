@@ -53,17 +53,21 @@ public class PreferenceProviderUtils {
         return variables;
     }
 
-    private static Optional<Integer> getNextIndexToken(String evaluateFunction, int currentIndex) {
-        int nextIndex = currentIndex + 1;
-        while (nextIndex < evaluateFunction.length() &&
-                Character.isDigit(evaluateFunction.charAt(nextIndex))) {
-            nextIndex++;
+    private static Optional<Integer> getNextIndexToken(String evaluateFunction, int charPos) {
+        int numberPos = charPos + 1;
+        while (numberPos < evaluateFunction.length() &&
+                Character.isDigit(evaluateFunction.charAt(numberPos))) {
+            numberPos++;
         }
-        if (nextIndex == currentIndex + 1) {
+        if (numberPos == charPos + 1) {
             return Optional.empty();
         }
-        String subString = evaluateFunction.substring(currentIndex + 1, nextIndex);
+        String subString = evaluateFunction.substring(charPos + 1, numberPos);
         int idx = Integer.parseInt(subString);
         return Optional.of(idx);
+    }
+
+    public static Set<String> getVariables(String evaluateFunction) {
+        return convertMapToSet(filterVariable(evaluateFunction));
     }
 }

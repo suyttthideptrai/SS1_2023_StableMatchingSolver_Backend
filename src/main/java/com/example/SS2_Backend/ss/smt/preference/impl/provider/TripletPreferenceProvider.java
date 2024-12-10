@@ -72,9 +72,6 @@ public class TripletPreferenceProvider implements PreferenceBuilder {
             }
             e = this.expressions.get(set);
 
-
-            int currentPosition = 0;
-
             // Xử lý từng set riêng biệt
             int tempIndex = 0;
 
@@ -82,6 +79,8 @@ public class TripletPreferenceProvider implements PreferenceBuilder {
                 if (otherSet != set) {
                     int setSize = setSizes.get(otherSet);
 
+                    // tạo scores và position tạm thời cho 1 set cụ thể để sort
+                    // ví dụ hiện tại Node 1 từ set 0 và cần tạo prefer líst đối với set 1 2 thì cần sort từng set trước khi thêm vào preferLíst
                     double[] tempScores = new double[setSize];
                     int[] tempPositions = new int[setSize];
 
@@ -99,9 +98,6 @@ public class TripletPreferenceProvider implements PreferenceBuilder {
                     sortDescendingByScores(tempScores, tempPositions);
                     // Add vào PreferenceList chính
                     a.addArray(tempScores, tempPositions);
-
-
-                    currentPosition += setSize; // padding
                 }
             }
 

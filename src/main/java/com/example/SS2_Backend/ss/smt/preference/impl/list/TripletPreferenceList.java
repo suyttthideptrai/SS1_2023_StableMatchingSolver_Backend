@@ -4,11 +4,12 @@ import com.example.SS2_Backend.ss.smt.preference.PreferenceList;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
 import lombok.AccessLevel;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
+@Slf4j
 @Data
 @FieldDefaults(level = AccessLevel.PROTECTED)
 public class TripletPreferenceList implements PreferenceList {
@@ -58,7 +59,7 @@ public class TripletPreferenceList implements PreferenceList {
 
     public int[] getPreferenceForSpecificSet(int currentSet,int setNumber, Map<Integer, Integer> setSizes) {
         int startIndex = 0;   // 1 2 3
-        for (int i = 1; i < setNumber; i++) {
+        for (int i = 0; i < setNumber; i++) {
             if (setSizes.containsKey(i) && i !=currentSet) {
                 startIndex += setSizes.get(i);
             }
@@ -69,8 +70,13 @@ public class TripletPreferenceList implements PreferenceList {
         return result;
     }
     @Override
-    public int getPositionByRank(int set, int rank) {
-        return 0;
+    public int getPositionByRank(int set, int rank) throws ArrayIndexOutOfBoundsException {
+        try {
+            return positions[rank] + this.padding;
+        } catch (ArrayIndexOutOfBoundsException e) {
+            log.error("Position {} not found:", rank, e);
+            return -1;
+        }
     }
 
     @Override

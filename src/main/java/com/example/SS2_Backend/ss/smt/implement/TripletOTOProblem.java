@@ -164,10 +164,12 @@ public class TripletOTOProblem implements MatchingProblem {
         // -1 is not find yet
         int result = -1;
 
-        int[] preferPartForTargetSet = nodePreferences.getPreferenceForSpecificSet(  // error
+        int[] preferPartForTargetSet = nodePreferences.getPreferenceForSpecificSet(
                 matchingData.getSetNoOf(newNode), targetSet, matchingData.getSetNums());
 
-        for (int preferNode : preferPartForTargetSet) {     // ghép với 1 cá thể trong preferList
+        for (int i = 0 ; i < preferPartForTargetSet.length; i++) {     // ghép với 1 cá thể trong preferList
+            int preferNode = nodePreferences.getPositionByRank(UNUSED_VAL, i);
+
             if (!matches.isFull(preferNode, matchingData.getCapacityOf(preferNode))) {
                 result = preferNode;    // ghép thành công với preferNode thì dừng vòng lặp
                 break;   //

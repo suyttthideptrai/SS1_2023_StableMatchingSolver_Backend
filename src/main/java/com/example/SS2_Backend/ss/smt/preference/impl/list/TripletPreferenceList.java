@@ -98,7 +98,12 @@ public class TripletPreferenceList implements PreferenceList {
 
     @Override
     public double getScore(int position) {
-        return 0;
+        try {
+            return scores[position - this.padding];
+        } catch (ArrayIndexOutOfBoundsException e) {
+            log.error("Position {} not found:", position, e);
+            return 0;
+        }
     }
 
 }

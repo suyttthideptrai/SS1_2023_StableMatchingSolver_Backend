@@ -115,8 +115,8 @@ public class EvaluatorUtils {
      * @return
      */
     public static String getValidEvaluationFunction(String func) {
-        if (StringUtils.isEmptyOrNull(func) ||
-                func.equals(MatchingConst.DEFAULT_EVALUATE_FUNC)) {
+        func = func.trim();
+        if (func.equals(MatchingConst.DEFAULT_EVALUATE_FUNC)) {
             return "";
         }
         return func;

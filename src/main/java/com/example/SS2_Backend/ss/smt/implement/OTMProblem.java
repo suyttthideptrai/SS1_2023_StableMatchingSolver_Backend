@@ -144,13 +144,10 @@ public class OTMProblem implements MatchingProblem {
         Permutation castVar = (Permutation) var;
         int[] decodeVar = castVar.toArray();
         Queue<Integer> unmatchedConsumers = new LinkedList<>();
-        Queue<Integer> unmatchedProviders = new LinkedList<>();
 
         // Split nodes into consumers and providers based on setNum
         for (int i = 0; i < problemSize; i++) {
-            if (decodeVar[i] < setNum) {
-                unmatchedProviders.add(i);
-            } else {
+            if (decodeVar[i] > setNum) {
                 unmatchedConsumers.add(i);
             }
         }
@@ -220,6 +217,6 @@ public class OTMProblem implements MatchingProblem {
 
     @Override
     public double[] getMatchesSatisfactions(Matches matches) {
-        return new double[0];
+        return this.preferenceLists.getMatchesSatisfactions(matches, matchingData);
     }
 }

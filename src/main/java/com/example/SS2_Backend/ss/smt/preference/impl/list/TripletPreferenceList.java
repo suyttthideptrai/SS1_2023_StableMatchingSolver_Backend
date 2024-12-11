@@ -14,12 +14,12 @@ import java.util.Set;
 @FieldDefaults(level = AccessLevel.PROTECTED)
 public class TripletPreferenceList implements PreferenceList {
 
-    // Scores are the preferences or priorities for the matching (either from provider or consumer perspective).
+    // Scores represent preferences or priorities.
     final double[] scores;
-    // The positions correspond to the IDs of the individuals (either providers or consumers).
-    final int[] positions;
+    final int[] positions; // IDs of the individuals.
     int current; // Tracks the current index in the list.
     final int padding; // Used for index adjustments.
+
     public TripletPreferenceList(int size, int padding) {
         scores = new double[size];
         positions = new int[size];
@@ -34,14 +34,14 @@ public class TripletPreferenceList implements PreferenceList {
 
     @Override
     public int getNumberOfOtherSets() {
-        return 0;
+        return 0; // Placeholder if needed for 3 sets.
     }
 
     @Override
     public int getLeastNode(int set, int newNode, Set<Integer> currentNodes) {
         int leastNode = newNode - this.padding;
         for (int currentNode : currentNodes) {
-            if (this.scores[leastNode] > this.scores[currentNode - this.padding]) {
+            if (compareScores(leastNode, currentNode - this.padding) > 0) {
                 leastNode = currentNode - this.padding;
             }
         }
@@ -50,17 +50,17 @@ public class TripletPreferenceList implements PreferenceList {
 
     @Override
     public int getLeastNode(int set, int newNode, int oldNode) {
-        if (isScoreGreater(set, newNode, oldNode)) {
+        if (compareScores(newNode - this.padding, oldNode - this.padding) > 0) {
             return oldNode;
         } else {
             return newNode;
         }
     }
 
-    public int[] getPreferenceForSpecificSet(int currentSet,int setNumber, Map<Integer, Integer> setSizes) {
-        int startIndex = 0;   // 1 2 3
+    public int[] getPreferenceForSpecificSet(int currentSet, int setNumber, Map<Integer, Integer> setSizes) {
+        int startIndex = 0;
         for (int i = 0; i < setNumber; i++) {
-            if (setSizes.containsKey(i) && i !=currentSet) {
+            if (setSizes.containsKey(i) && i != currentSet) {
                 startIndex += setSizes.get(i);
             }
         }
@@ -69,6 +69,7 @@ public class TripletPreferenceList implements PreferenceList {
         System.arraycopy(positions, startIndex, result, 0, setLength);
         return result;
     }
+
     @Override
     public int getPositionByRank(int set, int rank) throws ArrayIndexOutOfBoundsException {
         try {
@@ -81,9 +82,10 @@ public class TripletPreferenceList implements PreferenceList {
 
     @Override
     public int getLastOption(int set) {
-        return 0;
+        return positions[positions.length - 1] + this.padding;
     }
-    public void addArray (double[] scoreTMP, int[] positionTMP) {
+
+    public void addArray(double[] scoreTMP, int[] positionTMP) {
         for (int i = 0; i < scoreTMP.length; i++) {
             this.scores[current] = scoreTMP[i];
             this.positions[current] = positionTMP[i];
@@ -93,7 +95,7 @@ public class TripletPreferenceList implements PreferenceList {
 
     @Override
     public boolean isScoreGreater(int set, int node, int nodeToCompare) {
-        return this.scores[node - this.padding] > this.scores[nodeToCompare - this.padding];
+        return compareScores(node - this.padding, nodeToCompare - this.padding) > 0;
     }
 
     @Override
@@ -106,4 +108,20 @@ public class TripletPreferenceList implements PreferenceList {
         }
     }
 
+    /**
+     * Combines scores from multiple sets to evaluate preferences.
+     * For 2 sets, it defaults to a single score comparison.
+     * For 3 sets, it aggregates preferences.
+     */
+    public double calculateCombinedScore(int nodeA, int nodeB, int nodeC) {
+        return scores[nodeA - this.padding] + scores[nodeB - this.padding] + scores[nodeC - this.padding];
+    }
+
+    /**
+     * Helper method for comparing scores between two nodes.
+     */
+    private int compareScores(int node1, int node2) {
+        return Double.compare(scores[node1], scores[node2]);
+    }
 }
+

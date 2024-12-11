@@ -1,5 +1,6 @@
 package com.example.SS2_Backend.service;
 
+import com.example.SS2_Backend.dto.mapper.GameTheoryProblemMapper;
 import com.example.SS2_Backend.dto.request.GameTheoryProblemDTO;
 import com.example.SS2_Backend.dto.response.Progress;
 import com.example.SS2_Backend.dto.response.Response;
@@ -43,21 +44,7 @@ public class GameTheorySolver {
 
         try {
             log.info("Received request: " + request);
-            GameTheoryProblem problem;
-            String algorithm = request.getAlgorithm();
-            if (List.of("OMOPSO", "SMPSO").contains(algorithm)) {
-                problem = new PSOCompatibleGameTheoryProblem();
-            } else {
-                problem = new StandardGameTheoryProblem();
-            }
-            problem.setDefaultPayoffFunction(EvaluatorUtils
-                    .getIfDefaultFunction(request.getDefaultPayoffFunction()));
-            problem.setFitnessFunction(EvaluatorUtils
-                    .getValidFitnessFunction(request.getFitnessFunction()));
-            problem.setSpecialPlayer(request.getSpecialPlayer());
-            problem.setNormalPlayers(request.getNormalPlayers());
-            problem.setConflictSet(request.getConflictSet());
-            problem.setMaximizing(request.isMaximizing());
+            GameTheoryProblem problem = GameTheoryProblemMapper.toProblem(request);
 
 //            log.info("start writing {} problem to file", problem.getName());
 //            boolean result = ProblemUtils.writeProblemToFile(problem, "gt_data_1");
@@ -226,16 +213,10 @@ public class GameTheorySolver {
         simpMessagingTemplate.convertAndSendToUser(sessionCode,
                 "/progress",
                 createProgressMessage("Initializing the problem..."));
-        StandardGameTheoryProblem problem = new StandardGameTheoryProblem();
-        problem.setSpecialPlayer(request.getSpecialPlayer());
-        problem.setDefaultPayoffFunction(request.getDefaultPayoffFunction());
-        problem.setNormalPlayers(request.getNormalPlayers());
-        problem.setFitnessFunction(request.getFitnessFunction());
-        problem.setConflictSet(request.getConflictSet());
-        problem.setMaximizing(request.isMaximizing());
 
+        log.info("Mapping request to problem ...");
+        GameTheoryProblem problem = GameTheoryProblemMapper.toProblem(request);
         GameSolutionInsights gameSolutionInsights = initGameSolutionInsights(algorithms);
-
         int runCount = 1;
         int maxRunCount = algorithms.length * RUN_COUNT_PER_ALGORITHM;
         // solve the problem with different algorithms and then evaluate the performance of the algorithms

@@ -10,7 +10,7 @@
 ## Installation (Cài đặt)
 
 ### Requirements (Yêu cầu)
-1. github 
+1. git
 2. Java JDK 17
 3. Maven 3.8.3+
 
@@ -18,7 +18,9 @@
 1. Clone the repository (Clone repository này)
 ```bash 
 git clone https://github.com/suyttthideptrai/SS1_2023_StableMatchingSolver_Backend.git
+cd SS1_2023_StableMatchingSolver_Backend
 ```
+
 2. Build the project (Build project)
 ```bash
 mvn clean package

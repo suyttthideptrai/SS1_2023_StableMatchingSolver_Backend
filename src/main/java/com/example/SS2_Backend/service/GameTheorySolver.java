@@ -11,7 +11,6 @@ import com.example.SS2_Backend.ss.gt.implement.PSOCompatibleGameTheoryProblem;
 import com.example.SS2_Backend.ss.gt.implement.StandardGameTheoryProblem;
 import com.example.SS2_Backend.util.EvaluatorUtils;
 import com.example.SS2_Backend.util.NumberUtils;
-import com.example.SS2_Backend.util.ProblemUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.moeaframework.Executor;
@@ -38,27 +37,13 @@ public class GameTheorySolver {
     private final SimpMessagingTemplate simpMessagingTemplate;
 
     private static final int RUN_COUNT_PER_ALGORITHM = 10; // for insight running, each algorithm will be run for 10 times
+    static final String[] algorithms = {"NSGAII", "NSGAIII", "eMOEA", "PESA2", "VEGA", "OMOPSO" , "SMPSO"};
 
     public ResponseEntity<Response> solveGameTheory(GameTheoryProblemDTO request) {
 
         try {
             log.info("Received request: " + request);
-            GameTheoryProblem problem;
-            String algorithm = request.getAlgorithm();
-            if (List.of("OMOPSO", "SMPSO").contains(algorithm)) {
-                problem = new PSOCompatibleGameTheoryProblem();
-            } else {
-                problem = new StandardGameTheoryProblem();
-            }
-            problem.setDefaultPayoffFunction(EvaluatorUtils
-                    .getIfDefaultFunction(request.getDefaultPayoffFunction()));
-            problem.setFitnessFunction(EvaluatorUtils
-                    .getValidFitnessFunction(request.getFitnessFunction()));
-            problem.setSpecialPlayer(request.getSpecialPlayer());
-            problem.setNormalPlayers(request.getNormalPlayers());
-            problem.setConflictSet(request.getConflictSet());
-            problem.setMaximizing(request.isMaximizing());
-
+            GameTheoryProblem problem = getProblem(request, request.getAlgorithm());
 //            log.info("start writing {} problem to file", problem.getName());
 //            boolean result = ProblemUtils.writeProblemToFile(problem, "gt_data_1");
 //            if (result) {
@@ -220,19 +205,11 @@ public class GameTheorySolver {
     public ResponseEntity<Response> getProblemResultInsights(GameTheoryProblemDTO request,
                                                              String sessionCode) {
         log.info("Received request: " + request);
-        String[] algorithms = {"NSGAII", "NSGAIII", "eMOEA", "PESA2", "VEGA"};
 
 
         simpMessagingTemplate.convertAndSendToUser(sessionCode,
                 "/progress",
                 createProgressMessage("Initializing the problem..."));
-        StandardGameTheoryProblem problem = new StandardGameTheoryProblem();
-        problem.setSpecialPlayer(request.getSpecialPlayer());
-        problem.setDefaultPayoffFunction(request.getDefaultPayoffFunction());
-        problem.setNormalPlayers(request.getNormalPlayers());
-        problem.setFitnessFunction(request.getFitnessFunction());
-        problem.setConflictSet(request.getConflictSet());
-        problem.setMaximizing(request.isMaximizing());
 
         GameSolutionInsights gameSolutionInsights = initGameSolutionInsights(algorithms);
 
@@ -246,6 +223,8 @@ public class GameTheorySolver {
 
         for (String algorithm : algorithms) {
             log.info("Running algorithm: " + algorithm + "...");
+            final GameTheoryProblem problem = getProblem(request, algorithm);
+
             for (int i = 0; i < RUN_COUNT_PER_ALGORITHM; i++) {
                 System.out.println("Iteration: " + i);
                 long start = System.currentTimeMillis();
@@ -274,8 +253,6 @@ public class GameTheorySolver {
                 // add the fitness value and runtime to the insights
                 gameSolutionInsights.getFitnessValues().get(algorithm).add(fitnessValue);
                 gameSolutionInsights.getRuntimes().get(algorithm).add(runtime);
-
-
             }
 
         }
@@ -290,6 +267,25 @@ public class GameTheorySolver {
                 .message("Get problem result insights successfully!")
                 .data(gameSolutionInsights)
                 .build());
+    }
+
+    private static GameTheoryProblem getProblem(GameTheoryProblemDTO request, String algorithm) {
+        GameTheoryProblem problem;
+
+        if ("OMOPSO".equals(algorithm) || "SMPSO".equals(algorithm))
+            problem = new PSOCompatibleGameTheoryProblem();
+        else {
+            problem = new StandardGameTheoryProblem();
+        }
+        problem.setDefaultPayoffFunction(EvaluatorUtils
+            .getIfDefaultFunction(request.getDefaultPayoffFunction()));
+        problem.setFitnessFunction(EvaluatorUtils
+            .getValidFitnessFunction(request.getFitnessFunction()));
+        problem.setSpecialPlayer(request.getSpecialPlayer());
+        problem.setNormalPlayers(request.getNormalPlayers());
+        problem.setConflictSet(request.getConflictSet());
+        problem.setMaximizing(request.isMaximizing());
+        return problem;
     }
 
     private GameSolutionInsights initGameSolutionInsights(String[] algorithms) {

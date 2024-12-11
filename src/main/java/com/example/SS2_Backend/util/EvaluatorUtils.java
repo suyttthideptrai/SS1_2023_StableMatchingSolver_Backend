@@ -140,9 +140,9 @@ public class EvaluatorUtils {
      * @return
      */
     public static String getValidFitnessFunction(String func) {
-        func = func.trim().toLowerCase();
+        func = func.trim();
         if (StringUtils.isEmptyOrNull(func) ||
-                func.equals(MatchingConst.DEFAULT_FITNESS_FUNC)) {
+                func.equalsIgnoreCase(MatchingConst.DEFAULT_FITNESS_FUNC)) {
             return "";
         }
         return func;

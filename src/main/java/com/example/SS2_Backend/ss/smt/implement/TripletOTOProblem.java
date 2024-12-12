@@ -164,15 +164,17 @@ public class TripletOTOProblem implements MatchingProblem {
         // -1 is not find yet
         int result = -1;
 
-        int[] preferPartForTargetSet = nodePreferences.getPreferenceForSpecificSet(
-                matchingData.getSetNoOf(newNode), targetSet, matchingData.getSetNums());
+//        int[] preferPartForTargetSet = nodePreferences.getPreferenceForSpecificSet(
+//                matchingData.getSetNoOf(newNode), targetSet, matchingData.getSetNums());
+
+        int sizeOfTargetSet = matchingData.getSetNums().get(targetSet);
 
         int currentNewNodeSet = matchingData.getSetNoOf(newNode) ;
         int padding = calculatePadding(targetSet, currentNewNodeSet);
 
         nodePreferences.setPadding(padding);
 
-        for (int i = 0 ; i < preferPartForTargetSet.length; i++) {     // ghép với 1 cá thể trong preferList
+        for (int i = 0 ; i < sizeOfTargetSet; i++) {     // ghép với 1 cá thể trong preferList
 
             int preferNode = nodePreferences.getPositionByRank(UNUSED_VAL, calculate(targetSet,currentNewNodeSet ) + i );
 

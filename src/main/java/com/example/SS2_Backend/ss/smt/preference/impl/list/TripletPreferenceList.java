@@ -19,7 +19,7 @@ public class TripletPreferenceList implements PreferenceList {
     // The positions correspond to the IDs of the individuals (either providers or consumers).
     final int[] positions;
     int current; // Tracks the current index in the list.
-    final int padding; // Used for index adjustments.
+    int padding; // Used for index adjustments.
     public TripletPreferenceList(int size, int padding) {
         scores = new double[size];
         positions = new int[size];

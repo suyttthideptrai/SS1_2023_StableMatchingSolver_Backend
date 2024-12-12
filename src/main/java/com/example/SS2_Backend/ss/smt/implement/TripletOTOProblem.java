@@ -167,8 +167,14 @@ public class TripletOTOProblem implements MatchingProblem {
         int[] preferPartForTargetSet = nodePreferences.getPreferenceForSpecificSet(
                 matchingData.getSetNoOf(newNode), targetSet, matchingData.getSetNums());
 
+        int currentNewNodeSet = matchingData.getSetNoOf(newNode) ;
+        int padding = calculatePadding(targetSet, currentNewNodeSet);
+
+        nodePreferences.setPadding(padding);
+
         for (int i = 0 ; i < preferPartForTargetSet.length; i++) {     // ghép với 1 cá thể trong preferList
-            int preferNode = nodePreferences.getPositionByRank(UNUSED_VAL, i);
+
+            int preferNode = nodePreferences.getPositionByRank(UNUSED_VAL, calculate(targetSet,currentNewNodeSet ) + i );
 
             if (!matches.isFull(preferNode, matchingData.getCapacityOf(preferNode))) {
                 result = preferNode;    // ghép thành công với preferNode thì dừng vòng lặp
@@ -208,11 +214,45 @@ public class TripletOTOProblem implements MatchingProblem {
 
 
     private int[] getOtherSets(int currentSet) {
-
-        return IntStream.rangeClosed(1, setNum-1)     // fix error out of bound number of set
+        return IntStream.range(0, setNum)
                 .filter(set -> set != currentSet)
                 .toArray();
     }
+
+    private int calculatePadding(int targetSet, int currentNewNodeSet){
+        Map<Integer, Integer> setNums = matchingData.getSetNums();
+        if(currentNewNodeSet == setNum -1) return 0 ;
+        if(currentNewNodeSet == 0 ) return setNums.get(currentNewNodeSet) ;
+
+        // if smaller than newNode set, return 0 to get all name of previous set before current's
+        if(targetSet < currentNewNodeSet) return 0 ;
+
+        int paddingSize = 0 ;
+        if(targetSet > currentNewNodeSet){
+            for(int i = 0 ; i < currentNewNodeSet ; i++){
+                paddingSize += setNums.get(i);
+            }
+        }
+        return paddingSize;
+    }
+
+    private int calculate(int targetSet, int currentNewNodeSet){
+        Map<Integer, Integer> setNums = matchingData.getSetNums();
+
+        // if smaller than newNode set, return 0 to get all name of previous set before current's
+        int paddingSize = 0 ;
+
+            for(int i = 0 ; i < targetSet; i++){
+                if(i != currentNewNodeSet) {
+                    paddingSize += setNums.get(i);
+                }
+            }
+
+        return paddingSize;
+    }
+
+
+
 
     @Override
     public String getMatchingTypeName() {

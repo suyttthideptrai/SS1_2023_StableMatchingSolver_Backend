@@ -14,10 +14,12 @@ import net.objecthunter.exp4j.ExpressionBuilder;
 
 import java.util.*;
 
+import lombok.extern.slf4j.Slf4j;
+@Slf4j
 public class TripletPreferenceProvider implements PreferenceBuilder {
 
     private final MatchingData individuals;
-    private int numberOfIndividuals;
+    private final int numberOfIndividuals;
     @Getter
     private final Map<Integer, Integer> setSizes;
 
@@ -52,6 +54,9 @@ public class TripletPreferenceProvider implements PreferenceBuilder {
 
     // Calculate cumulative padding for a specific set
     private int calculatePaddingForSet(int targetSet) {
+        if(!setSizes.containsKey(targetSet)){
+            throw new IllegalArgumentException("Invalid targetSet:" + targetSet); // thêm ktra gtri targetSet
+        }
         int padding = 0;
         for (int set : setSizes.keySet()) {
             if (set < targetSet) {
@@ -185,6 +190,7 @@ public class TripletPreferenceProvider implements PreferenceBuilder {
         for (Map.Entry<String, Set<Integer>> entry : variables.entrySet()) {
             String key = entry.getKey();
             Set<Integer> values = entry.getValue();
+
             switch (key) {
                 case "P":
                     for (Integer value : values) {
@@ -218,25 +224,38 @@ public class TripletPreferenceProvider implements PreferenceBuilder {
     public PreferenceList getPreferenceListByDefault(int index) {
         int set = individuals.getSetNoOf(index);
         int numberOfProperties = individuals.getPropertyNum();
-        TripletPreferenceList a = new TripletPreferenceList(0, 0);
+        TripletPreferenceList preferenceList = new TripletPreferenceList(0,0);
         int size = 0;
+
+        //ktra dữ liệu trong sétSize
+        if (!setSizes.containsKey(set)){
+            throw new IllegalStateException("Set" + set + "is not defined in setSizes");
+        }
 
         if (setSizes.containsKey(set)) {
             for (int setNumber : setSizes.keySet()) {
                 if (setNumber != set) {
-                    size += setSizes.get(set);
+                    size += setSizes.getOrDefault(setNumber,0);
                 }
             }
             if(set == 0) {
-                a = new TripletPreferenceList(size, setSizes.get(0));    // khởi tạo preferlist với size = 2 set còn lại + vào
+                if (!setSizes.containsKey(0)){
+                    throw new IllegalStateException("Set 0 is not defined in setSizes");
+                }
+                preferenceList = new TripletPreferenceList(size, setSizes.get(0));    // khởi tạo preferlist với size = 2 set còn lại + vào
             } else {
-                a = new TripletPreferenceList(size, 0);
+                preferenceList = new TripletPreferenceList(size, 0);
             }
 
+
+            //khởi tạo chỉ tạm thời
             int tempIndex = 0;
             for (int otherSet : setSizes.keySet()) {
                 if (otherSet != set) {
-                    int setSize = setSizes.get(otherSet);
+                    int setSize = setSizes.getOrDefault(otherSet, 0);
+                    if (setSize <=0){
+                        continue;
+                    }
                     double[] tempScores = new double[setSize];
                     int[] tempPositions = new int[setSize];
 
@@ -250,6 +269,11 @@ public class TripletPreferenceProvider implements PreferenceBuilder {
                                 double PropertyWeight = individuals.getPropertyWeightOf(index, j);
                                 totalScore += requirement.getDefaultScaling(PropertyValue) * PropertyWeight;
                             }
+
+                            if (currentIndex >= setSize) {
+                                log.error("currentIndex {} exceeds setSize {}", currentIndex, setSize);
+                                break;
+                            }
                             tempScores[currentIndex] = totalScore;
                             tempPositions[currentIndex] = tempIndex;
                             tempIndex++;
@@ -258,13 +282,12 @@ public class TripletPreferenceProvider implements PreferenceBuilder {
                     }
 
                     sortDescendingByScores(tempScores, tempPositions);
-
-                    a.addArray(tempScores, tempPositions);
+                    preferenceList.addArray(tempScores, tempPositions);
                 }
             }
 
         }
-        return a;
+        return preferenceList;
     }
 
 

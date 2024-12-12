@@ -68,11 +68,17 @@ public class TripletPreferenceList implements PreferenceList {
         int[] result = new int[setLength];
         System.arraycopy(positions, startIndex, result, 0, setLength);
         return result;
+
     }
 
     @Override
     public int getPositionByRank(int set, int rank) throws ArrayIndexOutOfBoundsException {
+
         try {
+            if (rank < 0 || rank >= positions.length) {
+                log.error("Invalid rank: {}", rank);
+                throw new ArrayIndexOutOfBoundsException("Rank out of bounds: " + rank); //ktra rank
+            }
             return positions[rank] + this.padding;
         } catch (ArrayIndexOutOfBoundsException e) {
             log.error("Position {} not found:", rank, e);

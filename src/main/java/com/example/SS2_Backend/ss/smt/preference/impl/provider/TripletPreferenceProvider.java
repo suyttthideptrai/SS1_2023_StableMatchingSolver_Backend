@@ -50,6 +50,17 @@ public class TripletPreferenceProvider implements PreferenceBuilder {
         }
     }
 
+    // Calculate cumulative padding for a specific set
+    private int calculatePaddingForSet(int targetSet) {
+        int padding = 0;
+        for (int set : setSizes.keySet()) {
+            if (set < targetSet) {
+                padding += setSizes.get(set);
+            }
+        }
+        return padding;
+    }
+
     @Override
     public PreferenceList getPreferenceListByFunction(int index) {
         int set = individuals.getSetNoOf(index);

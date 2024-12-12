@@ -63,61 +63,57 @@ public class TripletPreferenceProvider implements PreferenceBuilder {
 
     @Override
     public PreferenceList getPreferenceListByFunction(int index) {
-        int currentSet = individuals.getSetNoOf(index);
-
-        // Calculate total size of other sets
-        int totalOtherSetsSize = 0;
-        for (int set : setSizes.keySet()) {
-            if (set != currentSet) {
-                totalOtherSetsSize += setSizes.get(set);
-            }
-        }
-
-        // Create preference list with correct size and padding
-        TripletPreferenceList preferenceList = new TripletPreferenceList(
-                totalOtherSetsSize,
-                calculatePaddingForSet(currentSet)
-        );
-
-        // If no evaluation function exists, use default
-        if (this.expressions.get(currentSet) == null) {
-            return this.getPreferenceListByDefault(index);
-        }
-
-        Expression evaluationExpression = this.expressions.get(currentSet);
-
-        // Process each other set
-        for (int otherSet : setSizes.keySet()) {
-            if (otherSet != currentSet) {
-                int setSize = setSizes.get(otherSet);
-                double[] tempScores = new double[setSize];
-                int[] tempPositions = new int[setSize];
-
-                int currentSetIndex = 0;
-                for (int i = 0; i < numberOfIndividuals; i++) {
-                    if (individuals.getSetNoOf(i) == otherSet) {
-                        // Set variables for evaluation
-                        evaluationExpression.setVariables(
-                                this.getVariableValuesForSet(currentSet, index, i)
-                        );
-
-                        // Calculate score
-                        tempScores[currentSetIndex] = evaluationExpression.evaluate();
-                        tempPositions[currentSetIndex] = calculatePaddingForSet(otherSet) + currentSetIndex;
-
-                        currentSetIndex++;
-                    }
+        int set = individuals.getSetNoOf(index);
+        TripletPreferenceList a = new TripletPreferenceList(0, 0);
+        Expression e;
+        int size = 0;
+        if (setSizes.containsKey(set)) {          // 1 2 3 4 5   6 7 8 9 10
+            for (int setNumber : setSizes.keySet()) {
+                if (setNumber != set) {
+                    size += setSizes.get(setNumber);
                 }
-
-                // Sort scores in descending order
-                sortDescendingByScores(tempScores, tempPositions);
-
-                // Add to preference list
-                preferenceList.addArray(tempScores, tempPositions);
             }
-        }
+            if(set == 0) {
+                a = new TripletPreferenceList(size, setSizes.get(0));    // khởi tạo preferlist với size = 2 set còn lại + vào
+            } else {
+                a = new TripletPreferenceList(size, 0);
+            }
+            if (this.expressions.get(set) == null) {
+                return this.getPreferenceListByDefault(index);
+            }
+            e = this.expressions.get(set);
 
-        return preferenceList;
+            // Xử lý từng set riêng biệt
+            int tempIndex = 0;
+
+            for (int otherSet : setSizes.keySet()) {
+                if (otherSet != set) {
+                    int setSize = setSizes.get(otherSet);
+
+                    // tạo scores và position tạm thời cho 1 set cụ thể để sort
+                    // ví dụ hiện tại Node 1 từ set 0 và cần tạo prefer líst đối với set 1 2 thì cần sort từng set trước khi thêm vào preferLíst
+                    double[] tempScores = new double[setSize];
+                    int[] tempPositions = new int[setSize];
+
+                    int currentIndex = 0 ;
+                    for (int i = 0; i < numberOfIndividuals; i++) {
+                        if (individuals.getSetNoOf(i) == otherSet) {
+                            e.setVariables(this.getVariableValuesForSet(set, index, i));
+                            tempScores[currentIndex] = e.evaluate();
+                            tempPositions[currentIndex] = tempIndex;
+                            currentIndex++;
+                            tempIndex++;
+                        }
+                    }
+                    // Sort mảng tạm (sử dụng hàm sort bên ngoài)
+                    sortDescendingByScores(tempScores, tempPositions);
+                    // Add vào PreferenceList chính
+                    a.addArray(tempScores, tempPositions);
+                }
+            }
+
+        }
+        return a;
     }
     private void sortDescendingByScores(double[] tempScores, int[] tempPositions) {
         int size = tempScores.length;

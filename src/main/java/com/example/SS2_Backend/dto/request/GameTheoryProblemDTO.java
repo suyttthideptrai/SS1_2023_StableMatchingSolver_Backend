@@ -1,8 +1,8 @@
 package com.example.SS2_Backend.dto.request;
 
-import com.example.SS2_Backend.model.gameTheory.Conflict;
-import com.example.SS2_Backend.model.gameTheory.NormalPlayer;
-import com.example.SS2_Backend.model.gameTheory.SpecialPlayer;
+import com.example.SS2_Backend.ss.gt.Conflict;
+import com.example.SS2_Backend.ss.gt.NormalPlayer;
+import com.example.SS2_Backend.ss.gt.SpecialPlayer;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,7 +13,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class GameTheoryProblemDTO {
+public class GameTheoryProblemDTO implements ProblemRequestDto{
     private SpecialPlayer specialPlayer;
     private List<NormalPlayer> normalPlayers;
     private List<Conflict> conflictSet = new ArrayList<>();

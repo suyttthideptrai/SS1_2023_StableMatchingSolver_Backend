@@ -1,15 +1,16 @@
-package com.example.SS2_Backend.model.gameTheory;
+package com.example.SS2_Backend.ss.gt;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Conflict {
+public class Conflict implements Serializable {
     private int leftPlayer;
     private int rightPlayer;
     private int leftPlayerStrategy;

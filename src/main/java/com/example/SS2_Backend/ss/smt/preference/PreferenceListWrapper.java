@@ -36,6 +36,8 @@ public class PreferenceListWrapper {
                                  int proposeNode,
                                  Set<Integer> setOfPreferNode,
                                  int preferNodeCapacity) {
+        if (setOfPreferNode.isEmpty()) return -1;
+
         PreferenceList prefOfSelectorNode = this.lists.get(preferNode);
         // Lớp có một thằng
         if (Objects.equals(preferNodeCapacity, 1)) {
@@ -100,6 +102,10 @@ public class PreferenceListWrapper {
     public int getLastChoiceOf(int set, int target) {
         PreferenceList pref = lists.get(target);
         return pref.getPositionByRank(set, pref.size(set) - 1);
+    }
+
+    public double getPreferenceScore(int target, int option) {
+        return lists.get(target).getScore(option);
     }
 
 }

@@ -1,4 +1,4 @@
-package com.example.SS2_Backend.model.gameTheory;
+package com.example.SS2_Backend.ss.gt;
 
 
 import lombok.AllArgsConstructor;
@@ -8,13 +8,14 @@ import lombok.NoArgsConstructor;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Strategy {
+public class Strategy implements Serializable {
     private String name;
     private List<Double> properties = new ArrayList<>();
     private double payoff;

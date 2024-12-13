@@ -6,7 +6,9 @@ import com.example.SS2_Backend.ss.smt.preference.PreferenceBuilder;
 import com.example.SS2_Backend.ss.smt.preference.PreferenceListWrapper;
 import com.example.SS2_Backend.ss.smt.preference.impl.list.TwoSetPreferenceList;
 import com.example.SS2_Backend.ss.smt.requirement.Requirement;
+import com.example.SS2_Backend.util.EvaluatorUtils;
 import com.example.SS2_Backend.util.PreferenceProviderUtils;
+import com.example.SS2_Backend.util.StringUtils;
 import lombok.Data;
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
@@ -37,21 +39,30 @@ public class TwoSetPreferenceProvider implements PreferenceBuilder {
      */
     public TwoSetPreferenceProvider(MatchingData matchingData, String[] evaluationFunctions) {
         this.matchingData = matchingData;
-        String evalFunctionForSet1 = evaluationFunctions[0];
-        String evalFunctionForSet2 = evaluationFunctions[1];
+        String evalFunctionForSet1 = EvaluatorUtils.getValidEvaluationFunction(evaluationFunctions[0]);
+        String evalFunctionForSet2 = EvaluatorUtils.getValidEvaluationFunction(evaluationFunctions[1]);
         this.sizeOf1 = matchingData.getTotalIndividualOfSet(0);
         this.sizeOf2 = matchingData.getSize() - sizeOf1;
 
-        this.variablesOfSet1 = PreferenceProviderUtils.filterVariable(evalFunctionForSet1);
-        this.expressionOfSet1 = new ExpressionBuilder(evalFunctionForSet1)
-                .variables(PreferenceProviderUtils.convertMapToSet(variablesOfSet1))
-                .build();
+        if (StringUtils.isEmptyOrNull(evalFunctionForSet1)) {
+            this.expressionOfSet1 = null;
+        } else {
+            if (expressionOfSet2 != null) return;
+            this.variablesOfSet1 = PreferenceProviderUtils.filterVariable(evalFunctionForSet1);
+            this.expressionOfSet1 = new ExpressionBuilder(evalFunctionForSet1)
+                    .variables(PreferenceProviderUtils.convertMapToSet(variablesOfSet1))
+                    .build();
+        }
 
-        if (expressionOfSet2 != null) return;
-        this.variablesOfSet2 = PreferenceProviderUtils.filterVariable(evalFunctionForSet2);
-        this.expressionOfSet2 = new ExpressionBuilder(evalFunctionForSet2)
-                .variables(PreferenceProviderUtils.convertMapToSet(variablesOfSet2))
-                .build();
+        if (StringUtils.isEmptyOrNull(evalFunctionForSet2)) {
+            this.expressionOfSet2 = null;
+        } else {
+            if (expressionOfSet2 != null) return;
+            this.variablesOfSet2 = PreferenceProviderUtils.filterVariable(evalFunctionForSet2);
+            this.expressionOfSet2 = new ExpressionBuilder(evalFunctionForSet2)
+                    .variables(PreferenceProviderUtils.convertMapToSet(variablesOfSet2))
+                    .build();
+        }
 
     }
 

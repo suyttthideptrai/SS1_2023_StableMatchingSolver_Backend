@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+@Deprecated
 public class FunctionDeserializer extends StdDeserializer<ArrayList<String>> {
     protected FunctionDeserializer(Class<?> vc) {
         super(vc);

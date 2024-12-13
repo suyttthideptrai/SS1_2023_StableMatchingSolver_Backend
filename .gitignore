@@ -39,3 +39,7 @@ err_err_profile.jfr.txt
 err_profile.jfr
 err_profile.jfr.txt
 profile.jfr
+
+### Run Data ###
+.data
+.log

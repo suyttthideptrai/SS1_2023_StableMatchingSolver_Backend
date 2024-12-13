@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class ComputerSpecs {
+
     String osFamily;
     String osManufacturer;
     String osVersion;
@@ -17,4 +18,5 @@ public class ComputerSpecs {
     Integer cpuPhysicalCores;
     Integer cpuLogicalCores;
     String totalMemory;
+
 }

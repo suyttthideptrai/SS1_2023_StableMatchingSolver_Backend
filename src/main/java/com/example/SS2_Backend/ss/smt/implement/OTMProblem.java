@@ -25,28 +25,44 @@ import java.util.*;
 @AllArgsConstructor
 public class OTMProblem implements MatchingProblem {
 
-    /** problem name */
+    /**
+     * problem name
+     */
     final String problemName;
 
-    /** problem size (number of individuals in matching problem */
+    /**
+     * problem size (number of individuals in matching problem
+     */
     final int problemSize;
 
-    /** number of set in matching problem */
+    /**
+     * number of set in matching problem
+     */
     final int setNum;
 
-    /** Matching data */
+    /**
+     * Matching data
+     */
     final MatchingData matchingData;
 
-    /** preference list  */
+    /**
+     * preference list
+     */
     final PreferenceListWrapper preferenceLists;
 
-    /** problem fitness function */
+    /**
+     * problem fitness function
+     */
     final String fitnessFunction;
 
-    /** fitness evaluator */
+    /**
+     * fitness evaluator
+     */
     final FitnessEvaluator fitnessEvaluator;
 
-    /** will not be used */
+    /**
+     * will not be used
+     */
     final int UNUSED_VAL = MatchingConst.UNUSED_VALUE;
 
     @Override
@@ -124,7 +140,7 @@ public class OTMProblem implements MatchingProblem {
     @Override
     public Matches stableMatching(Variable var) {
         Matches matches = new Matches(problemSize);
-        Set<Integer> matchedNode = new HashSet<>();
+        Set<Integer> matchedConsumers = new HashSet<>();
         Permutation castVar = (Permutation) var;
         int[] decodeVar = castVar.toArray();
         Queue<Integer> unmatchedConsumers = new LinkedList<>();
@@ -133,79 +149,72 @@ public class OTMProblem implements MatchingProblem {
         // Split nodes into consumers and providers based on setNum
         for (int i = 0; i < problemSize; i++) {
             if (decodeVar[i] < setNum) {
-                unmatchedConsumers.add(i);
-            } else {
                 unmatchedProviders.add(i);
+            } else {
+                unmatchedConsumers.add(i);
             }
         }
 
         // Process all unmatched consumers
         while (!unmatchedConsumers.isEmpty()) {
             int consumer = unmatchedConsumers.poll();
-
-            if (matchedNode.contains(consumer)) {
+            // Skip if already matched
+            if (matchedConsumers.contains(consumer)) {
                 continue;
             }
-
             PreferenceList consumerPreference = getPreferenceLists().get(consumer);
-            boolean matched = false;
-
             // Try to match with each preferred provider
             for (int i = 0; i < consumerPreference.size(UNUSED_VAL); i++) {
                 int provider = consumerPreference.getPositionByRank(UNUSED_VAL, i);
 
-                // If already matched to this provider, skip
-                if (matches.isMatched(provider, consumer)) {
-                    break;
-                }
+                // Check if provider is at full capacity
+                Set<Integer> currentMatches = matches.getSetOf(provider);
+                int currentMatchCount = currentMatches.size();
+                int providerCapacity = matchingData.getCapacityOf(provider);
 
-                // If provider has available capacity
-                if (!matches.isFull(provider, matchingData.getCapacityOf(provider))) {
-                    matches.addMatchBi(provider, consumer);
-                    matchedNode.add(consumer);
-                    matched = true;
-                    break;
-                } else {
-                    // Provider is at capacity - check if current consumer is preferred over existing matches
-                    int leastPreferred = preferenceLists.getLeastScoreNode(
-                            UNUSED_VAL,
-                            provider,
-                            consumer,
-                            matches.getSetOf(provider),
-                            matchingData.getCapacityOf(provider)
-                    );
+                if (currentMatchCount >= providerCapacity) {
+                    // Find the least preferred match based on provider's preference
+                    Integer leastPreferredMatch = null;
+                    double leastPreferredScore = Double.MIN_VALUE;
 
-                    if (leastPreferred != consumer) {
-                        // Current consumer is preferred over least preferred match
-                        matches.removeMatchBi(provider, leastPreferred);
-                        unmatchedConsumers.add(leastPreferred);
-                        matchedNode.remove(leastPreferred);
+                    for (Integer currentMatch : currentMatches) {
+                        double currentScore = preferenceLists.getPreferenceScore(
+                                provider,
+                                currentMatch
+                        );
 
-                        matches.addMatchBi(provider, consumer);
-                        matchedNode.add(consumer);
-                        matched = true;
-                        break;
-                    } else if (preferenceLists.getLastChoiceOf(UNUSED_VAL, consumer) == provider) {
-                        // If this was consumer's last choice and they weren't preferred, add to leftovers
-                        matches.addLeftOver(consumer);
-                        break;
+                        // Find the least preferred (highest score) match
+                        if (currentScore > leastPreferredScore) {
+                            leastPreferredScore = currentScore;
+                            leastPreferredMatch = currentMatch;
+                        }
+                    }
+
+                    // Check if new consumer is preferred over least preferred current match
+                    if (leastPreferredMatch != null) {
+                        double newConsumerScore = preferenceLists.getPreferenceScore(
+                                provider,
+                                consumer
+                        );
+
+                        // If new consumer is more preferred, replace the least preferred match
+                        if (newConsumerScore < leastPreferredScore) {
+                            matches.removeMatchBi(provider, leastPreferredMatch);
+                            matchedConsumers.remove(leastPreferredMatch);
+                            unmatchedConsumers.add(leastPreferredMatch);
+                        } else {
+                            // If not preferred, skip this provider
+                            continue;
+                        }
                     }
                 }
-            }
 
-            if (!matched && !matches.getLeftOvers().contains(consumer)) {
-                matches.addLeftOver(consumer);
-            }
-        }
-
-        // Add any remaining unmatched providers to leftovers
-        while (!unmatchedProviders.isEmpty()) {
-            int provider = unmatchedProviders.poll();
-            if (matches.getSetOf(provider).isEmpty()) {
-                matches.addLeftOver(provider);
+                // If provider has available capacity or we've made space
+                matches.addMatchBi(provider, consumer);
+                matchedConsumers.add(consumer);
+                break;
             }
         }
-
         return matches;
     }
 

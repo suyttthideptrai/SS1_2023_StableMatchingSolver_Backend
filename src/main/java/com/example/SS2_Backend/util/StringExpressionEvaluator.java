@@ -1,8 +1,8 @@
 package com.example.SS2_Backend.util;
 
 
-import com.example.SS2_Backend.model.gameTheory.NormalPlayer;
-import com.example.SS2_Backend.model.gameTheory.Strategy;
+import com.example.SS2_Backend.ss.gt.NormalPlayer;
+import com.example.SS2_Backend.ss.gt.Strategy;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -217,34 +217,18 @@ public class StringExpressionEvaluator {
 
 
     private static BigDecimal calculateByDefault(List<Double> values, String defaultFunction) {
-        DefaultFunction function = DefaultFunction.valueOf(defaultFunction.toUpperCase());
-        double val;
-        switch (function) {
-            case SUM:
-                val = calSum(values);
-                break;
-            case PRODUCT:
-                val = calProduct(values);
-                break;
-            case MAX:
-                val = calMax(values);
-                break;
-            case MIN:
-                val = calMin(values);
-                break;
-            case AVERAGE:
-                val = calAverage(values);
-                break;
-            case MEDIAN:
-                val = calMedian(values);
-                break;
-            case RANGE:
-                val = calRange(values);
-                break;
-            default:
-                val = calSum(values);
-                break;
-        }
+        DefaultFunction function = (!StringUtils.isEmptyOrNull(defaultFunction))
+                ? DefaultFunction.valueOf(defaultFunction.toUpperCase()) : DefaultFunction.SUM;
+        double val = switch (function) {
+            case SUM -> calSum(values);
+            case PRODUCT -> calProduct(values);
+            case MAX -> calMax(values);
+            case MIN -> calMin(values);
+            case AVERAGE -> calAverage(values);
+            case MEDIAN -> calMedian(values);
+            case RANGE -> calRange(values);
+            default -> calSum(values);
+        };
 
         return new BigDecimal(val);
 
@@ -252,8 +236,8 @@ public class StringExpressionEvaluator {
 
 
     public static double eval(String strExpression) {
-        System.out.println("Evaluating: ");
-        System.out.println(strExpression);
+//        System.out.println("Evaluating: ");
+//        System.out.println(strExpression);
 
         String formattedExpression = strExpression.replaceAll("NaN",
                         "0")// Replace NaN(Not A Number) with 0, so that the expression can be evaluated
@@ -371,25 +355,14 @@ public class StringExpressionEvaluator {
                     } else {
                         x = parseFactor();
                     }
-                    switch (func) {
-                        case "abs":
-                            x = Math.abs(x);
-                            break;
-                        case "sqrt":
-                            x = Math.sqrt(x);
-                            break;
-                        case "sin":
-                            x = Math.sin(Math.toRadians(x));
-                            break;
-                        case "cos":
-                            x = Math.cos(Math.toRadians(x));
-                            break;
-                        case "tan":
-                            x = Math.tan(Math.toRadians(x));
-                            break;
-                        default:
-                            throw new RuntimeException("Unknown function: " + func);
-                    }
+                    x = switch (func) {
+                        case "abs" -> Math.abs(x);
+                        case "sqrt" -> Math.sqrt(x);
+                        case "sin" -> Math.sin(Math.toRadians(x));
+                        case "cos" -> Math.cos(Math.toRadians(x));
+                        case "tan" -> Math.tan(Math.toRadians(x));
+                        default -> throw new RuntimeException("Unknown function: " + func);
+                    };
                 } else {
                     System.out.println("wrong expression: " + formattedExpression);
                     throw new RuntimeException("Unexpected: " + (char) ch);

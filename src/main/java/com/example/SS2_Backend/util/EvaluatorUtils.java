@@ -1,10 +1,16 @@
 package com.example.SS2_Backend.util;
 
+import com.example.SS2_Backend.constants.AppConst;
+import com.example.SS2_Backend.constants.MatchingConst;
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
+import net.objecthunter.exp4j.ValidationResult;
 
+import java.util.Set;
 import java.util.function.DoubleUnaryOperator;
 import java.util.stream.DoubleStream;
+
+import static org.hibernate.validator.internal.util.Contracts.assertTrue;
 
 public class EvaluatorUtils {
 
@@ -102,4 +108,73 @@ public class EvaluatorUtils {
         return setSatisfactions;
     }
 
+
+    /**
+     * temp
+     * @param func
+     * @return
+     */
+    public static String getValidEvaluationFunction(String func) {
+        func = func.trim();
+        if (func.equals(MatchingConst.DEFAULT_EVALUATE_FUNC)) {
+            return "";
+        }
+        return func;
+    }
+
+    /**
+     * temp
+     * @param func
+     * @return
+     */
+    public static String getIfDefaultFunction(String func) {
+        if (AppConst.DEFAULT_FUNC.equalsIgnoreCase(func)) {
+            return "";
+        }
+        return func;
+    }
+
+    /**
+     * temp
+     * @param func
+     * @return
+     */
+    public static String getValidFitnessFunction(String func) {
+        func = func.trim();
+        if (StringUtils.isEmptyOrNull(func) ||
+                func.equalsIgnoreCase(MatchingConst.DEFAULT_FITNESS_FUNC)) {
+            return "";
+        }
+        return func;
+    }
+
+
+
+    public static void main(String[] args) {
+        String[] vars = new String[] {
+                "u", "u12", "u21", "u202"
+        };
+        String[] functions = new String[] {
+//                "u+1",
+                "u202 + 1 + 2",
+                "(u12 + 1) * 2",
+                "abs(u12 - u21) / 2"
+        };
+        for (String func : functions ) {
+            Expression e = new ExpressionBuilder(func)
+                    .variables(vars)
+                    .build();
+            Set<String> extractedVars = PreferenceProviderUtils.getVariables(func);
+            for (String var : extractedVars) {
+                e.setVariable(var,1d);
+            }
+            ValidationResult res = e.validate();
+            printValidateRes(res);
+        }
+
+    }
+
+    private static void printValidateRes(ValidationResult valRes) {
+        System.out.println("Validation Result: " + valRes.isValid() + ", errors: " + valRes.getErrors());
+    }
 }

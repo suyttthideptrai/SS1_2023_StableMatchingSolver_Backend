@@ -6,6 +6,9 @@ import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.ArrayList;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Data Structure for result of StableMatchingExtra algorithm
@@ -21,9 +24,6 @@ public class Matches implements Serializable {
 
     /** matches data */
     final TreeSet<Integer>[] matches;
-
-    /** leftover individuals go here =)) */
-    final TreeSet<Integer> leftOvers = (new TreeSet<>());
 
     @SuppressWarnings("unchecked")
     public Matches(int size) {
@@ -42,15 +42,6 @@ public class Matches implements Serializable {
      */
     public Set<Integer> getSetOf(int targetIndividual) {
         return matches[targetIndividual];
-    }
-
-    /**
-     * add node to leftOvers :((
-     *
-     * @param leftOverNode int
-     */
-    public void addLeftOver(int leftOverNode) {
-        leftOvers.add(leftOverNode);
     }
 
     /**
@@ -151,8 +142,20 @@ public class Matches implements Serializable {
             i++;
         }
 
-        sb.append("Left Overs: ").append(leftOvers).append("\n");
+        sb.append("Left Overs: ").append(getLeftOvers()).append("\n");
         return sb;
+    }
+
+    public Set<Integer> getLeftOvers() {
+        ArrayList<Integer> leftOvers = new ArrayList<>();
+
+        for (int i = 0; i < matches.length; i++) {
+             if ( matches[i].isEmpty()) {
+                leftOvers.add(i);
+             }
+        }
+
+        return new TreeSet(leftOvers);
     }
 
     /**

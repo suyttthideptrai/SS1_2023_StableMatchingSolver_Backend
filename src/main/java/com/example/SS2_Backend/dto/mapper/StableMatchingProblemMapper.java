@@ -18,6 +18,7 @@ import com.example.SS2_Backend.ss.smt.preference.impl.provider.TripletPreference
 import com.example.SS2_Backend.ss.smt.preference.impl.provider.TwoSetPreferenceProvider;
 import com.example.SS2_Backend.ss.smt.requirement.Requirement;
 import com.example.SS2_Backend.ss.smt.requirement.RequirementDecoder;
+import com.example.SS2_Backend.util.EvaluatorUtils;
 
 import java.util.Arrays;
 
@@ -34,9 +35,27 @@ public class StableMatchingProblemMapper {
     }
 
 
-    public static OTMProblem toOTM(NewStableMatchingProblemDTO dto) {
-        //TODO: implement OTM map logic
-        return null;
+    public static OTMProblem toOTM(NewStableMatchingProblemDTO request) {
+        Requirement[][] requirements = RequirementDecoder.decode(request.getIndividualRequirements());
+        MatchingData data = new MatchingData(request.getNumberOfIndividuals(),
+                request.getNumberOfProperty(),
+                request.getIndividualSetIndices(),
+                request.getIndividualCapacities(),
+                request.getIndividualProperties(),
+                request.getIndividualWeights(),
+                requirements);
+        data.setExcludedPairs(request.getExcludedPairs());
+        PreferenceBuilder builder = new TwoSetPreferenceProvider(data,
+                request.getEvaluateFunctions());
+        PreferenceListWrapper preferenceLists = builder.toListWrapper();
+        FitnessEvaluator fitnessEvaluator = new TwoSetFitnessEvaluator(data);
+        return new OTMProblem(request.getProblemName(),
+                request.getNumberOfIndividuals(),
+                request.getNumberOfSets(),
+                data,
+                preferenceLists,
+                request.getFitnessFunction(),
+                fitnessEvaluator);
     }
 
     public static MTMProblem toMTM(NewStableMatchingProblemDTO request) {
@@ -53,12 +72,13 @@ public class StableMatchingProblemMapper {
                 request.getEvaluateFunctions());
         PreferenceListWrapper preferenceLists = builder.toListWrapper();
         FitnessEvaluator fitnessEvaluator = new TwoSetFitnessEvaluator(data);
+        String fitnessFunction = EvaluatorUtils.getValidFitnessFunction(request.getFitnessFunction());
         return new MTMProblem(request.getProblemName(),
                 request.getNumberOfIndividuals(),
                 request.getNumberOfSets(),
                 data,
                 preferenceLists,
-                request.getFitnessFunction(),
+                fitnessFunction,
                 fitnessEvaluator);
     }
     public static TripletOTOProblem toTripletOTO(NewStableMatchingProblemDTO request) {

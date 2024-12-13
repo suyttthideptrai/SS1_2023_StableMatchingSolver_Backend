@@ -5,13 +5,12 @@ import com.example.SS2_Backend.dto.mapper.StableMatchingProblemMapper;
 import com.example.SS2_Backend.dto.request.NewStableMatchingProblemDTO;
 import com.example.SS2_Backend.dto.response.Progress;
 import com.example.SS2_Backend.dto.response.Response;
-import com.example.SS2_Backend.model.stableMatching.Matches.MatchesOTO;
-import com.example.SS2_Backend.model.stableMatching.Matches.MatchingSolution;
-import com.example.SS2_Backend.model.stableMatching.Matches.MatchingSolutionInsights;
+import com.example.SS2_Backend.ss.smt.implement.TripletOTOProblem;
+import com.example.SS2_Backend.ss.smt.result.MatchingSolutionInsights;
+import com.example.SS2_Backend.ss.smt.result.MatchingSolution;
 import com.example.SS2_Backend.ss.smt.Matches;
 import com.example.SS2_Backend.ss.smt.MatchingProblem;
 import com.example.SS2_Backend.ss.smt.implement.MTMProblem;
-import com.example.SS2_Backend.ss.smt.implement.TripletOTOProblem;
 import com.example.SS2_Backend.util.ValidationUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +35,7 @@ import java.util.Map;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class TripletProblemRBO implements MatchingSolver{
+public class TripletProblemRBO {
 
     private static final int RUN_COUNT_PER_ALGORITHM = 10;
     private final SimpMessagingTemplate simpMessagingTemplate;
@@ -293,7 +292,7 @@ public class TripletProblemRBO implements MatchingSolver{
         Solution solution = result.get(0);
         MatchingSolution matchingSolution = new MatchingSolution();
         double fitnessValue = solution.getObjective(0);
-        matchingSolution.setMatches(((MatchesOTO) solution.getAttribute("matches")).toMatches());
+        matchingSolution.setMatches(((Matches) solution.getAttribute("matches")));
         matchingSolution.setFitnessValue(-fitnessValue);
         matchingSolution.setAlgorithm(algorithm);
         matchingSolution.setRuntime(Runtime);

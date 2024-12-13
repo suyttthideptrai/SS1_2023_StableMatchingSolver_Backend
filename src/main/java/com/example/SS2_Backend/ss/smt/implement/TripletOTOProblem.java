@@ -141,7 +141,7 @@ public class TripletOTOProblem implements MatchingProblem {
 
                 // if can not match with any node in target set, add to leftovers
                 if(preferNodeOfTargetSet == -1){
-                    matches.addLeftOver(preferNodeOfTargetSet);
+//                    matches.addLeftOver(preferNodeOfTargetSet);
                     break;
                 }
                 matchedGroup.add(preferNodeOfTargetSet);

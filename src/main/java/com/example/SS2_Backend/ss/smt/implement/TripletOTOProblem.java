@@ -152,6 +152,16 @@ public class TripletOTOProblem implements MatchingProblem {
 
         }
 
+        // case when a newNode match with only 1 in 2 set
+        for (int i = 0; i < matches.getSize(); i++) {
+            if (matches.getSetOf(i).toArray(new Integer[0]).length == 1) {
+                Collection<Integer> allMatched = matches.getMatchesAndTarget(i);
+                for (int matched : allMatched) {
+                    matches.disMatch(matched, allMatched);
+                }
+            }
+        }
+
         return matches;
 
     }
@@ -171,12 +181,12 @@ public class TripletOTOProblem implements MatchingProblem {
 
         int currentNewNodeSet = matchingData.getSetNoOf(newNode) ;
         int padding = calculatePadding(targetSet, currentNewNodeSet);
-
+        int calPosition = calculatePosition(targetSet,currentNewNodeSet ) ;
         nodePreferences.setPadding(padding);
 
         for (int i = 0 ; i < sizeOfTargetSet; i++) {     // ghép với 1 cá thể trong preferList
 
-            int preferNode = nodePreferences.getPositionByRank(UNUSED_VAL, calculate(targetSet,currentNewNodeSet ) + i );
+            int preferNode = nodePreferences.getPositionByRank(UNUSED_VAL, calPosition + i );
 
             if (!matches.isFull(preferNode, matchingData.getCapacityOf(preferNode))) {
                 result = preferNode;    // ghép thành công với preferNode thì dừng vòng lặp
@@ -230,15 +240,16 @@ public class TripletOTOProblem implements MatchingProblem {
         if(targetSet < currentNewNodeSet) return 0 ;
 
         int paddingSize = 0 ;
-        if(targetSet > currentNewNodeSet){
-            for(int i = 0 ; i < currentNewNodeSet ; i++){
-                paddingSize += setNums.get(i);
-            }
-        }
+//        if(targetSet > currentNewNodeSet){
+//            for(int i = 0 ; i < currentNewNodeSet ; i++){
+//                paddingSize += setNums.get(i);
+//            }
+//        }
+        paddingSize += setNums.get(targetSet);
         return paddingSize;
     }
 
-    private int calculate(int targetSet, int currentNewNodeSet){
+    private int calculatePosition(int targetSet, int currentNewNodeSet){
         Map<Integer, Integer> setNums = matchingData.getSetNums();
 
         // if smaller than newNode set, return 0 to get all name of previous set before current's

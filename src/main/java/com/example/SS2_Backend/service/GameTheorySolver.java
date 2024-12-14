@@ -1,5 +1,6 @@
 package com.example.SS2_Backend.service;
 
+import com.example.SS2_Backend.constants.GameTheoryConst;
 import com.example.SS2_Backend.dto.mapper.GameTheoryProblemMapper;
 import com.example.SS2_Backend.dto.request.GameTheoryProblemDTO;
 import com.example.SS2_Backend.dto.response.Progress;
@@ -207,7 +208,7 @@ public class GameTheorySolver {
     public ResponseEntity<Response> getProblemResultInsights(GameTheoryProblemDTO request,
                                                              String sessionCode) {
         log.info("Received request: " + request);
-        String[] algorithms = {"NSGAII", "NSGAIII", "eMOEA", "PESA2", "VEGA"};
+        String[] algorithms = GameTheoryConst.ALLOWED_INSIGHT_ALGORITHMS;
 
 
         simpMessagingTemplate.convertAndSendToUser(sessionCode,

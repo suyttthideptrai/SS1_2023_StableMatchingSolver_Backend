@@ -84,13 +84,6 @@ public class StandardGameTheoryProblem implements GameTheoryProblem, Serializabl
     }
 
     /**
-     * @usage To set gametheory instance data from .xlsx file
-     * @modifies specialPlayer, normalPlayers, conflictSet
-     * @params String path: .xlsx pathname,
-     * ________int startRow: start row in xlsx file - where real data inserted
-     */
-
-    /**
      * @usage To remove all conflict strategies of conflict set declared in .xlsx file
      * @modifies normalPlayers
      * @algorithm Loop through conflict set
@@ -241,13 +234,11 @@ public class StandardGameTheoryProblem implements GameTheoryProblem, Serializabl
 
     @Override
     public String getName() {
-        // TODO Auto-generated method stub
         return "Standard Game Theory Problem";
     }
 
     @Override
     public int getNumberOfVariables() {
-        // TODO Auto-generated method stub
         return normalPlayers.size();
     }
 
@@ -318,13 +309,11 @@ public class StandardGameTheoryProblem implements GameTheoryProblem, Serializabl
 
     @Override
     public int getNumberOfObjectives() {
-        // TODO Auto-generated method stub
         return 1;
     }
 
     @Override
     public int getNumberOfConstraints() {
-        // TODO Auto-generated method stub
         return conflictSet.size();
     }
 
@@ -447,6 +436,5 @@ public class StandardGameTheoryProblem implements GameTheoryProblem, Serializabl
 
     @Override
     public void close() {
-        // TODO Auto-generated method stub
     }
 }

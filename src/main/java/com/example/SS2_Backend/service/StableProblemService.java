@@ -223,8 +223,8 @@ public class StableProblemService implements ProblemService {
 
                 NondominatedPopulation results = solveProblem(problem,
                         algorithm,
-                        MatchingConst.InsightConfig.POPULATION_SIZE,
-                        MatchingConst.InsightConfig.GENERATIONS,
+                        request.getGeneration(),
+                        request.getPopulationSize(),
                         request.getMaxTime(),
                         request.getDistributedCores());
 

@@ -236,19 +236,20 @@ public class GameTheorySolver {
 
                 if (problem instanceof StandardGameTheoryProblem
                         && AppConst.PSO_BASED_ALGOS.contains(algorithm)) {
-                    problem = GameTheoryProblemMapper.toProblem(request);
+                    problem = GameTheoryProblemMapper
+                            .toPSOProblem((StandardGameTheoryProblem) problem);
                 }
 
-                // Ơ
                 if (problem instanceof PSOCompatibleGameTheoryProblem
                         && !AppConst.PSO_BASED_ALGOS.contains(algorithm)) {
-                    problem = GameTheoryProblemMapper.toProblem(request);
+                    problem = GameTheoryProblemMapper
+                            .toStandardProblem((PSOCompatibleGameTheoryProblem) problem);
                 }
 
                 NondominatedPopulation results = solveProblem(problem,
                         algorithm,
-                        InsightConfig.GENERATIONS,
-                        InsightConfig.POPULATION_SIZE,
+                        request.getGeneration(),
+                        request.getPopulationSize(),
                         request.getDistributedCores(),
                         request.getMaxTime());
 

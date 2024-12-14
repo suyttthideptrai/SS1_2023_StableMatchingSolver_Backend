@@ -43,7 +43,7 @@ public class GameTheoryProblemMapper {
      * @param problem StandardGameTheoryProblem
      * @return PSOCompatibleGameTheoryProblem
      */
-    public static PSOCompatibleGameTheoryProblem toProblem(StandardGameTheoryProblem problem) {
+    public static PSOCompatibleGameTheoryProblem toPSOProblem(StandardGameTheoryProblem problem) {
         PSOCompatibleGameTheoryProblem result = new PSOCompatibleGameTheoryProblem();
         result.setDefaultPayoffFunction(EvaluatorUtils
                 .getIfDefaultFunction(problem.getDefaultPayoffFunction()));
@@ -62,7 +62,7 @@ public class GameTheoryProblemMapper {
      * @param problem StandardGameTheoryProblem
      * @return PSOCompatibleGameTheoryProblem
      */
-    public static StandardGameTheoryProblem toProblem(PSOCompatibleGameTheoryProblem problem) {
+    public static StandardGameTheoryProblem toStandardProblem(PSOCompatibleGameTheoryProblem problem) {
         StandardGameTheoryProblem result = new StandardGameTheoryProblem();
         result.setDefaultPayoffFunction(EvaluatorUtils
                 .getIfDefaultFunction(problem.getDefaultPayoffFunction()));

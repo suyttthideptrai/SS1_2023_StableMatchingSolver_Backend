@@ -128,6 +128,19 @@ public class Matches implements Serializable {
     }
 
     /**
+     * Get the single match of a node if it exists
+     *
+     * @param targetNode the node to query
+     * @return the single matched node or -1 if none exists
+     */
+    public int getSingleMatch(int targetNode) {
+        if (matches[targetNode].size() == 1) {
+            return matches[targetNode].iterator().next();
+        }
+        return -1; // Indicating no single match exists
+    }
+
+    /**
      * as name
      *
      * @return StringBuilder

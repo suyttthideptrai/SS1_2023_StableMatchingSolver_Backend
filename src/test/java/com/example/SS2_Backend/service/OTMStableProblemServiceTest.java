@@ -39,63 +39,59 @@
 //        request.setNumberOfSets(2);
 //
 //        // Total number of individuals across both sets
-//        request.setNumberOfIndividuals(15);
+//        request.setNumberOfIndividuals(1500);
 //
-//        // Assume 5 universities (set 0) and 10 students (set 1)
-//        int[] setIndices = new int[15];
-//        Arrays.fill(setIndices, 0, 5, 0);  // First 5 are universities
-//        Arrays.fill(setIndices, 5, 15, 1); // Next 10 are students
+//        // Assume 500 universities (set 0) and 1000 students (set 1)
+//        int[] setIndices = new int[1500];
+//        Arrays.fill(setIndices, 0, 500, 0);  // First 500 are universities
+//        Arrays.fill(setIndices, 500, 1500, 1); // Next 1000 are students
 //        request.setIndividualSetIndices(setIndices);
 //
 //        // Capacities for universities (how many students they can accept)
-//        int[] capacities = new int[15];
-//        capacities[0] = 3;  // First university can take 3 students
-//        capacities[1] = 2;  // Second university can take 2 students
-//        capacities[2] = 4;  // Third university can take 4 students
-//        capacities[3] = 3;  // Fourth university can take 3 students
-//        capacities[4] = 2;  // Fifth university can take 2 students
-//        Arrays.fill(capacities, 5, 15, 1);  // Students have individual capacity of 1
+//        int[] capacities = new int[1500];
+//        for (int i = 0; i < 500; i++) {
+//            capacities[i] = 3 + (i % 3);  // Universities can take 3, 4, or 5 students
+//        }
+//        Arrays.fill(capacities, 500, 1500, 1);  // Students have individual capacity of 1
 //        request.setIndividualCapacities(capacities);
 //
 //        // Properties could represent things like academic performance, research interests, etc.
 //        request.setNumberOfProperty(2);
 //
 //        // Student requirements for universities
-//        String[][] requirements = new String[15][2];
-//        for (int i = 0; i < 5; i++) {
+//        String[][] requirements = new String[1500][2];
+//        for (int i = 0; i < 500; i++) {
 //            requirements[i][0] = "ResearchCapacity";
 //            requirements[i][1] = "FundingLevel";
 //        }
-//        for (int i = 5; i < 15; i++) {
+//        for (int i = 500; i < 1500; i++) {
 //            requirements[i][0] = "AcademicScore";
 //            requirements[i][1] = "ResearchInterest";
 //        }
 //        request.setIndividualRequirements(requirements);
 //
 //        // Weights for evaluating match quality
-//        double[][] weights = new double[15][2];
-//        for (int i = 0; i < 5; i++) {
+//        double[][] weights = new double[1500][2];
+//        for (int i = 0; i < 500; i++) {
 //            weights[i][0] = 0.7;  // Universities care more about research
 //            weights[i][1] = 0.3;  // Less about funding
 //        }
-//        for (int i = 5; i < 15; i++) {
+//        for (int i = 500; i < 1500; i++) {
 //            weights[i][0] = 0.6;  // Students care about academic performance
 //            weights[i][1] = 0.4;  // And research interests
 //        }
 //        request.setIndividualWeights(weights);
 //
 //        // Actual property values
-//        double[][] properties = new double[15][2];
+//        double[][] properties = new double[1500][2];
 //        // Universities' properties
-//        properties[0] = new double[]{8.5, 9.2};   // Top research university
-//        properties[1] = new double[]{7.8, 8.5};   // Strong research focus
-//        properties[2] = new double[]{9.0, 7.5};   // High research capacity
-//        properties[3] = new double[]{8.2, 8.8};   // Balanced
-//        properties[4] = new double[]{7.5, 9.0};   // High funding
+//        Random rand = new Random();
+//        for (int i = 0; i < 500; i++) {
+//            properties[i] = new double[]{7.0 + rand.nextDouble() * 3.0, 7.0 + rand.nextDouble() * 3.0};  // Random values between 7 and 10
+//        }
 //
 //        // Students' properties (random but realistic academic scores and research interests)
-//        Random rand = new Random();
-//        for (int i = 5; i < 15; i++) {
+//        for (int i = 500; i < 1500; i++) {
 //            properties[i][0] = 5.0 + rand.nextDouble() * 4.0;  // Academic score 5-9
 //            properties[i][1] = rand.nextDouble();  // Research interest 0-1
 //        }
@@ -112,9 +108,9 @@
 //
 //        // Some excluded pairs (incompatible matches)
 //        request.setExcludedPairs(new int[][]{
-//                {0, 5},  // University 0 doesn't want student 5
-//                {1, 7},  // University 1 doesn't want student 7
-//                {2, 9}   // University 2 doesn't want student 9
+//                {0, 500},  // University 0 doesn't want student 500
+//                {1, 700},  // University 1 doesn't want student 700
+//                {2, 900}   // University 2 doesn't want student 900
 //        });
 //
 //        // Genetic algorithm parameters

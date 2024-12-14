@@ -6,16 +6,21 @@ import com.example.SS2_Backend.ss.gt.implement.PSOCompatibleGameTheoryProblem;
 import com.example.SS2_Backend.ss.gt.implement.StandardGameTheoryProblem;
 import com.example.SS2_Backend.util.EvaluatorUtils;
 import com.example.SS2_Backend.util.StringUtils;
-
-import java.util.List;
+import com.example.SS2_Backend.constants.AppConst;
 
 public class GameTheoryProblemMapper {
 
+    /**
+     * Map from request to problem
+     *
+     * @param request GameTheoryProblemDTO
+     * @return GameTheoryProblem
+     */
     public static GameTheoryProblem toProblem(GameTheoryProblemDTO request) {
         GameTheoryProblem problem;
         String algorithm = request.getAlgorithm();
         if (!StringUtils.isEmptyOrNull(algorithm)
-                && List.of("OMOPSO", "SMPSO").contains(algorithm)) {
+                && AppConst.PSO_BASED_ALGOS.contains(algorithm)) {
             problem = new PSOCompatibleGameTheoryProblem();
         } else {
             problem = new StandardGameTheoryProblem();
@@ -30,5 +35,43 @@ public class GameTheoryProblemMapper {
         problem.setMaximizing(request.isMaximizing());
 
         return problem;
+    }
+
+    /**
+     * Map from StandardGameTheoryProblem to PSOCompatibleGameTheoryProblem
+     *
+     * @param problem StandardGameTheoryProblem
+     * @return PSOCompatibleGameTheoryProblem
+     */
+    public static PSOCompatibleGameTheoryProblem toProblem(StandardGameTheoryProblem problem) {
+        PSOCompatibleGameTheoryProblem result = new PSOCompatibleGameTheoryProblem();
+        result.setDefaultPayoffFunction(EvaluatorUtils
+                .getIfDefaultFunction(problem.getDefaultPayoffFunction()));
+        result.setFitnessFunction(EvaluatorUtils
+                .getValidFitnessFunction(problem.getFitnessFunction()));
+        result.setSpecialPlayer(problem.getSpecialPlayer());
+        result.setNormalPlayers(problem.getNormalPlayers());
+        result.setConflictSet(problem.getConflictSet());
+        result.setMaximizing(problem.isMaximizing());
+        return result;
+    }
+
+    /**
+     * Map from StandardGameTheoryProblem to PSOCompatibleGameTheoryProblem
+     *
+     * @param problem StandardGameTheoryProblem
+     * @return PSOCompatibleGameTheoryProblem
+     */
+    public static StandardGameTheoryProblem toProblem(PSOCompatibleGameTheoryProblem problem) {
+        StandardGameTheoryProblem result = new StandardGameTheoryProblem();
+        result.setDefaultPayoffFunction(EvaluatorUtils
+                .getIfDefaultFunction(problem.getDefaultPayoffFunction()));
+        result.setFitnessFunction(EvaluatorUtils
+                .getValidFitnessFunction(problem.getFitnessFunction()));
+        result.setSpecialPlayer(problem.getSpecialPlayer());
+        result.setNormalPlayers(problem.getNormalPlayers());
+        result.setConflictSet(problem.getConflictSet());
+        result.setMaximizing(problem.isMaximizing());
+        return result;
     }
 }

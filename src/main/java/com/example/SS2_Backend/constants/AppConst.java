@@ -2,6 +2,7 @@ package com.example.SS2_Backend.constants;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class AppConst {
@@ -60,6 +61,9 @@ public class AppConst {
             "expm1",
             "signum"
     ));
+
+    public static final List<String> PSO_BASED_ALGOS = Arrays.asList(
+            "OMOPSO", "SMPSO");
 
     public static final String DEFAULT_FUNC = "default";
     public static final Set<String> APP_CUSTOM_FUNCTIONS = Set.of("sigma");

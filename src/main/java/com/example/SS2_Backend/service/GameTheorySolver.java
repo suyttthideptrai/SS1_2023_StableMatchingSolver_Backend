@@ -1,5 +1,6 @@
 package com.example.SS2_Backend.service;
 
+import com.example.SS2_Backend.constants.AppConst;
 import com.example.SS2_Backend.constants.GameTheoryConst;
 import com.example.SS2_Backend.dto.mapper.GameTheoryProblemMapper;
 import com.example.SS2_Backend.dto.request.GameTheoryProblemDTO;
@@ -13,6 +14,7 @@ import com.example.SS2_Backend.ss.gt.implement.PSOCompatibleGameTheoryProblem;
 import com.example.SS2_Backend.ss.gt.implement.StandardGameTheoryProblem;
 import com.example.SS2_Backend.util.EvaluatorUtils;
 import com.example.SS2_Backend.util.NumberUtils;
+import com.example.SS2_Backend.constants.GameTheoryConst.InsightConfig;
 import com.example.SS2_Backend.util.ProblemUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -232,10 +234,21 @@ public class GameTheorySolver {
                 System.out.println("Iteration: " + i);
                 long start = System.currentTimeMillis();
 
+                if (problem instanceof StandardGameTheoryProblem
+                        && AppConst.PSO_BASED_ALGOS.contains(algorithm)) {
+                    problem = GameTheoryProblemMapper.toProblem(request);
+                }
+
+                // Ơ
+                if (problem instanceof PSOCompatibleGameTheoryProblem
+                        && !AppConst.PSO_BASED_ALGOS.contains(algorithm)) {
+                    problem = GameTheoryProblemMapper.toProblem(request);
+                }
+
                 NondominatedPopulation results = solveProblem(problem,
                         algorithm,
-                        request.getGeneration(),
-                        request.getPopulationSize(),
+                        InsightConfig.GENERATIONS,
+                        InsightConfig.POPULATION_SIZE,
                         request.getDistributedCores(),
                         request.getMaxTime());
 

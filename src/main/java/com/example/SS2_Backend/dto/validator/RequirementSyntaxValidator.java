@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 
 public class RequirementSyntaxValidator implements ConstraintValidator<ValidRequirementSyntax, String[][]> {
 
-    private static final Pattern VALID_PATTERN = Pattern.compile("^(\\d+(?:\\.\\d+)?)(?:[+-]{2}|:[\\d+(?:\\.\\d+)?])?$");
+    private static final Pattern VALID_PATTERN = Pattern.compile("^(\\d+(?:\\.\\d+)?)(?::(\\d+(?:\\.\\d+)?))?(?:\\+\\+|--)?$");
 
     @Override
     public void initialize(ValidRequirementSyntax annotation) {}

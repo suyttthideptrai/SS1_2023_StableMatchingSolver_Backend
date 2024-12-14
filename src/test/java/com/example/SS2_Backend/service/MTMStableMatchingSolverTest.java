@@ -1,41 +1,23 @@
 package com.example.SS2_Backend.service;
 
 import com.example.SS2_Backend.dto.request.NewStableMatchingProblemDTO;
+import com.example.SS2_Backend.util.SampleDataGenerator;
 import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
 
 public class MTMStableMatchingSolverTest {
-    NewStableMatchingProblemDTO newStableMatchingProblemDTO = new NewStableMatchingProblemDTO();
+    NewStableMatchingProblemDTO newStableMatchingProblemDTO;
+    int numberOfIndividuals1;
+    int numberOfIndividuals2;
+    String[] propNames;
 
     @BeforeEach
     public void setUp() {
-        String[][] individualRequirements = {
-                {"0.15", "0.15"},
-                {"0.15", "0.15"},
-                {"0.15", "0.15"},
-                {"0.15", "0.15"},
-                {"0.15", "0.15"}
-        };
-        double[][] individualWeights = {
-                {0.5, 0.5},
-                {0.4, 0.6},
-                {0.3, 0.7},
-                {0.6, 0.4},
-                {0.7, 0.3}
-        };
-        double[][] individualProperties = {
-                {10, 5},
-                {8, 6},
-                {12, 4},
-                {9, 7},
-                {11, 3}
-        };
-        int[] individualSetIndices = {0, 1, 1, 1, 1};
-        newStableMatchingProblemDTO.setNumberOfIndividuals(5);
-        newStableMatchingProblemDTO.setIndividualProperties(individualProperties);
-        newStableMatchingProblemDTO.setIndividualWeights(individualWeights);
-        newStableMatchingProblemDTO.setIndividualRequirements(individualRequirements);
-        newStableMatchingProblemDTO.setIndividualSetIndices(individualSetIndices);
+        numberOfIndividuals1 = 20;
+        numberOfIndividuals2 = 200;
+        propNames = new String[]{"Properties 1", "Properties 2", "Properties 3", "Properties 4", "Properties 5"};
+        SampleDataGenerator sampleData = new SampleDataGenerator(numberOfIndividuals1, numberOfIndividuals2, propNames);
+        newStableMatchingProblemDTO = sampleData.generate();
     }
 
     @Test

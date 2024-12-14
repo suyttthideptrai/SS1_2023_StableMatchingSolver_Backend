@@ -12,9 +12,7 @@ public class DistributedCoresValidator implements ConstraintValidator<ValidDistr
     public boolean isValid(String value, ConstraintValidatorContext context) {
         int availableCores = Runtime.getRuntime().availableProcessors();
 
-        if (value.equalsIgnoreCase("all")) {
-            return true;
-        }
+        if (value.equalsIgnoreCase("all")) return true;
 
         try {
             int cores = Integer.parseInt(value);

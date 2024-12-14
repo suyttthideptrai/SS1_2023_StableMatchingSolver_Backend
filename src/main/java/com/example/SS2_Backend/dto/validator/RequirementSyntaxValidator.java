@@ -14,13 +14,9 @@ public class RequirementSyntaxValidator implements ConstraintValidator<ValidRequ
 
     @Override
     public boolean isValid(String[][] value, ConstraintValidatorContext context) {
-        for (String[] row : value) {
-            for (String requirement : row) {
-                if (!VALID_PATTERN.matcher(requirement).matches()) {
-                    return false;
-                }
-            }
-        }
+        for (String[] row : value)
+            for (String requirement : row)
+                if (!VALID_PATTERN.matcher(requirement).matches()) return false;
         return true;
     }
 }

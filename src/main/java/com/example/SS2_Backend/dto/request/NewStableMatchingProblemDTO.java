@@ -148,22 +148,22 @@ public class NewStableMatchingProblemDTO implements ProblemRequestDto {
 //        }
 //    }
 
-    public static String[][] fromListToStringArray(List<List<String>> list) {
-        String[][] array = new String[list.size()][];
-        for (int i = 0; i < list.size(); i++) {
-            List<String> currentArr = list.get(i);
-            array[i] = currentArr.toArray(new String[0]);
-        }
-        return array;
-    }
-
-    public static double[][] fromListToDoubleArray(List<List<Double>> list) {
-        double[][] array = new double[list.size()][];
-        for (int i = 0; i < list.size(); i++) {
-            array[i] = list.get(i).stream().mapToDouble(Double::doubleValue).toArray();
-        }
-        return array;
-    }
+//    public static String[][] fromListToStringArray(List<List<String>> list) {
+//        String[][] array = new String[list.size()][];
+//        for (int i = 0; i < list.size(); i++) {
+//            List<String> currentArr = list.get(i);
+//            array[i] = currentArr.toArray(new String[0]);
+//        }
+//        return array;
+//    }
+//
+//    public static double[][] fromListToDoubleArray(List<List<Double>> list) {
+//        double[][] array = new double[list.size()][];
+//        for (int i = 0; i < list.size(); i++) {
+//            array[i] = list.get(i).stream().mapToDouble(Double::doubleValue).toArray();
+//        }
+//        return array;
+//    }
 
     @Override
     public String toString() {

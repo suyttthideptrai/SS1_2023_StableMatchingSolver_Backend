@@ -11,7 +11,11 @@ import org.moeaframework.core.variable.BinaryIntegerVariable;
 import java.io.IOException;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 
 import static com.example.SS2_Backend.util.StringExpressionEvaluator.*;
 
@@ -267,6 +271,7 @@ public class StandardGameTheoryProblem implements GameTheoryProblem, Serializabl
             // if the payoff function is relative to the player itself, then it can be calculated in the initialization
             List<BigDecimal> payoffValues = new ArrayList<>();
             for (int i = 0; i < player.getStrategies().size(); ++i) {
+//                log.info("strat {}, func {}", player.getStrategies().get(i).getProperties(), payoffFunction);
                 BigDecimal payoffValue =  evaluatePayoffFunctionNoRelative(player.getStrategies().get(i), payoffFunction);
                 payoffValues.add(payoffValue);
             }

@@ -245,8 +245,10 @@ public class GameTheorySolver {
 
                 NondominatedPopulation results = solveProblem(problem,
                         algorithm,
-                        request.getGeneration(),
-                        request.getPopulationSize(),
+//                        request.getGeneration(),
+//                        request.getPopulationSize(),
+                        50,
+                        20,
                         request.getDistributedCores(),
                         request.getMaxTime());
 

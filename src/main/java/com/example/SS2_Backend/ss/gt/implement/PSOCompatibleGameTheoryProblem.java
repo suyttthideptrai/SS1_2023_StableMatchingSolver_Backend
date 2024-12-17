@@ -219,7 +219,7 @@ public class PSOCompatibleGameTheoryProblem implements GameTheoryProblem, Serial
                 continue;
             }
 
-            // if the payoff function is relative to the player itself, then it can be calculated in the initialization
+            // if the payoff log.info("strat {}, func {}", player.getStrategies().get(i).getProperties(), payoffFunction);function is relative to the player itself, then it can be calculated in the initialization
             List<BigDecimal> payoffValues = new ArrayList<>();
             for (int i = 0; i < player.getStrategies().size(); ++i) {
                 BigDecimal payoffValue = evaluatePayoffFunctionNoRelative(player

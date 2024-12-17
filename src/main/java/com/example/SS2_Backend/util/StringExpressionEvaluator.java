@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+
 public class StringExpressionEvaluator {
 
 
@@ -98,7 +99,6 @@ public class StringExpressionEvaluator {
 
                 expression = expression.replaceAll(placeholder, formatDouble(propertyValue));
             }
-
 
             // evaluate this string expression to get the result
             double val = eval(expression);

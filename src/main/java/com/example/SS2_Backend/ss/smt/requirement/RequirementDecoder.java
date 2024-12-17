@@ -6,6 +6,8 @@ import com.example.SS2_Backend.ss.smt.requirement.impl.ScaleTarget;
 
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.example.SS2_Backend.util.NumberUtils.isDouble;
 import static com.example.SS2_Backend.util.NumberUtils.isInteger;
@@ -20,6 +22,8 @@ public class RequirementDecoder {
 
     private static final boolean INCREMENT = true;
     private static final boolean DECREMENT = false;
+    // Date of time
+    private static Timestamp analyzer;
 
     /**
      * Decode String[][] of requirements in request to Requirement[][]
@@ -47,6 +51,10 @@ public class RequirementDecoder {
                     return new ScaleTarget(Integer.parseInt(array[0]));
                 } else if (isDouble(array[0])) {
                     return new OneBound(Double.parseDouble(array[0]), INCREMENT);
+                } else if(isValidFormat(array[0])) {
+                    int set = analyzer.calculateFitness();
+                    analyzer.parseInput(array[0]);
+                    return new ScaleTarget(set);
                 } else {
                     return new OneBound(0.0, INCREMENT);
                 }
@@ -58,6 +66,15 @@ public class RequirementDecoder {
         } catch (NumberFormatException e) {
             return new OneBound(0.0, INCREMENT);
         }
+    }
+
+    public static boolean isValidFormat(String input) {
+        String regex = "\\[\\d+(, \\d+)*](, \\[\\d+(, \\d+)*])*";
+
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(input);
+
+        return matcher.matches();
     }
 
     private static String[] decodeInputRequirement(String item) {

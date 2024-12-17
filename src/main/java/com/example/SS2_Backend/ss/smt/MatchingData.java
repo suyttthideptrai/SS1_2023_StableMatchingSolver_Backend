@@ -41,6 +41,10 @@ public class MatchingData {
     private final double[][] weights;
     private final Requirement[][] requirements;
 
+    private final int[][] StartRangesRequirement;
+    private final int[][] EndRangesRequirement;
+
+
 
     public MatchingData(int size,
                         int propertyNum,
@@ -48,7 +52,7 @@ public class MatchingData {
                         int[] capacities,
                         double[][] propertyValues,
                         double[][] weights,
-                        Requirement[][] requirements) {
+                        Requirement[][] requirements, int[][] startRangesRequirement, int[][] endRangesRequirement) {
 
         Map<Integer, Integer> setNums = new HashMap<>();
         for (int set : sets) {
@@ -64,6 +68,9 @@ public class MatchingData {
         this.weights = weights;
         this.requirements = requirements;
 
+
+        this.StartRangesRequirement = startRangesRequirement;
+        this.EndRangesRequirement = endRangesRequirement;
     }
 
     /**
@@ -138,6 +145,30 @@ public class MatchingData {
     public Requirement getRequirementOf(int idx, int indexOfProperty) {
         return this.requirements[idx][indexOfProperty];
     }
+
+    /**
+     * get Start of Ranges Requirement
+     *
+     * @param idx position of individual
+     * @param indexOfProperty End of Ranges of property
+     * @return Requirement
+     */
+    public int getRequirementOfStart(int idx, int indexOfProperty) {
+        return this.EndRangesRequirement[idx][indexOfProperty];
+    }
+
+    /**
+     * get End of Ranges Requirement
+     *
+     * @param idx position of individual
+     * @param indexOfProperty End of Ranges of property
+     * @return Requirement
+     */
+    public int getRequirementOfEnd(int idx, int indexOfProperty) {
+        return this.StartRangesRequirement[idx][indexOfProperty];
+    }
+
+
 
     /**
      * to String Builder

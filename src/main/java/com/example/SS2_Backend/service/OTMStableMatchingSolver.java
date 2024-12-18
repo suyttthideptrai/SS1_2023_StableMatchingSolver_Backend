@@ -40,16 +40,6 @@ public class OTMStableMatchingSolver {
 
         try {
             log.info("Validating StableMatchingProblemDTO Request ...");
-            BindingResult bindingResult = ValidationUtils.validate(request);
-            if (bindingResult.hasErrors()) {
-                return ResponseEntity
-                        .status(HttpStatus.BAD_REQUEST)
-                        .body(Response
-                                .builder()
-                                .data(ValidationUtils.getAllErrorDetails(bindingResult))
-                                .build());
-            }
-
             MatchingProblem problem = StableMatchingProblemMapper.toOTM(request);
             log.info("Start solving: {}, problem name: {}, problem size: {}",
                     problem.getMatchingTypeName(),

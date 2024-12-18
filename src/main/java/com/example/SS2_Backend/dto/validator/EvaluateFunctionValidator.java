@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 
 public class EvaluateFunctionValidator implements ConstraintValidator<ValidEvaluateFunction, String[]> {
 
-    private static final Pattern VARIABLE_PATTERN = Pattern.compile("(P\\d+|W\\d+|R\\(\\d+(?:,\\d+)*\\)|\\{[^}]+\\})");
+    private static final Pattern VARIABLE_PATTERN = Pattern.compile("(P\\d+|W\\d+|R\\d+)");
 
     @Override
     public boolean isValid(String[] values, ConstraintValidatorContext context) {

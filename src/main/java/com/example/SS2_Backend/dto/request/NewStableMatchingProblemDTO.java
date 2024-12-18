@@ -55,10 +55,10 @@ public class NewStableMatchingProblemDTO implements ProblemRequestDto {
 
     private int [][] excludedPairs;
 
-    @Max(value = 2000, message = ErrMessage.POPULATION_SIZE)
+    @Max(value = 3000, message = ErrMessage.POPULATION_SIZE)
     private int populationSize;
 
-    @Max(value = 500, message = ErrMessage.GENERATION)
+    @Max(value = 1000, message = ErrMessage.GENERATION)
     private int generation;
 
     private int maxTime;

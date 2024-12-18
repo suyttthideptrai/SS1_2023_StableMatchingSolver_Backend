@@ -112,7 +112,7 @@ public class OTMProblem implements MatchingProblem {
     }
 
     public boolean hasFitnessFunc() {
-        return !this.fitnessFunction.equals("default") && !StringUtils.isEmptyOrNull(this.fitnessFunction);
+        return !this.fitnessFunction.equalsIgnoreCase("default") && !StringUtils.isEmptyOrNull(this.fitnessFunction);
     }
 
     @Override

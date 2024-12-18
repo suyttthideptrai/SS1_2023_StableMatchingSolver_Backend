@@ -15,6 +15,15 @@
     <description>Demo project for Spring Boot</description>
     <properties>
         <java.version>17</java.version>
+        <nodeVersion>v20.17.0</nodeVersion>
+        <npmVersion>10.8.2</npmVersion>
+        <nodePath>${project.basedir}/node</nodePath>
+        <frontend.repo.url>
+            git@github:suyttthideptrai/SS2-game-theory-solver
+        </frontend.repo.url>
+        <frontend.clone.dir>
+            ${project.basedir}/frontend
+        </frontend.clone.dir>
     </properties>
     <dependencies>
         <dependency>
@@ -108,12 +117,120 @@
                             <artifactId>lombok</artifactId>
                         </exclude>
                     </excludes>
-                    <!--<jvmArguments>-->
-                    <!---Xmx8G-->
-                    <!--</jvmArguments>-->
                 </configuration>
             </plugin>
         </plugins>
+        <!--<jvmArguments>-->
+        <!---Xmx8G-->
+        <!--</jvmArguments>-->
     </build>
-
+    <profiles>
+        <profile>
+            <id>withFront</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-maven-plugin</artifactId>
+                        <configuration>
+                            <excludes>
+                                <exclude>
+                                    <groupId>org.projectlombok</groupId>
+                                    <artifactId>lombok</artifactId>
+                                </exclude>
+                            </excludes>
+                        </configuration>
+                    </plugin>
+                    <!-- FE app build life cycle -->
+                    <plugin>
+                        <groupId>com.github.eirslett</groupId>
+                        <artifactId>frontend-maven-plugin</artifactId>
+                        <version>1.15.1</version>
+                        <executions>
+                            <!--                    Step 1: install node & npm-->
+                            <execution>
+                                <id>init-node</id>
+                                <goals>
+                                    <goal>install-node-and-npm</goal>
+                                </goals>
+                                <phase>
+                                    initialize
+                                </phase>
+                                <configuration>
+                                    <workingDirectory>${frontend.clone.dir}</workingDirectory>
+                                    <nodeVersion>${nodeVersion}</nodeVersion>
+                                    <npmVersion>${npmVersion}</npmVersion>
+                                    <installDirectory>${nodePath}</installDirectory>
+                                </configuration>
+                            </execution>
+                            <!--                    Step 2: clone FE sources via npx-->
+                            <execution>
+                                <id>clone-fe</id>
+                                <phase>generate-sources</phase>
+                                <goals>
+                                    <goal>npx</goal>
+                                </goals>
+                                <configuration>
+                                    <arguments>
+                                        degit ${frontend.repo.url} ${frontend.clone.dir} --force
+                                        <!--                                <argument>degit</argument>-->
+                                        <!--                                <argument>${frontend.repo.url}</argument>-->
+                                        <!--                                <argument>${frontend.clone.dir}</argument>-->
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                            <!-- Step 3: install npm dependencies-->
+                            <execution>
+                                <id>npm-install</id>
+                                <phase>
+                                    generate-resources
+                                </phase>
+                                <goals>
+                                    <goal>npm</goal>
+                                </goals>
+                                <configuration>
+                                    <nodePath>${nodePath}</nodePath>
+                                    <arguments>install</arguments>
+                                    <workingDirectory>${frontend.clone.dir}</workingDirectory>
+                                </configuration>
+                            </execution>
+                            <!-- Step 4: compile FE product resources-->
+                            <execution>
+                                <id>compile-fe</id>
+                                <phase>
+                                    compile
+                                </phase>
+                                <goals>
+                                    <goal>npm</goal>
+                                </goals>
+                                <configuration>
+                                    <workingDirectory>${frontend.clone.dir}</workingDirectory>
+                                    <nodePath>${nodePath}</nodePath>
+                                    <arguments>run build</arguments>
+                                </configuration>
+                            </execution>
+                            <!-- Target Script: start FE development server port 3000-->
+                            <execution>
+                                <id>start-fe-dev</id>
+                                <phase>
+                                    verify
+                                </phase>
+                                <goals>
+                                    <goal>npm</goal>
+                                </goals>
+                                <configuration>
+                                    <workingDirectory>${frontend.clone.dir}</workingDirectory>
+                                    <nodePath>${nodePath}</nodePath>
+                                    <arguments>start</arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

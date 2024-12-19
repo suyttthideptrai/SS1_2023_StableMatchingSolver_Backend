@@ -15,7 +15,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class StringExpressionEvaluator {
-    public static Pattern nonRelativePattern = Pattern.compile("[^0-9]p[0-9]+");
+    public static Pattern nonRelativePattern = Pattern.compile("p[0-9]+");
     public static Pattern relativePattern = Pattern.compile("P[0-9]+p[0-9]+");
 
 
@@ -30,29 +30,29 @@ public class StringExpressionEvaluator {
                                                                               List<NormalPlayer> normalPlayers,
                                                                               int[] chosenStrategyIndices) {
         String expression = payoffFunction;
-        Matcher nonRelativeMatcher = nonRelativePattern.matcher(expression);
-        // replace non-relative variables with value
-        while (nonRelativeMatcher.find()) {
-            String placeholder = nonRelativeMatcher.group();
-            int index = Integer.parseInt(placeholder.substring(1));
-            double propertyValue = strategy.getProperties().get(index);
-            expression = expression.replaceAll(placeholder, formatDouble(propertyValue));
-        }
 
-        // replace relative variables with value
-        Matcher relativeMatcher = relativePattern.matcher(expression);
-        while (relativeMatcher.find()) {
-            String placeholder = relativeMatcher.group();
-            // syntax Pjpi
-            int[] ji = Arrays.stream(placeholder
-                    .substring(1) // remove P
-                    .split("p")) // split at p
-                .mapToInt(Integer::parseInt)
-                .toArray(); // [j, i]
-            NormalPlayer otherPlayer = normalPlayers.get(ji[0]);
-            Strategy otherPlayerStrategy = otherPlayer.getStrategyAt(chosenStrategyIndices[ji[0]]);
-            double propertyValue = otherPlayerStrategy.getProperties().get(ji[1]);
-            expression = expression.replaceAll(placeholder, formatDouble(propertyValue));
+        // match both relative and non-relative variables
+        Pattern generalPattern = Pattern.compile("(P[0-9]+)?" + nonRelativePattern.pattern());
+        Matcher generalMatcher = generalPattern.matcher(expression);
+        while (generalMatcher.find()) {
+            String placeholder = generalMatcher.group();
+            if (placeholder.contains("P")) {
+                // relative variables - syntax Pjpi
+                int[] ji = Arrays.stream(placeholder
+                        .substring(1) // remove P
+                        .split("p")) // split at p
+                    .mapToInt(Integer::parseInt)
+                    .toArray(); // [j, i]
+                NormalPlayer otherPlayer = normalPlayers.get(ji[0]);
+                Strategy otherPlayerStrategy = otherPlayer.getStrategyAt(chosenStrategyIndices[ji[0]]);
+                double propertyValue = otherPlayerStrategy.getProperties().get(ji[1]);
+                expression = expression.replaceAll(placeholder, formatDouble(propertyValue));
+            } else {
+                // non-relative variables
+                int index = Integer.parseInt(placeholder.substring(1));
+                double propertyValue = strategy.getProperties().get(index);
+                expression = expression.replaceAll(placeholder, formatDouble(propertyValue));
+            }
         }
 
         // evaluate this string expression to get the result

@@ -1,0 +1,268 @@
+[33mcommit 661383f5c6c7f78e815a04018858fe4a30870de4[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mgroup6_2/NTKien[m[33m)[m
+Merge: 7338651 68a676b
+Author: ducsieunhan <Chroller03@gmail.com>
+Date:   Thu Dec 5 21:05:47 2024 +0700
+
+    Merge branch 'group6_2/all' into group6_2/NTKien
+
+[33mcommit 7338651963250252bba6b21f8dca96aeebbed92c[m[33m ([m[1;31morigin/group6_2/NTKien[m[33m)[m
+Author: ducsieunhan <Chroller03@gmail.com>
+Date:   Thu Dec 5 21:01:56 2024 +0700
+
+     logic matching 3 set
+
+[33mcommit 68a676ba1bf239876d1f74fc6b2928f4c01101a5[m
+Author: kenshoul <scthanhhoa88@gmail.com>
+Date:   Thu Dec 5 15:10:19 2024 +0700
+
+    update
+
+[33mcommit 8f4c71543fd86c8f6c8c20ab0f149bcf65ec6d7b[m
+Author: kiensun99x <kiensun99x@gmail.com>
+Date:   Thu Dec 5 14:58:50 2024 +0700
+
+    add mot it method
+
+[33mcommit 91d6a5564255388d72905730a2347a91ce919ca8[m
+Author: thanggw <thangvuvan0611@gmail.com>
+Date:   Thu Dec 5 02:07:06 2024 +0700
+
+    threeSetPreference
+
+[33mcommit 359e7ace8a0222eb7077ba3435e7823d448fcff8[m
+Merge: 750696e ffda6e2
+Author: tuvan <2201040159@ms.hanu.edu.vn>
+Date:   Wed Dec 4 10:23:13 2024 +0700
+
+    Update
+
+[33mcommit ffda6e216f236e0d91d199e065c3b2ae33459479[m
+Author: Thành <2101040168@ms.hanu.edu.vn>
+Date:   Mon Dec 2 21:12:22 2024 +0700
+
+    Revert "add setup"
+    
+    This reverts commit 3ebb69a688c803a63ed29a5f5dd74e07d9c3962a.
+
+[33mcommit b1a8fdc61299a0be231fdfc8ce417f925e980986[m
+Author: Thành <2101040168@ms.hanu.edu.vn>
+Date:   Mon Dec 2 21:12:17 2024 +0700
+
+    Revert "finalize setup"
+    
+    This reverts commit dc93d0575a254be006fb530f4292e3d35c9734d6.
+
+[33mcommit dc93d0575a254be006fb530f4292e3d35c9734d6[m
+Author: suyttthideptrai <ntienthanhn@gmail.com>
+Date:   Sun Dec 1 23:28:46 2024 +0700
+
+    finalize setup
+
+[33mcommit 3ebb69a688c803a63ed29a5f5dd74e07d9c3962a[m
+Author: Thành <2101040168@ms.hanu.edu.vn>
+Date:   Sun Dec 1 14:48:06 2024 +0700
+
+    add setup
+
+[33mcommit adc87d94d147acfc18344bb9f48fc9374ac0c034[m
+Merge: b7c07a0 841f649
+Author: Thành <131802697+suyttthideptrai@users.noreply.github.com>
+Date:   Wed Nov 27 21:33:39 2024 +0700
+
+    Merge pull request #27 from suyttthideptrai/mon_group1/session14/keep-refactor
+    
+    add some refactor in problem
+
+[33mcommit 750696e4673f412cc44f97b69ff123bada5a717e[m
+Author: tuvan <2201040159@ms.hanu.edu.vn>
+Date:   Mon Nov 25 15:36:28 2024 +0700
+
+    Update for 3set
+
+[33mcommit 16706ec8f5d52813f3ed09121754c961c27eb0a2[m
+Author: tuvan <2201040159@ms.hanu.edu.vn>
+Date:   Mon Nov 25 15:19:48 2024 +0700
+
+    Update for 3set
+
+[33mcommit 841f64979331c741ce72a4ff5c9112d3b8065beb[m
+Author: dat.pl <dat.pl@mbageas.life>
+Date:   Sun Nov 24 23:51:38 2024 +0700
+
+    add some refactor in problem
+
+[33mcommit b7c07a083176be7d3e50c86159afa63f6bb45d2e[m[33m ([m[1;32mmaster[m[33m)[m
+Merge: 3e8051e 35751c4
+Author: Thành <131802697+suyttthideptrai@users.noreply.github.com>
+Date:   Sat Nov 23 01:18:35 2024 +0700
+
+    Merge pull request #26 from suyttthideptrai/ta/week12/feature/merge-changes
+    
+    Gộp các thay đổi
+
+[33mcommit 35751c414727bbf91bdec87c348cd7ceb3285c14[m[33m ([m[1;31morigin/ta/week12/feature/merge-changes[m[33m)[m
+Author: Thành <2101040168@ms.hanu.edu.vn>
+Date:   Sat Nov 23 01:16:51 2024 +0700
+
+    update
+
+[33mcommit 6937d3b8034ec7fd592d8d80aae1352f3eb08c50[m
+Author: Thành <2101040168@ms.hanu.edu.vn>
+Date:   Sat Nov 23 00:50:33 2024 +0700
+
+    update runnable
+
+[33mcommit 7f3687a7d31826e865d3baf35ebab0f35534a581[m
+Author: Thành <2101040168@ms.hanu.edu.vn>
+Date:   Fri Nov 22 22:51:03 2024 +0700
+
+    update buildable
+
+[33mcommit 7c93e01be853150b14e87cb17b9cd345ed14bc56[m
+Author: Thành <2101040168@ms.hanu.edu.vn>
+Date:   Thu Nov 21 16:41:06 2024 +0700
+
+    update tmp (finalize problem)
+
+[33mcommit c796002191441edd160519a02d4334af6da3645b[m
+Author: Thành <2101040168@ms.hanu.edu.vn>
+Date:   Thu Nov 21 00:41:12 2024 +0700
+
+    update tmp
+
+[33mcommit 71ac6f3d22963fde53edd72ced033466f6fe4d69[m
+Author: Thành <2101040168@ms.hanu.edu.vn>
+Date:   Wed Nov 20 20:19:31 2024 +0700
+
+    update tmp
+
+[33mcommit 7f5af9900004516bcdc93457cfd82e134f4b80a6[m
+Merge: c0faaa6 3e8051e
+Author: Thành <2101040168@ms.hanu.edu.vn>
+Date:   Wed Nov 20 16:37:07 2024 +0700
+
+    Merge branch 'master' into ta/week12/feature/merge-changes
+
+[33mcommit c0faaa6360c83db274c321abed04b2e3aeff3a47[m
+Author: Thành <2101040168@ms.hanu.edu.vn>
+Date:   Wed Nov 20 16:37:02 2024 +0700
+
+    tmp
+
+[33mcommit 3e8051e0af7761868025b624dbf42c567a9444f6[m
+Merge: b9bd17a 0680236
+Author: Thành <131802697+suyttthideptrai@users.noreply.github.com>
+Date:   Wed Nov 20 16:32:53 2024 +0700
+
+    Merge pull request #23 from duy103zxc/master
+    
+    Cải thiện StableMatchingDTO
+
+[33mcommit 0680236f588681715b63377cf1fbf29f60f8c481[m
+Author: Khanh Duy <duykhanh471@protonmail.com>
+Date:   Wed Nov 20 15:51:06 2024 +0700
+
+    Cải thiện StableMatchingDTO
+
+[33mcommit a3060e1ae0653345ded487c0352b6cd8742b9a27[m
+Merge: 36a7ffa b9bd17a
+Author: Thành <2101040168@ms.hanu.edu.vn>
+Date:   Wed Nov 20 10:09:01 2024 +0700
+
+    Merge branch 'master' into ta/week12/feature/merge-changes
+
+[33mcommit b9bd17aafcd7315a1480b71b235d3c63d2aa743e[m
+Merge: dee229b 7ecf87b
+Author: Thành <131802697+suyttthideptrai@users.noreply.github.com>
+Date:   Wed Nov 20 09:52:33 2024 +0700
+
+    Merge pull request #21 from suyttthideptrai/mon_group1/session13/keep-refactor
+    
+    refactor preference provider
+
+[33mcommit dee229b1da803942459543f06e42f75b622b7240[m
+Merge: 4dd35a8 d444fa1
+Author: Thành <131802697+suyttthideptrai@users.noreply.github.com>
+Date:   Wed Nov 20 09:50:05 2024 +0700
+
+    Merge pull request #22 from suyttthideptrai/mon_group1/session11/refactor-SampleDataGenerator
+    
+    update SampleDataGenerator
+
+[33mcommit 4dd35a8302b95c7ae9c28497a0ee55b2c37adca1[m
+Author: Thành <2101040168@ms.hanu.edu.vn>
+Date:   Mon Nov 18 16:53:44 2024 +0700
+
+    update Dockerfile
+
+[33mcommit d444fa15f3b626526b1e0637261ac6191c3c715a[m[33m ([m[1;31morigin/mon_group1/session11/refactor-SampleDataGenerator[m[33m)[m
+Author: Manh Nguyen <nguyenphucmanh194@gmail.com>
+Date:   Sun Nov 17 19:39:43 2024 +0700
+
+    update SampleDataGenerator
+
+[33mcommit 7ecf87b3b9f715503b8eccd887f950f9a1b0c676[m
+Author: dat.pl <dat.pl@mbageas.life>
+Date:   Sun Nov 17 18:07:51 2024 +0700
+
+    refactor preference provider
+
+[33mcommit 36a7ffa6f19b4f8a3648e0e3a02bcb1f3b6b4982[m
+Author: Thành <2101040168@ms.hanu.edu.vn>
+Date:   Sun Nov 17 14:48:02 2024 +0700
+
+    update
+
+[33mcommit 6851ead484873f259765d3b1f26e421295906cab[m
+Author: Thành <2101040168@ms.hanu.edu.vn>
+Date:   Thu Nov 14 19:50:34 2024 +0700
+
+    update
+
+[33mcommit b24776ca5eaa5e7ef3318bc297025803dd35ef7c[m
+Author: Thành <2101040168@ms.hanu.edu.vn>
+Date:   Thu Nov 14 19:50:13 2024 +0700
+
+    update
+
+[33mcommit 6466f3138b60efd60134fc59d1356ccb52328fb4[m
+Author: Thành <2101040168@ms.hanu.edu.vn>
+Date:   Thu Nov 14 16:20:59 2024 +0700
+
+    update code & comment
+
+[33mcommit 4e6a0403c31baca798b01a21d50f79575f9efce7[m
+Author: Thành <2101040168@ms.hanu.edu.vn>
+Date:   Thu Nov 14 16:18:18 2024 +0700
+
+    commit
+
+[33mcommit 00a0e74d260c3cf85102f856ae6eb4404fc3b015[m
+Merge: 6a72668 3d9a922
+Author: Thành <131802697+suyttthideptrai@users.noreply.github.com>
+Date:   Thu Nov 14 15:16:29 2024 +0700
+
+    Merge pull request #17 from duy103zxc/mon_group1/week9/refactor/stableMatchingProblem
+    
+    Xử lý DTO Validation (Pull Request cuối cho Branch)
+
+[33mcommit 6a7266801f58331c68332c4f4f774712cc3d3dda[m
+Author: Thành <2101040168@ms.hanu.edu.vn>
+Date:   Wed Nov 13 17:45:08 2024 +0700
+
+    code & comment
+
+[33mcommit 8f42b3b859098d189c2f260efcea396d5ead9a3a[m
+Merge: 0b90e96 09a6ee1
+Author: Thành <131802697+suyttthideptrai@users.noreply.github.com>
+Date:   Wed Nov 13 13:57:27 2024 +0700
+
+    Merge pull request #19 from suyttthideptrai/mon_group1/session11/refactor-structure
+    
+    Please review, DO NOT MERGE
+
+[33mcommit 3d9a922b92e90cbd438de027112d71625dc07940[m
+Author: Khanh Duy <duykhanh471@protonmail.com>
+Date:   Wed Nov 13 10:17:11 2024 +0700
+
+    Cập nhật sửa thêm các phần yêu cầu bổ sung trong Validation của TA và anh Ho�

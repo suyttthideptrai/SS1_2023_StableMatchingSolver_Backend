@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;
+import java.util.*;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.TreeSet;
@@ -181,4 +182,29 @@ public class Matches implements Serializable {
     }
 
 
+    public TreeSet<Integer>[] getAllMatches() {
+        return matches;
+    }
+
+    public void addMatchForGroup(List<Integer> nodes) {
+        for (int i = 0; i < nodes.size(); i++) {
+            int currentNode = nodes.get(i);
+            for (int j = 0; j < nodes.size(); j++) {
+                if (i != j) { // Prevent matching a node with itself
+                    addMatch(currentNode, nodes.get(j));
+                }
+            }
+        }
+    }
+
+    public Collection<Integer> getMatchesAndTarget(int target) {
+        Collection<Integer> nodesToRemove = new HashSet<>();
+        nodesToRemove.add(target);
+        nodesToRemove.addAll(getSetOf(target));
+        return nodesToRemove;
+    }
+
+    public void disMatch(int target, Collection<Integer> nodeToRemove) {
+        matches[target].removeAll(nodeToRemove);
+    }
 }

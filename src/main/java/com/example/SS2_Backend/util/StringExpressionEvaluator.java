@@ -11,8 +11,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class StringExpressionEvaluator {
+    public static Pattern nonRelativePattern = Pattern.compile("[^0-9]p[0-9]+");
+    public static Pattern relativePattern = Pattern.compile("P[0-9]+p[0-9]+");
 
 
     public enum DefaultFunction {
@@ -24,52 +28,36 @@ public class StringExpressionEvaluator {
     public static BigDecimal evaluatePayoffFunctionWithRelativeToOtherPlayers(Strategy strategy,
                                                                               String payoffFunction,
                                                                               List<NormalPlayer> normalPlayers,
-                                                                              List<Integer> chosenStrategyIndices) {
-
-        // this method is for some players who take other players' strategies into account when calculating their payoff
+                                                                              int[] chosenStrategyIndices) {
         String expression = payoffFunction;
-
-        if (payoffFunction.isBlank()) {
-            // the payoff function is the sum function of all properties by default
-            return calculateByDefault(strategy.getProperties(), null);
-        } else {
-
-            // if there is no relationship in the payoff function, then just evaluate it normally, no need to replace any P placeholder
-            if (!payoffFunction.contains("P")) {
-                return evaluatePayoffFunctionNoRelative(strategy, expression);
-            }
-
-            // replace the placeholder for THIS current player's strategy with the actual value
-            // example: payoffFunction is a string formula, e.g: p1 + p2 / p3 - P2p3 with p1, p2, p3 are the properties 1, 2, 3 of the strategy chosen by this player
-            for (int i = 0; i < strategy.getProperties().size(); ++i) {
-                double propertyValue = strategy.getProperties().get(i);
-                String placeholder = String.format("\\bp%d\\b", i + 1);
-
-                expression = expression.replaceAll(placeholder, formatDouble(propertyValue));
-            }
-
-            // replace the placeholder for OTHER players' strategies with the actual values
-            // example: payoffFunction is a string formula, e.g: p1 + p2 / p3 - P2p3 with P2p3 is the property p of the strategy chosen by the player 2
-            for (int i = 0; i < normalPlayers.size(); i++) {
-                // example: P1
-                NormalPlayer otherPlayer = normalPlayers.get(i);
-                Strategy otherPlayerStrategy = otherPlayer.getStrategyAt(chosenStrategyIndices.get(i));
-
-                for (int j = 0; j < otherPlayerStrategy.getProperties().size(); j++) {
-                    // example: P1p1
-                    String placeholder = String.format("\\bP%dp%d\\b", i + 1, j + 1);
-                    Double propertyValue = otherPlayerStrategy.getProperties().get(j);
-                    expression = expression.replaceAll(placeholder, formatDouble(propertyValue));
-                }
-            }
-
-            // evaluate this string expression to get the result
-            double val = eval(expression);
-            return new BigDecimal(val).setScale(10, RoundingMode.HALF_UP);
-
+        Matcher nonRelativeMatcher = nonRelativePattern.matcher(expression);
+        // replace non-relative variables with value
+        while (nonRelativeMatcher.find()) {
+            String placeholder = nonRelativeMatcher.group();
+            int index = Integer.parseInt(placeholder.substring(1));
+            double propertyValue = strategy.getProperties().get(index);
+            expression = expression.replaceAll(placeholder, formatDouble(propertyValue));
         }
 
+        // replace relative variables with value
+        Matcher relativeMatcher = relativePattern.matcher(expression);
+        while (relativeMatcher.find()) {
+            String placeholder = relativeMatcher.group();
+            // syntax Pjpi
+            int[] ji = Arrays.stream(placeholder
+                    .substring(1) // remove P
+                    .split("p")) // split at p
+                .mapToInt(Integer::parseInt)
+                .toArray(); // [j, i]
+            NormalPlayer otherPlayer = normalPlayers.get(ji[0]);
+            Strategy otherPlayerStrategy = otherPlayer.getStrategyAt(chosenStrategyIndices[ji[0]]);
+            double propertyValue = otherPlayerStrategy.getProperties().get(ji[1]);
+            expression = expression.replaceAll(placeholder, formatDouble(propertyValue));
+        }
 
+        // evaluate this string expression to get the result
+        double val = eval(expression);
+        return new BigDecimal(val).setScale(10, RoundingMode.HALF_UP);
     }
 
 

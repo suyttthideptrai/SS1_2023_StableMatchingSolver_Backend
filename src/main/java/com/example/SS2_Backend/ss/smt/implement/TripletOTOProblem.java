@@ -1,7 +1,6 @@
 package com.example.SS2_Backend.ss.smt.implement;
 
 import com.example.SS2_Backend.constants.MatchingConst;
-import com.example.SS2_Backend.model.stableMatching.Extra.MatchesExtra;
 import com.example.SS2_Backend.ss.smt.preference.PreferenceList;
 import com.example.SS2_Backend.ss.smt.MatchingData;
 import com.example.SS2_Backend.ss.smt.MatchingProblem;
@@ -154,11 +153,10 @@ public class TripletOTOProblem implements MatchingProblem {
 
         // case when a newNode match with only 1 in 2 set
         for (int i = 0; i < matches.getSize(); i++) {
-            if (matches.getSetOf(i).toArray(new Integer[0]).length == 1) {
-                Collection<Integer> allMatched = matches.getMatchesAndTarget(i);
-                for (int matched : allMatched) {
-                    matches.disMatch(matched, allMatched);
-                }
+            Set<Integer> currentSet = matches.getSetOf(i);
+            if (currentSet.size() == 1) {
+                int element = currentSet.iterator().next();
+                matches.removeMatchBi(i, element);
             }
         }
 

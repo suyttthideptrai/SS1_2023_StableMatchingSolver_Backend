@@ -77,16 +77,14 @@ public class StringExpressionEvaluator {
                 return calculateByDefault(strategy.getProperties(), payoffFunction);
             }
 
-            // replace the placeholder for THIS current player's strategy with the actual value
-            // example: payoffFunction is a string formula, e.g: p1 + p2 / p3 - P2p3 with p1, p2, p3 are the properties 1, 2, 3 of the strategy chosen by this player
-            for (int i = 0; i < strategy.getProperties().size(); ++i) {
-                double propertyValue = strategy.getProperties().get(i);
-
-                String placeholder = String.format("\\bp%d\\b", i + 1);
-
+            Matcher nonRelativeMatcher = nonRelativePattern.matcher(expression);
+            // replace non-relative variables with value
+            while (nonRelativeMatcher.find()) {
+                String placeholder = nonRelativeMatcher.group();
+                int index = Integer.parseInt(placeholder.substring(1));
+                double propertyValue = strategy.getProperties().get(index);
                 expression = expression.replaceAll(placeholder, formatDouble(propertyValue));
             }
-
 
             // evaluate this string expression to get the result
             double val = eval(expression);

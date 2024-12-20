@@ -23,7 +23,7 @@ public class MTMNodeCapacityTest {
         propNames = new String[]{"Properties 1", "Properties 2", "Properties 3", "Properties 4", "Properties 5"};
 
         SampleDataGenerator sampleData = new SampleDataGenerator(numberOfIndividuals1, numberOfIndividuals2, propNames);
-        newStableMatchingProblemDTO = sampleData.generate();
+        newStableMatchingProblemDTO = sampleData.generateDto();
     }
 
     @Test

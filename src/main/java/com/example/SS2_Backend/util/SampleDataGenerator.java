@@ -2,21 +2,21 @@ package com.example.SS2_Backend.util;
 
 import com.example.SS2_Backend.dto.mapper.StableMatchingProblemMapper;
 import com.example.SS2_Backend.dto.request.NewStableMatchingProblemDTO;
-import com.example.SS2_Backend.model.stableMatching.Individual;
 import com.example.SS2_Backend.model.stableMatching.Matches.Matches;
-import com.example.SS2_Backend.model.stableMatching.StableMatchingProblem;
 import com.example.SS2_Backend.ss.smt.MatchingProblem;
-import io.micrometer.core.instrument.util.StringUtils;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.moeaframework.Executor;
 import org.moeaframework.core.NondominatedPopulation;
 import org.moeaframework.core.Solution;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
+enum MATCHING_PROBLEM_TYPE {
+    MTM,
+    OTM,
+    OTO
+}
 /**
  * Stable Matching Problem Testing Space.
  */
@@ -24,7 +24,7 @@ import java.util.Random;
 @Slf4j
 public class SampleDataGenerator {
     // Configuration parameters
-    private String[] propNames;
+    private int numberOfProperties;
     private int numberOfSet1;
     private int numberOfSet2;
     private int set1Cap = 10; // Default capacity for set 1
@@ -49,9 +49,8 @@ public class SampleDataGenerator {
      * Main method to demonstrate usage.
      */
     public static void main(String[] args) {
-        String[] propNames = {"Prop1", "Prop2", "Prop3", "Prop4"};
-        SampleDataGenerator generator = new SampleDataGenerator(20, 2000, propNames);
-        generator.setPropNames(propNames);
+        int numberOfProperties = 5;
+        SampleDataGenerator generator = new SampleDataGenerator(20, 2000, numberOfProperties);
         generator.setSet1Cap(1);
         generator.setSet2Cap(100);
         generator.setRandCapSet1(false);
@@ -60,7 +59,7 @@ public class SampleDataGenerator {
         generator.setF2("none");
         generator.setFnf("none");
         // Generate the NewStableMatchingProblemDTO instance
-        NewStableMatchingProblemDTO request = generator.generate();
+        NewStableMatchingProblemDTO request = generator.generateDto();
         String algo = "IBEA";
         // Mapping DTO to MatchingProblem
         MatchingProblem problem = StableMatchingProblemMapper.toMTM(request);
@@ -97,14 +96,14 @@ public class SampleDataGenerator {
      * @param numberOfSet1 Number of individuals in set 1
      * @param numberOfSet2 Number of individuals in set 2
      */
-    public SampleDataGenerator(int numberOfSet1, int numberOfSet2, String[] propNames) {
+    public SampleDataGenerator(MATCHING_PROBLEM_TYPE matchingProblemType, int numberOfSet1, int numberOfSet2, int numberOfProperties) {
         this.numberOfSet1 = numberOfSet1;
         this.numberOfSet2 = numberOfSet2;
-        this.propNames = propNames;
+        this.numberOfProperties = numberOfProperties;
         numberOfIndividuals = numberOfSet1 + numberOfSet2;
-        individualProperties = new double[numberOfIndividuals][propNames.length];
-        individualWeights = new double[numberOfIndividuals][propNames.length];
-        individualRequirements = new String[numberOfIndividuals][propNames.length];
+        individualProperties = new double[numberOfIndividuals][numberOfProperties];
+        individualWeights = new double[numberOfIndividuals][numberOfProperties];
+        individualRequirements = new String[numberOfIndividuals][numberOfProperties];
         individualCapacity = new int[numberOfIndividuals];
         individualSetIndices = new int[numberOfIndividuals];
     }
@@ -114,7 +113,22 @@ public class SampleDataGenerator {
      *
      * @return A NewStableMatchingProblemDTO object
      */
-    public NewStableMatchingProblemDTO generate() {
+    public NewStableMatchingProblemDTO generateDto() {
+        generateIndividualsWithCapacity();
+        NewStableMatchingProblemDTO problemDTO = new NewStableMatchingProblemDTO();
+        problemDTO.setIndividualProperties(individualProperties);
+        problemDTO.setIndividualWeights(individualWeights);
+        problemDTO.setIndividualRequirements(individualRequirements);
+        problemDTO.setIndividualSetIndices(individualSetIndices);
+        return problemDTO;
+    }
+
+    /**
+     * Generates a NewStableMatchingProblemDTO instance based on the configured parameters.
+     *
+     * @return A NewStableMatchingProblemDTO object
+     */
+    public NewStableMatchingProblemDTO generateProblem() {
         generateIndividualsWithCapacity();
         NewStableMatchingProblemDTO problemDTO = new NewStableMatchingProblemDTO();
         problemDTO.setIndividualProperties(individualProperties);
@@ -130,8 +144,8 @@ public class SampleDataGenerator {
      * @return A list of individuals
      */
     private void generateIndividualsWithCapacity() {
-        createIndividuals(numberOfSet1, set1Cap, randCapSet1, 0, propNames); // Set 1
-        createIndividuals(numberOfSet2, set2Cap, randCapSet2, 2, propNames); // Set 2
+        createIndividuals(numberOfSet1, set1Cap, randCapSet1, 0, numberOfProperties); // Set 1
+        createIndividuals(numberOfSet2, set2Cap, randCapSet2, 2, numberOfProperties); // Set 2
     }
 
     /**
@@ -142,11 +156,11 @@ public class SampleDataGenerator {
      * @param randomize  Whether to randomize capacity
      * @param set        Set number (0 for Set 1, 2 for Set 2)
      */
-    private void createIndividuals(int count, int capacity, boolean randomize, int set, String[] propNames) {
+    private void createIndividuals(int count, int capacity, boolean randomize, int set, int numberOfProperties) {
         for (int i = 0; i < count; i++) {
             individualSetIndices[i] = set;
             individualCapacity[i] = (randomize ? RANDOM.nextInt(capacity - 1) + 1 : capacity);
-            addPropertiesToIndividual(i, propNames);
+            addPropertiesToIndividual(i, numberOfProperties);
         }
     }
 
@@ -155,10 +169,8 @@ public class SampleDataGenerator {
      *
      * @param currentIndividual The individual to which properties will be added
      */
-    private void addPropertiesToIndividual(int currentIndividual, String[] propNames) {
-        int numProps = propNames.length;
-
-        for (int j = 0; j < numProps; j++) {
+    private void addPropertiesToIndividual(int currentIndividual, int numberOfProperties) {
+        for (int j = 0; j < numberOfProperties; j++) {
             // Example property values
             double propertyValue = RANDOM.nextDouble() * (70.0 - 20.0) + 20.0;
             double propertyWeight = 1 + (10 - 1) * RANDOM.nextDouble();

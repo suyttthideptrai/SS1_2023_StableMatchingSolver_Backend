@@ -80,7 +80,6 @@ public class StandardGameTheoryProblem implements GameTheoryProblem, Serializabl
         }
 
         eliminateConflictStrategies();
-        computeNashEquilibrium();
     }
 
     /**
@@ -320,15 +319,14 @@ public class StandardGameTheoryProblem implements GameTheoryProblem, Serializabl
     @Override
     public void evaluate(Solution solution) {
 //        System.out.println("Evaluating " + count++);
-        double[] NashEquilibrium = {computeNashEquilibrium()};
         double[] payoffs =new double[solution.getNumberOfVariables()];
 
-        List<Integer> chosenStrategyIndices = new ArrayList<>();
+        int[] chosenStrategyIndices = new int[solution.getNumberOfVariables()];
         // chosenStrategyIndices[0] is the strategy index that normalPlayers[0] has chosen
 
         for (int i = 0; i < normalPlayers.size(); i++) {
             BinaryIntegerVariable chosenStrategyIndex = (BinaryIntegerVariable) solution.getVariable(i);
-            chosenStrategyIndices.add(chosenStrategyIndex.getValue());
+            chosenStrategyIndices[i] = (chosenStrategyIndex.getValue());
         }
 
         // check if the solution violates any constraint
@@ -342,7 +340,7 @@ public class StandardGameTheoryProblem implements GameTheoryProblem, Serializabl
             if (leftPlayerIndex == rightPlayerIndex && oldNormalPlayers.size() > i) {
                 // this conflict is between 2 different strategies of the same player at 2 iterations, (for problem with dynamic data)
                 int prevStrategyIndex = oldNormalPlayers.get(i).getPrevStrategyIndex();
-                int currentStrategyIndex = chosenStrategyIndices.get(leftPlayerIndex);
+                int currentStrategyIndex = chosenStrategyIndices[leftPlayerIndex];
 
                 // if the prevStrategyIndex is one of 2 conflict strategies, and the currentStrategyIndex is the other one
                 boolean violated = (prevStrategyIndex == leftPlayerStrategy && currentStrategyIndex == rightPlayerStrategy) ||
@@ -354,8 +352,8 @@ public class StandardGameTheoryProblem implements GameTheoryProblem, Serializabl
                 }
             } else {
                 // this conflict is between 2 strategies of the 2 players at the a iteration
-                if (chosenStrategyIndices.get(leftPlayerIndex - 1) == leftPlayerStrategy &&
-                        chosenStrategyIndices.get(rightPlayerIndex - 1) == rightPlayerStrategy) {
+                if (chosenStrategyIndices[leftPlayerIndex - 1] == leftPlayerStrategy &&
+                        chosenStrategyIndices[rightPlayerIndex - 1] == rightPlayerStrategy) {
                     solution.setConstraint(i, -1); // this solution violates the constraints[i]
                 }
             }
@@ -366,7 +364,7 @@ public class StandardGameTheoryProblem implements GameTheoryProblem, Serializabl
         // calculate the payoff of the strategy each player has chosen
         for (int i = 0; i < normalPlayers.size(); i++) {
             NormalPlayer normalPlayer = normalPlayers.get(i);
-            Strategy chosenStrategy = normalPlayer.getStrategyAt(chosenStrategyIndices.get(i));
+            Strategy chosenStrategy = normalPlayer.getStrategyAt(chosenStrategyIndices[i]);
 
             String payoffFunction = normalPlayer.getPayoffFunction();
             // if the player does not have his own payoff function, use the default one
@@ -386,7 +384,7 @@ public class StandardGameTheoryProblem implements GameTheoryProblem, Serializabl
             }
             else {
                 // if the payoff function is relative to the player itself, then it can be calculated in the initialization
-                chosenStrategyPayoff = normalPlayer.getPayoffValues().get(chosenStrategyIndices.get(i));
+                chosenStrategyPayoff = normalPlayer.getPayoffValues().get(chosenStrategyIndices[i]);
             }
 
             chosenStrategy.setPayoff(chosenStrategyPayoff.doubleValue());

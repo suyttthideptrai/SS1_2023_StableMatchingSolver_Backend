@@ -17,6 +17,7 @@ import java.util.regex.Pattern;
 public class StringExpressionEvaluator {
     public static Pattern nonRelativePattern = Pattern.compile("p[0-9]+");
     public static Pattern relativePattern = Pattern.compile("P[0-9]+p[0-9]+");
+    public static Pattern fitnessPattern = Pattern.compile("u[0-9]+");
 
 
     public enum DefaultFunction {
@@ -32,6 +33,7 @@ public class StringExpressionEvaluator {
         String expression = payoffFunction;
 
         // match both relative and non-relative variables
+        // should note that variables in function use base 1 index
         Pattern generalPattern = Pattern.compile("(P[0-9]+)?" + nonRelativePattern.pattern());
         Matcher generalMatcher = generalPattern.matcher(expression);
         while (generalMatcher.find()) {
@@ -44,13 +46,13 @@ public class StringExpressionEvaluator {
                     .mapToInt(Integer::parseInt)
                     .toArray(); // [j, i]
                 NormalPlayer otherPlayer = normalPlayers.get(ji[0]);
-                Strategy otherPlayerStrategy = otherPlayer.getStrategyAt(chosenStrategyIndices[ji[0]]);
-                double propertyValue = otherPlayerStrategy.getProperties().get(ji[1]);
+                Strategy otherPlayerStrategy = otherPlayer.getStrategyAt(chosenStrategyIndices[ji[0] - 1]);
+                double propertyValue = otherPlayerStrategy.getProperties().get(ji[1] - 1);
                 expression = expression.replaceAll(placeholder, formatDouble(propertyValue));
             } else {
                 // non-relative variables
                 int index = Integer.parseInt(placeholder.substring(1));
-                double propertyValue = strategy.getProperties().get(index);
+                double propertyValue = strategy.getProperties().get(index - 1);
                 expression = expression.replaceAll(placeholder, formatDouble(propertyValue));
             }
         }
@@ -78,6 +80,7 @@ public class StringExpressionEvaluator {
             }
 
             Matcher nonRelativeMatcher = nonRelativePattern.matcher(expression);
+            // should note that variables in function use base 1 index
             // replace non-relative variables with value
             while (nonRelativeMatcher.find()) {
                 String placeholder = nonRelativeMatcher.group();
@@ -111,11 +114,12 @@ public class StringExpressionEvaluator {
             if (checkIfIsDefaultFunction(fitnessFunction)) {
                 return calculateByDefault(payoffList, fitnessFunction);
             }
-            for (int i = 0; i < payoffs.length; i++) {
-                double playerPayoff = payoffs[i];
-
-                String placeholder = String.format("\\bu%d\\b", i + 1);
-                expression = expression.replaceAll(placeholder, formatDouble(playerPayoff));
+            Matcher fitnessMatcher = fitnessPattern.matcher(expression);
+            while (fitnessMatcher.find()) {
+                String placeholder = fitnessMatcher.group();
+                int index = Integer.parseInt(placeholder.substring(1));
+                double propertyValue = payoffs[index - 1];
+                expression = expression.replaceAll(placeholder, formatDouble(propertyValue));
             }
 
             double val = eval(expression);

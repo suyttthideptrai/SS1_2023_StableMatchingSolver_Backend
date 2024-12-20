@@ -3,6 +3,7 @@ package com.example.SS2_Backend.util;
 import com.example.SS2_Backend.dto.mapper.StableMatchingProblemMapper;
 import com.example.SS2_Backend.dto.request.NewStableMatchingProblemDTO;
 import com.example.SS2_Backend.model.stableMatching.Matches.Matches;
+import com.example.SS2_Backend.model.stableMatching.StableMatchingRBOProblem;
 import com.example.SS2_Backend.ss.smt.MatchingProblem;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +11,7 @@ import org.moeaframework.Executor;
 import org.moeaframework.core.NondominatedPopulation;
 import org.moeaframework.core.Solution;
 
+import java.util.Map;
 import java.util.Random;
 
 enum MATCHING_PROBLEM_TYPE {
@@ -24,19 +26,21 @@ enum MATCHING_PROBLEM_TYPE {
 @Slf4j
 public class SampleDataGenerator {
     // Configuration parameters
+    private MATCHING_PROBLEM_TYPE matchingProblemType = MATCHING_PROBLEM_TYPE.MTM;
+    // problemSize
+    private int individualNum;
     private int numberOfProperties;
-    private int numberOfSet1;
-    private int numberOfSet2;
-    private int set1Cap = 10; // Default capacity for set 1
-    private int set2Cap = 10; // Default capacity for set 2
-    private boolean randCapSet1 = false; // Randomize capacity for set 1
-    private boolean randCapSet2 = false; // Randomize capacity for set 2
-    private String f1 = "none";  // Evaluation function for set 1
-    private String f2 = "none";  // Evaluation function for set 2
-    private String fnf = "none"; // Fitness function
+    // max capacity tiêu chuẩn cho mỗi set dạng map<int, int>, vd: với MTM: {0: 2, 1: 10}, 3Set: {0: 1, 1: 10, 2: 12}
+     private int numberOfSet1;
+     private int numberOfSet2;
+    // private int set1Cap = 10; // Default capacity for set 1
+    // private int set2Cap = 10; // Default capacity for set 2
+    Map<Integer, Integer> setCapacities;
+    // capRandomize: Căn cứ với set Capacities để generate capacity cho matching data
+    boolean[] capRandomize = {false, false};
+    private String[] evaluateFunctions = {"none", "none"};
+    private String fnf = "none"; // Fitness function    
     private static final Random RANDOM = new Random(); // Random generator
-
-
     // Individuals' properties
     private int numberOfIndividuals;
     private double[][] individualProperties;
@@ -51,12 +55,11 @@ public class SampleDataGenerator {
     public static void main(String[] args) {
         int numberOfProperties = 5;
         SampleDataGenerator generator = new SampleDataGenerator(20, 2000, numberOfProperties);
-        generator.setSet1Cap(1);
-        generator.setSet2Cap(100);
-        generator.setRandCapSet1(false);
-        generator.setRandCapSet2(false);
-        generator.setF1("none");
-        generator.setF2("none");
+        generator.setCapacities.put(20, 1);
+        generator.setCapacities.put(2000, 100);
+        generator.setCapRandomize(new boolean[]{false, false});
+        generator.setEvaluateFunctions(new String[]{"none", "none"});
+
         generator.setFnf("none");
         // Generate the NewStableMatchingProblemDTO instance
         NewStableMatchingProblemDTO request = generator.generateDto();
@@ -96,9 +99,11 @@ public class SampleDataGenerator {
      * @param numberOfSet1 Number of individuals in set 1
      * @param numberOfSet2 Number of individuals in set 2
      */
-    public SampleDataGenerator(MATCHING_PROBLEM_TYPE matchingProblemType, int numberOfSet1, int numberOfSet2, int numberOfProperties) {
+    public SampleDataGenerator(int numberOfSet1, int numberOfSet2, int numberOfProperties) {
         this.numberOfSet1 = numberOfSet1;
         this.numberOfSet2 = numberOfSet2;
+        this.setCapacities.put(numberOfSet1, 10);
+        this.setCapacities.put(numberOfSet2, 10);
         this.numberOfProperties = numberOfProperties;
         numberOfIndividuals = numberOfSet1 + numberOfSet2;
         individualProperties = new double[numberOfIndividuals][numberOfProperties];
@@ -108,13 +113,13 @@ public class SampleDataGenerator {
         individualSetIndices = new int[numberOfIndividuals];
     }
 
+
     /**
      * Generates a NewStableMatchingProblemDTO instance based on the configured parameters.
      *
      * @return A NewStableMatchingProblemDTO object
      */
     public NewStableMatchingProblemDTO generateDto() {
-        generateIndividualsWithCapacity();
         NewStableMatchingProblemDTO problemDTO = new NewStableMatchingProblemDTO();
         problemDTO.setIndividualProperties(individualProperties);
         problemDTO.setIndividualWeights(individualWeights);
@@ -124,28 +129,29 @@ public class SampleDataGenerator {
     }
 
     /**
-     * Generates a NewStableMatchingProblemDTO instance based on the configured parameters.
+     * Generates a StableMatchingRBOProblem instance based on the configured parameters.
      *
-     * @return A NewStableMatchingProblemDTO object
+     * @return StableMatchingRBOProblem
      */
-    public NewStableMatchingProblemDTO generateProblem() {
-        generateIndividualsWithCapacity();
+    public StableMatchingRBOProblem generateProblem() {
         NewStableMatchingProblemDTO problemDTO = new NewStableMatchingProblemDTO();
         problemDTO.setIndividualProperties(individualProperties);
         problemDTO.setIndividualWeights(individualWeights);
         problemDTO.setIndividualRequirements(individualRequirements);
         problemDTO.setIndividualSetIndices(individualSetIndices);
-        return problemDTO;
+
+        StableMatchingRBOProblem stableMatchingRBOProblem = new StableMatchingRBOProblem();
+        stableMatchingRBOProblem.setPopulation(problemDTO);
+        return stableMatchingRBOProblem;
     }
 
     /**
      * Generates a list of individuals with their respective capacities.
-     *
-     * @return A list of individuals
      */
     private void generateIndividualsWithCapacity() {
-        createIndividuals(numberOfSet1, set1Cap, randCapSet1, 0, numberOfProperties); // Set 1
-        createIndividuals(numberOfSet2, set2Cap, randCapSet2, 2, numberOfProperties); // Set 2
+        createIndividuals(numberOfSet1, setCapacities.get(numberOfSet1), capRandomize[0], 0, numberOfProperties); // Set 1
+        // Set Number - Set Capacity - Rand cap
+        createIndividuals(numberOfSet2, setCapacities.get(numberOfSet2), capRandomize[1], 2, numberOfProperties);
     }
 
     /**

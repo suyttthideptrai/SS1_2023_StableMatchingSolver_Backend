@@ -17,13 +17,8 @@
         <java.version>17</java.version>
         <nodeVersion>v20.17.0</nodeVersion>
         <npmVersion>10.8.2</npmVersion>
-        <nodePath>${project.basedir}/node</nodePath>
-        <frontend.repo.url>
-            git@github:suyttthideptrai/SS2-game-theory-solver
-        </frontend.repo.url>
-        <frontend.clone.dir>
-            ${project.basedir}/frontend
-        </frontend.clone.dir>
+        <frontend.dir.env>${project.basedir}/frontend</frontend.dir.env>
+        <frontend.repo.url>git@github:suyttthideptrai/SS2-game-theory-solver</frontend.repo.url>
     </properties>
     <dependencies>
         <dependency>
@@ -120,15 +115,16 @@
                 </configuration>
             </plugin>
         </plugins>
-        <!--<jvmArguments>-->
-        <!---Xmx8G-->
-        <!--</jvmArguments>-->
     </build>
     <profiles>
         <profile>
             <id>withFront</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <property>
+                    <name>withFront.active</name>
+                    <value>true</value>
+                </property>
+                <activeByDefault>false</activeByDefault>
             </activation>
             <build>
                 <plugins>
@@ -150,39 +146,38 @@
                         <artifactId>frontend-maven-plugin</artifactId>
                         <version>1.15.1</version>
                         <executions>
-                            <!--                    Step 1: install node & npm-->
+                            <!-- Step 1: install node & npm-->
                             <execution>
                                 <id>init-node</id>
                                 <goals>
                                     <goal>install-node-and-npm</goal>
                                 </goals>
                                 <phase>
-                                    initialize
+                                    generate-resources
                                 </phase>
                                 <configuration>
-                                    <workingDirectory>${frontend.clone.dir}</workingDirectory>
+                                    <workingDirectory>${frontend.dir.env}</workingDirectory>
                                     <nodeVersion>${nodeVersion}</nodeVersion>
                                     <npmVersion>${npmVersion}</npmVersion>
-                                    <installDirectory>${nodePath}</installDirectory>
                                 </configuration>
                             </execution>
-                            <!--                    Step 2: clone FE sources via npx-->
+                            <!--Step 2: clone FE source code, might switch to tar.gz in the future-->
                             <execution>
                                 <id>clone-fe</id>
-                                <phase>generate-sources</phase>
+                                <phase>generate-resources</phase>
                                 <goals>
                                     <goal>npx</goal>
                                 </goals>
                                 <configuration>
                                     <arguments>
-                                        degit ${frontend.repo.url} ${frontend.clone.dir} --force
-                                        <!--                                <argument>degit</argument>-->
-                                        <!--                                <argument>${frontend.repo.url}</argument>-->
-                                        <!--                                <argument>${frontend.clone.dir}</argument>-->
+                                        degit ${frontend.repo.url} ${frontend.dir.env} --force
                                     </arguments>
+                                    <workingDirectory>
+                                        ${frontend.dir.env}
+                                    </workingDirectory>
                                 </configuration>
                             </execution>
-                            <!-- Step 3: install npm dependencies-->
+                            <!--Step 3: install npm dependencies-->
                             <execution>
                                 <id>npm-install</id>
                                 <phase>
@@ -192,9 +187,8 @@
                                     <goal>npm</goal>
                                 </goals>
                                 <configuration>
-                                    <nodePath>${nodePath}</nodePath>
+                                    <workingDirectory>${frontend.dir.env}</workingDirectory>
                                     <arguments>install</arguments>
-                                    <workingDirectory>${frontend.clone.dir}</workingDirectory>
                                 </configuration>
                             </execution>
                             <!-- Step 4: compile FE product resources-->
@@ -207,24 +201,105 @@
                                     <goal>npm</goal>
                                 </goals>
                                 <configuration>
-                                    <workingDirectory>${frontend.clone.dir}</workingDirectory>
-                                    <nodePath>${nodePath}</nodePath>
+                                    <workingDirectory>${frontend.dir.env}</workingDirectory>
                                     <arguments>run build</arguments>
                                 </configuration>
                             </execution>
-                            <!-- Target Script: start FE development server port 3000-->
+                            <!-- Step 5: start FE development server port 3000-->
+<!--                            <execution>-->
+<!--                                <id>fe-run-test</id>-->
+<!--                                <phase>-->
+<!--                                    test-->
+<!--                                </phase>-->
+<!--                                <goals>-->
+<!--                                    <goal>npm</goal>-->
+<!--                                </goals>-->
+<!--                                <configuration>-->
+<!--                                    <workingDirectory>${frontend.dir.env}</workingDirectory>-->
+<!--                                    <arguments>start</arguments>-->
+<!--                                </configuration>-->
+<!--                            </execution>-->
+<!--                            &lt;!&ndash;Stop node server on Maven exit&ndash;&gt;-->
+<!--                            <execution>-->
+<!--                                <id>npm-stop</id>-->
+<!--                                <goals>-->
+<!--                                    <goal>npm</goal>-->
+<!--                                </goals>-->
+<!--                                <phase>post-integration-test</phase>-->
+<!--                                <configuration>-->
+<!--                                    <workingDirectory>${frontend.dir.env}</workingDirectory>-->
+<!--                                    <arguments>stop</arguments>-->
+<!--                                </configuration>-->
+<!--                            </execution>-->
+
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>startBE</id>
+            <properties>
+                <default.active>true</default.active>
+            </properties>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>3.5.0</version>
+                        <executions>
                             <execution>
-                                <id>start-fe-dev</id>
                                 <phase>
                                     verify
                                 </phase>
                                 <goals>
-                                    <goal>npm</goal>
+                                    <goal>java</goal>
                                 </goals>
                                 <configuration>
-                                    <workingDirectory>${frontend.clone.dir}</workingDirectory>
-                                    <nodePath>${nodePath}</nodePath>
-                                    <arguments>start</arguments>
+                                    <mainClass>com.example.SS2_Backend.Ss2BackendApplication</mainClass>
+                                    <arguments>
+                                        <argument>-jar</argument>
+                                        <argument>${project.build.directory}/${project.build.finalName}.jar</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>startFE</id>
+            <properties>
+                <withFront.active>true</withFront.active>
+            </properties>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.github.eirslett</groupId>
+                        <artifactId>frontend-maven-plugin</artifactId>
+                        <version>1.15.1</version>
+                        <executions>
+                            <execution>
+                                <id>fe-serve</id>
+                                <phase>
+                                    verify
+                                </phase>
+                                <goals>
+                                    <goal>npx</goal>
+                                </goals>
+                                <configuration>
+                                    <workingDirectory>${frontend.dir.env}</workingDirectory>
+                                    <arguments>serve -s build</arguments>
                                 </configuration>
                             </execution>
                         </executions>

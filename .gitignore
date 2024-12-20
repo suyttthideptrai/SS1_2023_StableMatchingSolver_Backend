@@ -43,3 +43,8 @@ profile.jfr
 ### Run Data ###
 .data
 .log
+
+
+### frontend module ###
+node
+frontend

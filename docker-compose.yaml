@@ -3,32 +3,13 @@ services:
   nginx:
     depends_on:
       - backend
-#      - frontend (no need anymore), use generated production build in /usr/share/nginx/html
     restart: always
     build:
-      dockerfile: nginx/Dockerfile
+      dockerfile: Dockerfile
       context: nginx
-    volumes:
-      - container-data:/usr/share/nginx/html
     ports:
-      - "80:80" #TODO: SSL
+      - "80:80"
   backend:
     build:
       dockerfile: Dockerfile
       context: ./
-
-    volumes:
-      - container-data:/
-
-volumes:
-  container-data:
-#  frontend:
-#    stdin_open: true
-#    environment:
-#      - CHOKIDAR_USEPOLLING=true
-#    build:
-#      dockerfile: Dockerfile
-#      context: ./frontend
-#    volumes:
-#      - /app/node_modules
-#      - ./frontend:/app

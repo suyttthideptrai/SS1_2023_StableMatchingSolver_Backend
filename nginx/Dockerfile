@@ -1,4 +1,15 @@
+FROM node:alpine as build
+RUN apk add --no-cache git
+WORKDIR /app
+RUN git clone --depth 1 https://github.com/suyttthideptrai/SS2-game-theory-solver.git .
+RUN npm i -f
+RUN npm run build
+
+
 FROM nginx:alpine
-RUN chown -R spring:spring /usr/share/nginx/html
-USER spring:spring
-COPY default.conf /etc/nginx/conf.d/default.conf
+RUN rm /etc/nginx/conf.d/default.conf
+COPY --from=build /app/build /usr/share/nginx/html
+COPY default.conf /etc/nginx
+# For container resources and configs interaction
+VOLUME /usr/share/nginx/html
+VOLUME /etc/nginx

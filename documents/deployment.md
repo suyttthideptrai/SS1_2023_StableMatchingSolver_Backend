@@ -1,5 +1,3 @@
-
-
 ## Docker compose for BE FE deployment. 
 
 #### Currently under development, might not be running as expected.
@@ -22,8 +20,4 @@ nano /frontend/.env
 ```bash
 docker compose build
 docker compose up -d
-```
-
-```
-TODO: automatically set REACT_APP_ backend port & url as environment variables
 ```

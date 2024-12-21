@@ -1,0 +1,15 @@
+version: "3.8"
+services:
+  nginx:
+    depends_on:
+      - backend
+    restart: always
+    build:
+      dockerfile: Dockerfile
+      context: nginx
+    ports:
+      - "80:80"
+  backend:
+    build:
+      dockerfile: Dockerfile
+      context: ./

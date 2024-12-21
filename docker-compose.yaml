@@ -8,15 +8,20 @@ services:
     build:
       dockerfile: nginx/Dockerfile
       context: nginx
+    volumes:
+      - container-data:/usr/share/nginx/html
     ports:
       - "80:80" #TODO: SSL
   backend:
     build:
       dockerfile: Dockerfile
-      context: "./"
+      context: ./
+
     volumes:
-      - /app/target
-      - ./backend:/app
+      - container-data:/
+
+volumes:
+  container-data:
 #  frontend:
 #    stdin_open: true
 #    environment:

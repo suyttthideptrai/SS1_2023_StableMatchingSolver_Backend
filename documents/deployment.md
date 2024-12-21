@@ -20,6 +20,7 @@ nano /frontend/.env
 
 ### Step 3: Start docker
 ```bash
+docker compose build
 docker compose up -d
 ```
 

@@ -1,25 +1,20 @@
 package com.example.SS2_Backend.dto.request;
 
 import com.example.SS2_Backend.constants.MessageConst.ErrMessage;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Size;
+import com.example.SS2_Backend.dto.validator.*;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import net.objecthunter.exp4j.Expression;
-import net.objecthunter.exp4j.ExpressionBuilder;
-import net.objecthunter.exp4j.ValidationResult;
-import org.springframework.validation.BindingResult;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@ValidIndividualArraysSize
+@ValidEvaluateFunctionCount
+@ValidIndividualArrayPropertyCount
 public class NewStableMatchingProblemDTO implements ProblemRequestDto {
 
     @Size(max = 255, message = ErrMessage.PROBLEM_NAME)
@@ -41,6 +36,7 @@ public class NewStableMatchingProblemDTO implements ProblemRequestDto {
     private int[] individualCapacities;
 
     @Size(min = 3, message = ErrMessage.MES_002)
+    @ValidRequirementSyntax
     private String[][] individualRequirements;
 
     @Size(min = 3, message = ErrMessage.MES_002)
@@ -49,16 +45,20 @@ public class NewStableMatchingProblemDTO implements ProblemRequestDto {
     @Size(min = 3, message = ErrMessage.MES_002)
     private double[][] individualProperties;
 
+    @NotNull(message = ErrMessage.NOT_BLANK)
+    @ValidEvaluateFunction
     private String[] evaluateFunctions;
 
+    @NotEmpty(message = ErrMessage.NOT_BLANK)
+    @ValidFitnessFunction
     private String fitnessFunction;
 
     private int [][] excludedPairs;
 
-    @Max(value = 1000, message = ErrMessage.POPULATION_SIZE)
+    @Max(value = 3000, message = ErrMessage.POPULATION_SIZE)
     private int populationSize;
 
-    @Max(value = 100, message = ErrMessage.GENERATION)
+    @Max(value = 1000, message = ErrMessage.GENERATION)
     private int generation;
 
     private int maxTime;
@@ -66,6 +66,7 @@ public class NewStableMatchingProblemDTO implements ProblemRequestDto {
     @NotEmpty(message = ErrMessage.NOT_BLANK)
     private String algorithm;
 
+    @ValidDistributedCores
     private String distributedCores;
 
     public void isEvaluateFunctionValid(BindingResult bindingResult) {

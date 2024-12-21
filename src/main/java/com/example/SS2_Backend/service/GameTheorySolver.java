@@ -1,18 +1,18 @@
 package com.example.SS2_Backend.service;
 
+import com.example.SS2_Backend.constants.AppConst;
+import com.example.SS2_Backend.constants.GameTheoryConst;
 import com.example.SS2_Backend.dto.mapper.GameTheoryProblemMapper;
 import com.example.SS2_Backend.dto.request.GameTheoryProblemDTO;
 import com.example.SS2_Backend.dto.response.Progress;
 import com.example.SS2_Backend.dto.response.Response;
-import com.example.SS2_Backend.ss.gt.result.GameSolution;
-import com.example.SS2_Backend.ss.gt.result.GameSolutionInsights;
-import com.example.SS2_Backend.ss.gt.NormalPlayer;
 import com.example.SS2_Backend.ss.gt.GameTheoryProblem;
+import com.example.SS2_Backend.ss.gt.NormalPlayer;
 import com.example.SS2_Backend.ss.gt.implement.PSOCompatibleGameTheoryProblem;
 import com.example.SS2_Backend.ss.gt.implement.StandardGameTheoryProblem;
-import com.example.SS2_Backend.util.EvaluatorUtils;
+import com.example.SS2_Backend.ss.gt.result.GameSolution;
+import com.example.SS2_Backend.ss.gt.result.GameSolutionInsights;
 import com.example.SS2_Backend.util.NumberUtils;
-import com.example.SS2_Backend.util.ProblemUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.moeaframework.Executor;
@@ -207,7 +207,7 @@ public class GameTheorySolver {
     public ResponseEntity<Response> getProblemResultInsights(GameTheoryProblemDTO request,
                                                              String sessionCode) {
         log.info("Received request: " + request);
-        String[] algorithms = {"NSGAII", "NSGAIII", "eMOEA", "PESA2", "VEGA"};
+        String[] algorithms = GameTheoryConst.ALLOWED_INSIGHT_ALGORITHMS;
 
 
         simpMessagingTemplate.convertAndSendToUser(sessionCode,
@@ -230,6 +230,18 @@ public class GameTheorySolver {
             for (int i = 0; i < RUN_COUNT_PER_ALGORITHM; i++) {
                 System.out.println("Iteration: " + i);
                 long start = System.currentTimeMillis();
+
+                if (problem instanceof StandardGameTheoryProblem
+                        && AppConst.PSO_BASED_ALGOS.contains(algorithm)) {
+                    problem = GameTheoryProblemMapper
+                            .toPSOProblem((StandardGameTheoryProblem) problem);
+                }
+
+                if (problem instanceof PSOCompatibleGameTheoryProblem
+                        && !AppConst.PSO_BASED_ALGOS.contains(algorithm)) {
+                    problem = GameTheoryProblemMapper
+                            .toStandardProblem((PSOCompatibleGameTheoryProblem) problem);
+                }
 
                 NondominatedPopulation results = solveProblem(problem,
                         algorithm,

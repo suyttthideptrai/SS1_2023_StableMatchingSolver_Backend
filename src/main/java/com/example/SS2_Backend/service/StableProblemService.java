@@ -38,16 +38,16 @@ public class StableProblemService implements ProblemService {
 
         try {
             log.info("Validating StableMatchingProblemDTO Request ...");
-            BindingResult bindingResult = ValidationUtils.validate(request);
-            if (bindingResult.hasErrors()) {
-                return ResponseEntity
-                        .status(HttpStatus.BAD_REQUEST)
-                        .body(Response
-                                .builder()
-                                .data(ValidationUtils.getAllErrorDetails(bindingResult))
-                                .build());
-            }
-            log.info("Building preference list...");
+//            BindingResult bindingResult = ValidationUtils.validate(request);
+//            if (bindingResult.hasErrors()) {
+//                return ResponseEntity
+//                        .status(HttpStatus.BAD_REQUEST)
+//                        .body(Response
+//                                .builder()
+//                                .data(ValidationUtils.getAllErrorDetails(bindingResult))
+//                                .build());
+//            }
+//            log.info("Building preference list...");
 
             MatchingProblem problem = StableMatchingProblemMapper.toMTM(request);
 //            Unsafe unsafe;
@@ -223,8 +223,8 @@ public class StableProblemService implements ProblemService {
 
                 NondominatedPopulation results = solveProblem(problem,
                         algorithm,
-                        MatchingConst.InsightConfig.POPULATION_SIZE,
-                        MatchingConst.InsightConfig.GENERATIONS,
+                        request.getGeneration(),
+                        request.getPopulationSize(),
                         request.getMaxTime(),
                         request.getDistributedCores());
 

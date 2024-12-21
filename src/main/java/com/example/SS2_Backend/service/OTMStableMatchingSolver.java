@@ -26,10 +26,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -43,17 +40,6 @@ public class OTMStableMatchingSolver {
 
         try {
             log.info("Validating StableMatchingProblemDTO Request ...");
-            BindingResult bindingResult = ValidationUtils.validate(request);
-            if (bindingResult.hasErrors()) {
-                return ResponseEntity
-                        .status(HttpStatus.BAD_REQUEST)
-                        .body(Response
-                                .builder()
-                                .data(ValidationUtils.getAllErrorDetails(bindingResult))
-                                .build());
-            }
-            log.info("Building preference list...");
-
             MatchingProblem problem = StableMatchingProblemMapper.toOTM(request);
             log.info("Start solving: {}, problem name: {}, problem size: {}",
                     problem.getMatchingTypeName(),
@@ -68,7 +54,17 @@ public class OTMStableMatchingSolver {
                     request.getMaxTime(),
                     request.getDistributedCores());
 
-            assert results != null;
+            if(Objects.isNull(results)){
+                return ResponseEntity
+                        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(Response
+                                .builder()
+                                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                                .message("Error solving OTM stable matching problem.")
+                                .data(null)
+                                .build());
+            }
+
             long endTime = System.currentTimeMillis();
 
             double runtime = ((double) (endTime - startTime) / 1000);
@@ -163,7 +159,7 @@ public class OTMStableMatchingSolver {
             //log.info("[Service] Stable Matching: Problem solved successfully!");
             return result;
         } catch (Exception e) {
-            log.error("[Service] Stable Matching: Error solving the problem {}", e.getMessage(), e);
+            log.error("Error solving {}, {}", problem.getName(), e.getMessage(), e);
             return null;
         }
     }
@@ -279,17 +275,4 @@ public class OTMStableMatchingSolver {
         return solution.getObjective(0);
     }
 
-
-    private MatchingSolution formatSolutionOTO(String algorithm,
-                                               NondominatedPopulation result,
-                                               double Runtime) {
-        Solution solution = result.get(0);
-        MatchingSolution matchingSolution = new MatchingSolution();
-        double fitnessValue = solution.getObjective(0);
-        matchingSolution.setMatches((Matches) solution.getAttribute("matches"));
-        matchingSolution.setFitnessValue(-fitnessValue);
-        matchingSolution.setAlgorithm(algorithm);
-        matchingSolution.setRuntime(Runtime);
-        return matchingSolution;
-    }
 }

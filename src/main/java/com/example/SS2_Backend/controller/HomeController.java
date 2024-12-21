@@ -6,6 +6,7 @@ import com.example.SS2_Backend.dto.response.Response;
 import com.example.SS2_Backend.service.GameTheorySolver;
 import com.example.SS2_Backend.service.OTMStableMatchingSolver;
 import com.example.SS2_Backend.service.StableProblemService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
@@ -40,7 +41,7 @@ public class HomeController {
 
     @Async("taskExecutor")
     @PostMapping("/stable-matching-solver")
-    public CompletableFuture<ResponseEntity<Response>> solveStableMatching(@RequestBody NewStableMatchingProblemDTO object) {
+    public CompletableFuture<ResponseEntity<Response>> solveStableMatching(@RequestBody @Valid NewStableMatchingProblemDTO object) {
         return CompletableFuture.completedFuture(stableMatchingSolver.solve(object));
     }
 
@@ -52,7 +53,7 @@ public class HomeController {
 
     @Async("taskExecutor")
     @PostMapping("/stable-matching-otm-solver")
-    public CompletableFuture<ResponseEntity<Response>> solveStableMatchingOTM(@RequestBody NewStableMatchingProblemDTO object) {
+    public CompletableFuture<ResponseEntity<Response>> solveStableMatchingOTM(@RequestBody @Valid NewStableMatchingProblemDTO object) {
         return CompletableFuture.completedFuture(stableMatchingOTMProblemDTO.solve(object));
     }
 
@@ -73,7 +74,7 @@ public class HomeController {
 
     @Async("taskExecutor")
     @PostMapping("/matching-problem-result-insights/{sessionCode}")
-    public CompletableFuture<ResponseEntity<Response>> getMatchingResultInsights(@RequestBody NewStableMatchingProblemDTO object,
+    public CompletableFuture<ResponseEntity<Response>> getMatchingResultInsights(@RequestBody @Valid NewStableMatchingProblemDTO object,
                                                                                  @PathVariable String sessionCode) {
         return CompletableFuture.completedFuture(stableMatchingSolver.getInsights(object,
                 sessionCode));
@@ -81,7 +82,7 @@ public class HomeController {
 
     @Async("taskExecutor")
     @PostMapping("/otm-matching-problem-result-insights/{sessionCode}")
-    public CompletableFuture<ResponseEntity<Response>> getOTMMatchingResultInsights(@RequestBody NewStableMatchingProblemDTO object,
+    public CompletableFuture<ResponseEntity<Response>> getOTMMatchingResultInsights(@RequestBody @Valid NewStableMatchingProblemDTO object,
                                                                                     @PathVariable String sessionCode) {
         return CompletableFuture.completedFuture(stableMatchingOTMProblemDTO.getInsights(
                 object,

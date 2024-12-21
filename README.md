@@ -32,7 +32,7 @@ If result not present, please test on your system and give feedback.
 | Windows   | 10               | N/A     | Untested                            |
 |           | 11               | Working | Tested                              |
 | WSL       | Ubuntu           | Working | -PwithFront stuck on unpacking node | 
-| Linux     | Ubuntu           | N/A     | Untested                            |
+| Linux     | Ubuntu           | Working | Tested, Deployed                    |
 |           | Debian           | N/A     | Untested                            |
 | Mac       | N/A              | N/A     | Untested                            |
 
@@ -54,7 +54,7 @@ cd SS1_2023_StableMatchingSolver_Backend
 
 * Linux
 ```bash
-./mvnw clean install
+bash ./mvnw clean install
 ```
 
 * Windows

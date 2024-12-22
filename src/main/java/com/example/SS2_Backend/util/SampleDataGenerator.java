@@ -20,7 +20,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-import static com.example.SS2_Backend.constants.AppConst.DEFAULT_FUNC;
+import static com.example.SS2_Backend.constants.MatchingConst.DEFAULT_EVALUATE_FUNC;
+import static com.example.SS2_Backend.constants.MatchingConst.DEFAULT_FITNESS_FUNC;
 
 /**
  * Stable Matching Problem Testing Space.
@@ -30,9 +31,10 @@ import static com.example.SS2_Backend.constants.AppConst.DEFAULT_FUNC;
 public class SampleDataGenerator {
 
     private static final Random RANDOM = new Random(); // Random generator
-    Map<Integer, Integer> setCapacities;
+    Map<Integer, Integer> setCapacities = new HashMap<Integer, Integer>();
     // capRandomize: Căn cứ với set Capacities để generate capacity cho matching data
-    boolean[] capRandomize = {false, false};
+    // Mặc định để xử lý MTM Problem nên sẽ để cả hai đều là `true`
+    boolean[] capRandomize = {true, true};
     // Configuration parameters
     private MatchingProblemType matchingProblemType = MatchingProblemType.MTM;
     // problemSize
@@ -40,8 +42,8 @@ public class SampleDataGenerator {
     private int numberOfProperties;
     // max capacity tiêu chuẩn cho mỗi set dạng map<int, int>, vd: với MTM: {0: 2, 1: 10}, 3Set: {0: 1, 1: 10, 2: 12}
     private int[] numberForeachSet;
-    private String[] evaluateFunctions = {DEFAULT_FUNC, DEFAULT_FUNC};
-    private String fnf = "none"; // Fitness function
+    private String[] evaluateFunctions = {DEFAULT_EVALUATE_FUNC, DEFAULT_EVALUATE_FUNC};
+    private String fnf = DEFAULT_FITNESS_FUNC; // Fitness function
 
     public SampleDataGenerator(MatchingProblemType matchingProblemType, int numberOfSet1, int numberOfSet2, int numberOfProperties) {
         this.matchingProblemType = matchingProblemType;
@@ -64,18 +66,16 @@ public class SampleDataGenerator {
      */
     public static void main(String[] args) {
         int numberOfProperties = 5;
-        SampleDataGenerator generator = new SampleDataGenerator(20, 2000, numberOfProperties);
+        SampleDataGenerator generator = new SampleDataGenerator(MatchingProblemType.MTM, 20, 2000, numberOfProperties);
         generator.setCapacities.put(20, 1);
         generator.setCapacities.put(2000, 100);
         generator.setCapRandomize(new boolean[]{false, false});
-        generator.setEvaluateFunctions(new String[]{DEFAULT_FUNC, DEFAULT_FUNC});
+        generator.setEvaluateFunctions(new String[]{DEFAULT_EVALUATE_FUNC, DEFAULT_EVALUATE_FUNC});
 
-        generator.setFnf("none");
-        // Generate the NewStableMatchingProblemDTO instance
-        NewStableMatchingProblemDTO request = generator.generateDto();
+        generator.setFnf(DEFAULT_FITNESS_FUNC);
         String algo = "IBEA";
         // Mapping DTO to MatchingProblem
-        MatchingProblem problem = StableMatchingProblemMapper.toMTM(request);
+        MatchingProblem problem = generator.generateProblem();
         // Run the algorithm
         long startTime = System.currentTimeMillis();
         NondominatedPopulation result = new Executor()
@@ -119,18 +119,26 @@ public class SampleDataGenerator {
      * @return StableMatchingRBOProblem
      */
     public MatchingProblem generateProblem() {
-        MatchingProblem matchingProblem = switch (this.matchingProblemType) {
+        MatchingProblem matchingProblem;
+        NewStableMatchingProblemDTO newDto = this.generateDto();
+        switch (this.matchingProblemType) {
             case MTM -> {
-
+                this.capRandomize = new boolean[]{true, true};
+                matchingProblem = StableMatchingProblemMapper.toMTM(newDto);
             }
             case OTM -> {
-
+                this.capRandomize = new boolean[]{true, false};
+                matchingProblem = StableMatchingProblemMapper.toOTM(newDto);
             }
             case OTO -> {
-
+                this.capRandomize = new boolean[]{false};
+                matchingProblem = StableMatchingProblemMapper.toOTO(newDto);
+            }
+            default -> {
+                log.info("[ERROR] Match Problem Type hasn't been initialized yet. Terminated...");
+                matchingProblem = null;
             }
         }
-
         return matchingProblem;
     }
 

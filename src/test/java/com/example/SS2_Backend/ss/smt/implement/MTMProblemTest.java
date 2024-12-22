@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.moeaframework.core.Solution;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class MTMNodeCapacityTest {
+public class MTMProblemTest {
     NewStableMatchingProblemDTO newStableMatchingProblemDTO;
     int numberOfIndividuals1;
     int numberOfIndividuals2;

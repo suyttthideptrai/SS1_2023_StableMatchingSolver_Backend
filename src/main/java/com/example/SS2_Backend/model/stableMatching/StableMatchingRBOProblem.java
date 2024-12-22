@@ -65,8 +65,8 @@ public class StableMatchingRBOProblem implements Problem {
     private boolean fnfStatus = false;
 
     /* Phần được thay thế từ phần Code cũ
-    * Thay từ Individual từ Code cũ thành các Array khác nhau với độ dài bằng nhau
-    * */
+     * Thay từ Individual từ Code cũ thành các Array khác nhau với độ dài bằng nhau
+     * */
 
     private String[][] individualRequirements;
     private double[][] individualWeights;
@@ -86,6 +86,9 @@ public class StableMatchingRBOProblem implements Problem {
      */
 
     public void setPopulation(NewStableMatchingProblemDTO request) {
+        this.individualRequirements = request.getIndividualRequirements();
+        this.individualWeights = request.getIndividualWeights();
+        this.individualProperties = request.getIndividualProperties();
         this.individualSetIndices = request.getIndividualSetIndices();
         this.numberOfIndividuals = request.getNumberOfIndividuals();
         this.individualCapacities = request.getIndividualCapacities();
@@ -108,7 +111,7 @@ public class StableMatchingRBOProblem implements Problem {
             }
         }
         this.preferencesProvider.numberOfIndividualForSet0 = count;
-        
+
         initializePrefProvider();
         preferenceLists = getPreferences();
     }
@@ -138,6 +141,7 @@ public class StableMatchingRBOProblem implements Problem {
      * This method sets the evaluation function for Set 1 and updates the status accordingly.
      * If the input function contains "P" or "M", indicating it as a valid function,
      * the status for function 1 is set to true and the input function is assigned.
+     *
      * @param evaluateFunctionForSet1 The input function for Set 1 evaluation.
      *                                It will be validated to contain "P" or "M".
      */
@@ -150,6 +154,7 @@ public class StableMatchingRBOProblem implements Problem {
 
     /**
      * Vice versa
+     *
      * @param evaluateFunctionForSet2 Input function for Set 2 evaluate Set 1
      */
     public void setEvaluateFunctionForSet2(String evaluateFunctionForSet2) {
@@ -165,6 +170,7 @@ public class StableMatchingRBOProblem implements Problem {
      * This method sets the fitness function and updates the status accordingly.
      * If the input function contains "S", indicating it as a valid fitness function,
      * the status for the fitness function is set to true and the input function is assigned.
+     *
      * @param fitnessFunction The fitness function to be set.
      *                        It will be validated to contain "S".
      */
@@ -364,16 +370,16 @@ public class StableMatchingRBOProblem implements Problem {
      * Supported functions:
      * #: SIGMA{S1} calculate sum of all MatchSet of a belonging set eg: SIGMA{S1}
      * Supported mathematical calculations:
-     *     Name             :    Usage
+     * Name             :    Usage
      * 1. absolute       : abs(expression)
      * 2. exponent      : (expression)^(expression)
      * 3. sin                 : sin(expression)
      * 4. cos                 : cos(expression)
      * 5. tan                : tan(expression)
      * 6. logarithm     : log(expression)(expression) Logarithm calculation requires 2 parameters in two separate curly braces
-     * 							   Default log calculation (with Math.E constant) could be achieved like this: log(e)(expression)
-     * 							   Make sure expression is not negative or the final outcome might be
-     * 							   resulted in: NaN / Infinity / - Infinity
+     * Default log calculation (with Math.E constant) could be achieved like this: log(e)(expression)
+     * Make sure expression is not negative or the final outcome might be
+     * resulted in: NaN / Infinity / - Infinity
      * 7. square root : sqrt(expression)
      */
     private double withFitnessFunctionEvaluation(double[] satisfactions, String fitnessFunction) {
@@ -555,7 +561,7 @@ public class StableMatchingRBOProblem implements Problem {
                 this.numberOfIndividuals + "\nNumber Of Properties: " +
                 numberOfIndividuals + "\nFitness Function: " + fitnessFunction +
                 "\nEvaluate Function For Set 1: " + this.evaluateFunctionForSet1 +
-                "\nEvaluate Function For Set 2: " + this.evaluateFunctionForSet2 + "\n" ;
+                "\nEvaluate Function For Set 2: " + this.evaluateFunctionForSet2 + "\n";
     }
 
     public String getPreferenceListsString() {

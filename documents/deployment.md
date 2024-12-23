@@ -22,3 +22,6 @@ nano /nginx/.env
 docker compose build
 docker compose up -d
 ```
+
+###### Update 2024-12-23 by [Tiến Thành](https://github.com/suyttthideptrai)
+

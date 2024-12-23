@@ -4,19 +4,20 @@
 #### Tested with Ubuntu 24.04. gi gi day LTS
 
 
-### Step 1: pre-setup for deployment
+### Step 1: install docker via this script
 ```bash
 sudo bash docker_setup.sh
 ```
 
 ### Step 2: Setup deployment system's public IP for Web Application
-
 ```bash
-nano /frontend/.env
+nano /nginx/.env
 # Then change REACT_APP_BACKEND_URL to the correct public ipv4 of the server
+# Nginx setup ignores the REACT_APP_BACKEND_PORT so leave it as 80
+# Save file and continue the next step
 ```
 
-### Step 3: Start docker
+### Step 3: Build and start docker
 ```bash
 docker compose build
 docker compose up -d

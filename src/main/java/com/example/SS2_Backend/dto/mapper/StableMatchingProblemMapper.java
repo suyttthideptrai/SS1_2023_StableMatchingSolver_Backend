@@ -25,9 +25,29 @@ import com.example.SS2_Backend.util.EvaluatorUtils;
  */
 public class StableMatchingProblemMapper {
 
-    public static OTOProblem toOTO(NewStableMatchingProblemDTO dto) {
-        //TODO: implement OTO map logic
-        return null;
+    public static OTOProblem toOTO(NewStableMatchingProblemDTO request) {
+        Requirement[][] requirements = RequirementDecoder.decode(request.getIndividualRequirements());
+        MatchingData data = new MatchingData(request.getNumberOfIndividuals(),
+                request.getNumberOfProperty(),
+                request.getIndividualSetIndices(),
+                request.getIndividualCapacities(),
+                request.getIndividualProperties(),
+                request.getIndividualWeights(),
+                requirements);
+        data.setExcludedPairs(request.getExcludedPairs());
+        PreferenceBuilder builder = new TwoSetPreferenceProvider(data,
+                request.getEvaluateFunctions());
+        PreferenceListWrapper preferenceLists = builder.toListWrapper();
+        FitnessEvaluator fitnessEvaluator = new TwoSetFitnessEvaluator(data);
+
+        return new OTOProblem(request.getProblemName(),
+                request.getNumberOfIndividuals(),
+                request.getNumberOfSets(),
+                data,
+                preferenceLists,
+                request.getFitnessFunction(),
+                fitnessEvaluator
+        );
     }
 
 

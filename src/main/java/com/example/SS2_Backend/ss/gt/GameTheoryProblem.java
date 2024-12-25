@@ -4,6 +4,9 @@ import org.moeaframework.core.Problem;
 
 import java.util.List;
 
+/**
+ * Base class for Game theory problem
+ */
 public interface GameTheoryProblem extends Problem {
 
     void setDefaultPayoffFunction(String payoffFunction);

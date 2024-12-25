@@ -3,6 +3,8 @@ package com.example.SS2_Backend.util;
 
 import com.example.SS2_Backend.ss.gt.NormalPlayer;
 import com.example.SS2_Backend.ss.gt.Strategy;
+import org.moeaframework.core.Solution;
+import org.moeaframework.core.variable.EncodingUtils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -49,6 +51,54 @@ public class StringExpressionEvaluator {
                 NormalPlayer otherPlayer = normalPlayers.get(ji[0]);
                 Strategy otherPlayerStrategy = otherPlayer.getStrategyAt(chosenStrategyIndices[ji[0]]);
                 double propertyValue = otherPlayerStrategy.getProperties().get(ji[1]);
+                expression = expression.replaceAll(placeholder, formatDouble(propertyValue));
+            } else {
+                // non-relative variables
+                int index = Integer.parseInt(placeholder.substring(1)) - 1;
+                double propertyValue = strategy.getProperties().get(index);
+                expression = expression.replaceAll(placeholder, formatDouble(propertyValue));
+            }
+        }
+
+        // evaluate this string expression to get the result
+        double val = eval(expression);
+        return new BigDecimal(val).setScale(10, RoundingMode.HALF_UP);
+    }
+
+
+    public static BigDecimal evalPayoffWithPolyPlayer(Strategy strategy,
+                                                      String payoffFunction,
+                                                      List<NormalPlayer> normalPlayers,
+                                                      int[] chosenStrategyIndices,
+                                                      Solution solution) {
+        final int PP_IDX = 0;
+        String expression = payoffFunction;
+
+        // match both relative and non-relative variables
+        Pattern generalPattern = Pattern.compile("(P[0-9]+)?" + nonRelativePattern.pattern());
+        Matcher generalMatcher = generalPattern.matcher(expression);
+        while (generalMatcher.find()) {
+            String placeholder = generalMatcher.group();
+            // indices should account for offset from base 1 index of variables
+            if (placeholder.contains("P")) {
+                // relative variables - syntax Pjpi with j the player index, and i the property index
+                int[] ji = Arrays.stream(placeholder
+                                .substring(1) // remove P
+                                .split("p")) // split at p
+                        .mapToInt(Integer::parseInt)
+                        .map(x -> x - 1)
+                        .toArray(); // [j, i]
+                int playerPos = ji[0];
+                int propertyPos = ji[1];
+                double propertyValue;
+                if (playerPos == PP_IDX) {
+                    propertyValue = EncodingUtils.getReal(solution.getVariable(propertyPos));
+                } else {
+                    int chosenStratPos = chosenStrategyIndices[playerPos];
+                    NormalPlayer otherPlayer = normalPlayers.get(playerPos);
+                    Strategy otherPlayerStrategy = otherPlayer.getStrategyAt(chosenStratPos);
+                    propertyValue = otherPlayerStrategy.getProperties().get(propertyPos);
+                }
                 expression = expression.replaceAll(placeholder, formatDouble(propertyValue));
             } else {
                 // non-relative variables

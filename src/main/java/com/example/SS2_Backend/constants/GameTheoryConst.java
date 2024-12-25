@@ -21,4 +21,7 @@ public class GameTheoryConst {
         int GENERATIONS = 100;
     }
 
+    // TODO: temporarily use "cheat code" to initialize PSP_GT_PROBLEM
+    public static final String PSP_CHEAT_CODE = "HelloWorld";
+
 }

@@ -431,6 +431,10 @@ public class StandardGameTheoryProblem implements GameTheoryProblem, Serializabl
         return solution;
     }
 
+    @Override
+    public boolean getPSOCompatibility() {
+        return false;
+    }
 
     @Override
     public void close() {

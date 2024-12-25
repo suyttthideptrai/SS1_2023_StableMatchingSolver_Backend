@@ -355,6 +355,11 @@ public class PSOCompatibleGameTheoryProblem implements GameTheoryProblem, Serial
     }
 
     @Override
+    public boolean getPSOCompatibility() {
+        return true;
+    }
+
+    @Override
     public void close() {
     }
 

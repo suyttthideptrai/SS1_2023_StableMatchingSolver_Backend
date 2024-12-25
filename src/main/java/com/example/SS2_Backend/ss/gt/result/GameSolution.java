@@ -31,6 +31,8 @@ public class GameSolution {
     public static class Player {
         private String playerName;
         private String strategyName;
+        // TODO: tmp for PSP GT type
+        private List<Double> properties;
         private double payoff;
     }
 }

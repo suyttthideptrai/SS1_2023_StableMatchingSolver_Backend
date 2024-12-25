@@ -14,6 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GameTheoryProblemDTO implements ProblemRequestDto{
+    private String problemName;
     private SpecialPlayer specialPlayer;
     private List<NormalPlayer> normalPlayers;
     private List<Conflict> conflictSet = new ArrayList<>();

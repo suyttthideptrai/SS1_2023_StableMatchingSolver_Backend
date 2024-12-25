@@ -23,4 +23,5 @@ public interface GameTheoryProblem extends Problem {
 
     List<NormalPlayer> getNormalPlayers();
 
+    boolean getPSOCompatibility();
 }

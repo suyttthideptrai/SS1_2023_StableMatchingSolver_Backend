@@ -9,6 +9,7 @@ import com.example.SS2_Backend.dto.response.Response;
 import com.example.SS2_Backend.ss.gt.GameTheoryProblem;
 import com.example.SS2_Backend.ss.gt.NormalPlayer;
 import com.example.SS2_Backend.ss.gt.implement.PSOCompatibleGameTheoryProblem;
+import com.example.SS2_Backend.ss.gt.implement.PolyStrategicPlayerGTProblem;
 import com.example.SS2_Backend.ss.gt.implement.StandardGameTheoryProblem;
 import com.example.SS2_Backend.ss.gt.result.GameSolution;
 import com.example.SS2_Backend.ss.gt.result.GameSolutionInsights;
@@ -44,6 +45,7 @@ public class GameTheorySolver {
 
         try {
             log.info("Received request: " + request);
+            boolean isPSP = request.getProblemName().contains(GameTheoryConst.PSP_CHEAT_CODE);
             GameTheoryProblem problem = GameTheoryProblemMapper.toProblem(request);
 
 //            log.info("start writing {} problem to file", problem.getName());
@@ -73,7 +75,9 @@ public class GameTheorySolver {
 
             // format the output
             log.info("Preparing the solution ...");
-            GameSolution gameSolution = formatSolution(problem, results);
+            GameSolution gameSolution = isPSP
+                    ? formatPSPSolution(problem, results)
+                    : formatSolution(problem, results);
             gameSolution.setAlgorithm(request.getAlgorithm());
             gameSolution.setRuntime(runtime);
             return ResponseEntity.ok(Response
@@ -204,11 +208,85 @@ public class GameTheorySolver {
         return gameSolution;
     }
 
+    /**
+     * Cloned & tweaked from static formatSolution
+     * May look horrible
+     * TODO: Will.. make it better
+     */
+    public static GameSolution formatPSPSolution(GameTheoryProblem problem,
+                                                 NondominatedPopulation result) {
+        Solution solution = result.get(0);
+        GameSolution gameSolution = new GameSolution();
+
+        double uniPayoff = (double) solution.getAttribute(PolyStrategicPlayerGTProblem.AttributeKeys.PSP_PAYOFF);
+        double[] studentPayoffs = (double[]) solution.getAttribute(PolyStrategicPlayerGTProblem.AttributeKeys.NORMAL_PAYOFFS);
+        double fitnessValue = solution.getObjective(0);
+        if (fitnessValue < 0) {
+            fitnessValue = -fitnessValue;
+        }
+
+        gameSolution.setFitnessValue(fitnessValue);
+
+        List<NormalPlayer> players = problem.getNormalPlayers();
+        List<GameSolution.Player> gameSolutionPlayers = new ArrayList<>();
+
+        int chosenStratIdx;
+
+        NormalPlayer pspPlayer = players.get(0);
+        int pspPlayerPropertyNum = pspPlayer.getStrategies().size() - 1; // Minus constraint
+
+        GameSolution.Player sPspPlayer = new GameSolution.Player();
+        List<Double> pValues  = new ArrayList<>();
+        for (int i = 0; i < pspPlayerPropertyNum; i++) {
+            pValues.add(EncodingUtils.getReal(solution.getVariable(i)));
+        }
+        sPspPlayer.setPlayerName(pspPlayer.getName());
+        sPspPlayer.setStrategyName(pspPlayer.getStrategyAt(0).getName());
+        sPspPlayer.setPayoff(uniPayoff);
+        sPspPlayer.setProperties(pValues);
+        gameSolutionPlayers.add(sPspPlayer);
+
+
+
+        // loop through all players and get the strategy chosen by each player
+        int noNormalPlayer = 1;
+        for (int i = pspPlayerPropertyNum; i < solution.getNumberOfVariables(); i++) {
+            NormalPlayer normalPlayer = players.get(noNormalPlayer);
+            Variable var = solution.getVariable(i);
+            if (var instanceof RealVariable) {
+                chosenStratIdx = NumberUtils.toInteger((RealVariable) var);
+            } else if (var instanceof BinaryIntegerVariable) {
+                chosenStratIdx = EncodingUtils.getInt(var);
+            } else {
+                // :v
+                chosenStratIdx = EncodingUtils.getInt(var);
+            }
+
+            double payoff = studentPayoffs[noNormalPlayer - 1];
+
+            String playerName = getPlayerName(normalPlayer, i);
+            String strategyName = getStrategyName(chosenStratIdx, normalPlayer, i);
+
+            GameSolution.Player gameSolutionPlayer = GameSolution.Player
+                    .builder()
+                    .playerName(playerName)
+                    .strategyName(strategyName)
+                    .payoff(payoff)
+                    .build();
+
+            gameSolutionPlayers.add(gameSolutionPlayer);
+            noNormalPlayer ++;
+        }
+
+        gameSolution.setPlayers(gameSolutionPlayers);
+
+        return gameSolution;
+    }
+
     public ResponseEntity<Response> getProblemResultInsights(GameTheoryProblemDTO request,
                                                              String sessionCode) {
         log.info("Received request: " + request);
         String[] algorithms = GameTheoryConst.ALLOWED_INSIGHT_ALGORITHMS;
-
 
         simpMessagingTemplate.convertAndSendToUser(sessionCode,
                 "/progress",
@@ -225,64 +303,75 @@ public class GameTheorySolver {
                 "/progress",
                 createProgressMessage("Start benchmarking the algorithms..."));
 
-        for (String algorithm : algorithms) {
-            log.info("Running algorithm: " + algorithm + "...");
-            for (int i = 0; i < RUN_COUNT_PER_ALGORITHM; i++) {
-                System.out.println("Iteration: " + i);
-                long start = System.currentTimeMillis();
+        try {
+            for (String algorithm : algorithms) {
+                log.info("Running algorithm: " + algorithm + "...");
+                for (int i = 0; i < RUN_COUNT_PER_ALGORITHM; i++) {
+                    System.out.println("Iteration: " + i);
+                    long start = System.currentTimeMillis();
 
-                if (problem instanceof StandardGameTheoryProblem
-                        && AppConst.PSO_BASED_ALGOS.contains(algorithm)) {
-                    problem = GameTheoryProblemMapper
-                            .toPSOProblem((StandardGameTheoryProblem) problem);
+                    if (problem instanceof StandardGameTheoryProblem
+                            && AppConst.PSO_BASED_ALGOS.contains(algorithm)) {
+                        problem = GameTheoryProblemMapper
+                                .toPSOProblem((StandardGameTheoryProblem) problem);
+                    }
+
+                    if (problem instanceof PSOCompatibleGameTheoryProblem
+                            && !AppConst.PSO_BASED_ALGOS.contains(algorithm)) {
+                        problem = GameTheoryProblemMapper
+                                .toStandardProblem((PSOCompatibleGameTheoryProblem) problem);
+                    }
+
+                    NondominatedPopulation results = solveProblem(problem,
+                            algorithm,
+                            request.getGeneration(),
+                            request.getPopulationSize(),
+                            request.getDistributedCores(),
+                            request.getMaxTime());
+
+                    long end = System.currentTimeMillis();
+
+                    double runtime = (double) (end - start) / 1000;
+                    double fitnessValue = getFitnessValue(results);
+
+                    // send the progress to the client
+                    String message =
+                            "Algorithm " + algorithm + " finished iteration: #" + (i + 1) + "/" +
+                                    RUN_COUNT_PER_ALGORITHM;
+                    Progress progress = createProgress(message, runtime, runCount, maxRunCount);
+                    System.out.println(progress);
+                    simpMessagingTemplate.convertAndSendToUser(sessionCode, "/progress", progress);
+                    runCount++;
+
+                    // add the fitness value and runtime to the insights
+                    gameSolutionInsights.getFitnessValues().get(algorithm).add(fitnessValue);
+                    gameSolutionInsights.getRuntimes().get(algorithm).add(runtime);
+
+
                 }
-
-                if (problem instanceof PSOCompatibleGameTheoryProblem
-                        && !AppConst.PSO_BASED_ALGOS.contains(algorithm)) {
-                    problem = GameTheoryProblemMapper
-                            .toStandardProblem((PSOCompatibleGameTheoryProblem) problem);
-                }
-
-                NondominatedPopulation results = solveProblem(problem,
-                        algorithm,
-                        request.getGeneration(),
-                        request.getPopulationSize(),
-                        request.getDistributedCores(),
-                        request.getMaxTime());
-
-                long end = System.currentTimeMillis();
-
-                double runtime = (double) (end - start) / 1000;
-                double fitnessValue = getFitnessValue(results);
-
-                // send the progress to the client
-                String message =
-                        "Algorithm " + algorithm + " finished iteration: #" + (i + 1) + "/" +
-                                RUN_COUNT_PER_ALGORITHM;
-                Progress progress = createProgress(message, runtime, runCount, maxRunCount);
-                System.out.println(progress);
-                simpMessagingTemplate.convertAndSendToUser(sessionCode, "/progress", progress);
-                runCount++;
-
-                // add the fitness value and runtime to the insights
-                gameSolutionInsights.getFitnessValues().get(algorithm).add(fitnessValue);
-                gameSolutionInsights.getRuntimes().get(algorithm).add(runtime);
-
 
             }
+            log.info("Benchmarking finished!");
+            simpMessagingTemplate.convertAndSendToUser(sessionCode,
+                    "/progress",
+                    createProgressMessage("Benchmarking finished!"));
 
+            return ResponseEntity.ok(Response
+                    .builder()
+                    .status(200)
+                    .message("Get problem result insights successfully!")
+                    .data(gameSolutionInsights)
+                    .build());
+        } catch (Exception e) {
+            log.error("ERROR ", e);
+            return ResponseEntity.ok(Response
+                    .builder()
+                    .status(500)
+                    .message("Get problem result insights failed!")
+                    .data(null)
+                    .build());
         }
-        log.info("Benchmarking finished!");
-        simpMessagingTemplate.convertAndSendToUser(sessionCode,
-                "/progress",
-                createProgressMessage("Benchmarking finished!"));
 
-        return ResponseEntity.ok(Response
-                .builder()
-                .status(200)
-                .message("Get problem result insights successfully!")
-                .data(gameSolutionInsights)
-                .build());
     }
 
     private GameSolutionInsights initGameSolutionInsights(String[] algorithms) {

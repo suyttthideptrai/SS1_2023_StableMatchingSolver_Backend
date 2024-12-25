@@ -1,12 +1,16 @@
 package com.example.SS2_Backend.dto.mapper;
 
+import com.example.SS2_Backend.constants.GameTheoryConst;
 import com.example.SS2_Backend.dto.request.GameTheoryProblemDTO;
 import com.example.SS2_Backend.ss.gt.GameTheoryProblem;
 import com.example.SS2_Backend.ss.gt.implement.PSOCompatibleGameTheoryProblem;
+import com.example.SS2_Backend.ss.gt.implement.PolyStrategicPlayerGTProblem;
 import com.example.SS2_Backend.ss.gt.implement.StandardGameTheoryProblem;
 import com.example.SS2_Backend.util.EvaluatorUtils;
 import com.example.SS2_Backend.util.StringUtils;
 import com.example.SS2_Backend.constants.AppConst;
+
+import java.util.Objects;
 
 public class GameTheoryProblemMapper {
 
@@ -22,6 +26,9 @@ public class GameTheoryProblemMapper {
         if (!StringUtils.isEmptyOrNull(algorithm)
                 && AppConst.PSO_BASED_ALGOS.contains(algorithm)) {
             problem = new PSOCompatibleGameTheoryProblem();
+        } else if (Objects.nonNull(request.getProblemName())
+                && request.getProblemName().contains(GameTheoryConst.PSP_CHEAT_CODE)) {
+            problem = new PolyStrategicPlayerGTProblem();
         } else {
             problem = new StandardGameTheoryProblem();
         }

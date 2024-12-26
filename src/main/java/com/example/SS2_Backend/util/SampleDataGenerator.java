@@ -82,27 +82,27 @@ public class SampleDataGenerator {
         MatchingProblem problem = StableMatchingProblemMapper.toMTM(generator.generateDto());
         // Run the algorithm
         long startTime = System.currentTimeMillis();
-//        NondominatedPopulation result = new Executor()
-//                .withProblem(problem)
-//                .withAlgorithm(algo)
-//                .withMaxEvaluations(100)
-//                .withProperty("populationSize", 1000)
-//                .distributeOnAllCores()
-//                .run();
+        NondominatedPopulation result = new Executor()
+                .withProblem(problem)
+                .withAlgorithm(algo)
+                .withMaxEvaluations(100)
+                .withProperty("populationSize", 1000)
+                .distributeOnAllCores()
+                .run();
 
-        IBEA algorithm = new IBEA(problem);
-        algorithm.run(100);
-        algorithm.getResult().display();
-
+//        IBEA algorithm = new IBEA(problem);
+//        algorithm.run(100);
+//        algorithm.getResult().display();
+//
         long endTime = System.currentTimeMillis();
         double runtime = ((double) (endTime - startTime) / 1000);
         runtime = Math.round(runtime * 100.0) / 100.0;
 
         // Process and print the results
-//        for (Solution solution : result) {
-//            Matches matches = (Matches) solution.getAttribute("matches");
-//            System.out.println("Fitness Score: " + -solution.getObjective(0));
-//        }
+        for (Solution solution : result) {
+            Matches matches = (Matches) solution.getAttribute("matches");
+            System.out.println("Fitness Score: " + -solution.getObjective(0));
+        }
         System.out.println("\nExecution time: " + runtime + " Second(s) with Algorithm: " + algo);
 
     }
@@ -114,11 +114,11 @@ public class SampleDataGenerator {
      */
     public NewStableMatchingProblemDTO generateDto() {
         NewStableMatchingProblemDTO problemDTO = new NewStableMatchingProblemDTO();
-        problemDTO.setIndividualSetIndices(generateSetIndices());
-        problemDTO.setIndividualCapacities(generateCapacities());
+        problemDTO.setNumberOfIndividuals(individualNum);
         problemDTO.setNumberOfSets(numberForeachSet.length);
         problemDTO.setNumberOfProperty(numberOfProperties);
-        problemDTO.setNumberOfIndividuals(individualNum);
+        problemDTO.setIndividualSetIndices(generateSetIndices());
+        problemDTO.setIndividualCapacities(generateCapacities());
         problemDTO.setIndividualProperties((double[][]) generatePW().get("property"));
         problemDTO.setIndividualWeights((double[][]) generatePW().get("weight"));
         problemDTO.setIndividualRequirements(generateRequirementString());
@@ -183,15 +183,15 @@ public class SampleDataGenerator {
     private int[] generateSetIndices() {
         int[] setIndices = new int[this.individualNum];
         // Số set hiện tại
-        int currentSetIndex = 1;
+        int currentSetIndex = 0;
         // Số lượng tổng các Individual, làm giới hạn cho mỗi lần chuyển sang một Set khác
-        int currentPosition = numberForeachSet[currentSetIndex - 1];
+        int currentPosition = numberForeachSet[currentSetIndex];
         for (int i = 0; i < this.individualNum; i++) {
-            if (i > currentPosition) {
+            if (i >= currentPosition) {
                 currentSetIndex += 1;
-                currentPosition += numberForeachSet[currentSetIndex - 1];
+                currentPosition += numberForeachSet[currentSetIndex];
             } else {
-                setIndices[i] = currentSetIndex;
+                setIndices[i] = currentSetIndex + 1;
             }
         }
         return setIndices;
@@ -199,19 +199,18 @@ public class SampleDataGenerator {
 
     private int[] generateCapacities() {
         int[] capacities = new int[this.individualNum];
-
-        int currentSetIndex = 1;
+        int currentSetIndex = 0;
         // Số lượng tổng các Individual, làm giới hạn cho mỗi lần chuyển sang một Set khác
-        int currentPosition = numberForeachSet[currentSetIndex - 1];
-        int setCurrentCap = this.numberForeachSet[currentSetIndex];
+        int currentPosition = numberForeachSet[currentSetIndex];
+        int setCurrentCap = setCapacities.get(numberForeachSet[currentSetIndex]);
 
         for (int i = 0; i < this.individualNum; i++) {
             // Nếu số hiện tại lớn hơn số lượng individual của set hiện tại thì +1;
             if (i > currentPosition) {
                 currentSetIndex += 1;
-                currentPosition += numberForeachSet[currentSetIndex - 1];
+                currentPosition += numberForeachSet[currentSetIndex];
             } else {
-                if (this.capRandomize[currentSetIndex - 1]) {
+                if (this.capRandomize[currentSetIndex]) {
                     capacities[i] = RANDOM.nextInt() * setCurrentCap;
                 } else {
                     capacities[i] = setCurrentCap;

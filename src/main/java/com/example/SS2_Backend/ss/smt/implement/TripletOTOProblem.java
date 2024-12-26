@@ -16,6 +16,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.moeaframework.core.Solution;
 import org.moeaframework.core.Variable;
+import org.moeaframework.core.variable.EncodingUtils;
 import org.moeaframework.core.variable.Permutation;
 
 import java.util.*;
@@ -100,7 +101,7 @@ public class TripletOTOProblem implements MatchingProblem {
      * @return true if exists
      */
     public boolean hasFitnessFunc() {
-        return StringUtils.isEmptyOrNull(this.fitnessFunction);
+        return  !StringUtils.isEmptyOrNull(this.fitnessFunction) && this.fitnessFunction.equalsIgnoreCase("default");
     }
 
 
@@ -115,8 +116,7 @@ public class TripletOTOProblem implements MatchingProblem {
     public Matches stableMatching(Variable var){
         Matches matches = new Matches(matchingData.getSize());
         Set<Integer> matchedNode = new HashSet<>();
-        Permutation castVar = (Permutation) var;
-        int[] decodeVar = castVar.toArray();
+        int[] decodeVar = EncodingUtils.getPermutation(var);
         Queue<Integer> unMatchedNode = new LinkedList<>();
 
         for (int val : decodeVar) {

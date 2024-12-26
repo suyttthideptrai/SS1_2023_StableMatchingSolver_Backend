@@ -63,7 +63,7 @@ public class NewStableMatchingProblemDTO implements ProblemRequestDto {
 
     private int maxTime;
 
-    @NotEmpty(message = ErrMessage.NOT_BLANK)
+//    @NotEmpty(message = ErrMessage.NOT_BLANK)
     private String algorithm;
 
     @ValidDistributedCores

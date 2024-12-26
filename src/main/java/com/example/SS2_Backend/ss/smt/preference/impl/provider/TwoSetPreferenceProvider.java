@@ -49,9 +49,10 @@ public class TwoSetPreferenceProvider implements PreferenceBuilder {
         } else {
             if (expressionOfSet2 != null) return;
             this.variablesOfSet1 = PreferenceProviderUtils.filterVariable(evalFunctionForSet1);
-            this.expressionOfSet1 = new ExpressionBuilder(evalFunctionForSet1)
-                    .variables(PreferenceProviderUtils.convertMapToSet(variablesOfSet1))
-                    .build();
+//            this.expressionOfSet1 = new ExpressionBuilder(evalFunctionForSet1)
+//                    .variables(PreferenceProviderUtils.convertMapToSet(variablesOfSet1))
+//                    .build();
+            this.expressionOfSet1 = null;
         }
 
         if (StringUtils.isEmptyOrNull(evalFunctionForSet2)) {

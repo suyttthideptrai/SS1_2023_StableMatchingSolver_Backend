@@ -45,8 +45,12 @@ public class SampleDataGenerator {
     private String fnf = DEFAULT_FITNESS_FUNC; // Fitness function
 
     public SampleDataGenerator(MatchingProblemType matchingProblemType, int numberOfSet1, int numberOfSet2, int numberOfProperties) {
+        if (numberOfSet1 <= 0 || numberOfSet2 <= 0 || numberOfProperties <= 0) {
+            throw new IllegalArgumentException("Number of sets and properties must be greater than 0");
+        }
         this.matchingProblemType = matchingProblemType;
         this.numberForeachSet = new int[2];
+        this.individualNum = numberOfSet1 + numberOfSet2;
         this.numberForeachSet[0] = numberOfSet1;
         this.numberForeachSet[1] = numberOfSet2;
         this.setCapacities.put(numberOfSet1, 10);
@@ -65,16 +69,16 @@ public class SampleDataGenerator {
      */
     public static void main(String[] args) {
         int numberOfProperties = 5;
-        SampleDataGenerator generator = new SampleDataGenerator(MatchingProblemType.MTM, 20, 2000, numberOfProperties);
+        SampleDataGenerator generator = new SampleDataGenerator(MatchingProblemType.OTM, 20, 2000, numberOfProperties);
         generator.setCapacities.put(20, 1);
         generator.setCapacities.put(2000, 100);
         generator.setCapRandomize(new boolean[]{false, false});
         generator.setEvaluateFunctions(new String[]{DEFAULT_EVALUATE_FUNC, DEFAULT_EVALUATE_FUNC});
-
         generator.setFnf(DEFAULT_FITNESS_FUNC);
+
         String algo = "IBEA";
-        // Mapping DTO to MatchingProblem
         MatchingProblem problem = generator.generateProblem();
+
         // Run the algorithm
         long startTime = System.currentTimeMillis();
         NondominatedPopulation result = new Executor()
@@ -84,6 +88,7 @@ public class SampleDataGenerator {
                 .withProperty("populationSize", 1000)
                 .distributeOnAllCores()
                 .run();
+
         long endTime = System.currentTimeMillis();
         double runtime = ((double) (endTime - startTime) / 1000);
         runtime = Math.round(runtime * 100.0) / 100.0;
@@ -106,9 +111,12 @@ public class SampleDataGenerator {
         NewStableMatchingProblemDTO problemDTO = new NewStableMatchingProblemDTO();
         problemDTO.setIndividualSetIndices(generateSetIndices());
         problemDTO.setIndividualCapacities(generateCapacities());
+        problemDTO.setNumberOfSets(numberForeachSet.length);
         problemDTO.setIndividualProperties((double[][]) generatePW().get("property"));
         problemDTO.setIndividualWeights((double[][]) generatePW().get("weight"));
         problemDTO.setIndividualRequirements(generateRequirementString());
+        problemDTO.setEvaluateFunctions(evaluateFunctions);
+        problemDTO.setFitnessFunction(fnf);
         return problemDTO;
     }
 
@@ -120,6 +128,7 @@ public class SampleDataGenerator {
     public MatchingProblem generateProblem() {
         MatchingProblem matchingProblem;
         NewStableMatchingProblemDTO newDto = this.generateDto();
+
         switch (this.matchingProblemType) {
             case MTM -> {
                 this.capRandomize = new boolean[]{true, true};
@@ -138,6 +147,7 @@ public class SampleDataGenerator {
                 matchingProblem = null;
             }
         }
+
         return matchingProblem;
     }
 
@@ -165,7 +175,6 @@ public class SampleDataGenerator {
 
     private int[] generateSetIndices() {
         int[] setIndices = new int[this.individualNum];
-        // TODO: individualSetIndices -> dựa vào numberForeachSet, label cho từng i với id set cụ thể
         // Số set hiện tại
         int currentSetIndex = 1;
         // Số lượng tổng các Individual, làm giới hạn cho mỗi lần chuyển sang một Set khác

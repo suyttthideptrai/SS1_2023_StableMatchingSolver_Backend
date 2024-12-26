@@ -54,10 +54,7 @@ public class MTMStableMatchingSolverTest {
         StableProblemService solver = new StableProblemService(null);
         // Run the solver
         solver.solve(newStableMatchingProblemDTO);
-        // Lấy nguyên phần Code của bên Solver chạy rồi ném vào đây? Kết quả không trùng là sao?
     }
 }
 
-// - test luồng chạy (generate 1 dto vứt vào service rồi cho nó chạy) assert kqua không trùng (Gan xong) 
-// - test khi có evaluate function assert kqua đúng (DOING)
 // - test fitness calculation assert kqua đúng.

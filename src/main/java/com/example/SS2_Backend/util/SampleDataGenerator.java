@@ -7,7 +7,6 @@ import com.example.SS2_Backend.dto.request.NewStableMatchingProblemDTO;
 import com.example.SS2_Backend.model.stableMatching.Matches.Matches;
 import com.example.SS2_Backend.model.stableMatching.StableMatchingRBOProblem;
 import com.example.SS2_Backend.ss.smt.MatchingProblem;
-import com.example.SS2_Backend.ss.smt.implement.MTMProblem;
 import com.example.SS2_Backend.ss.smt.requirement.Requirement;
 import com.example.SS2_Backend.ss.smt.requirement.RequirementDecoder;
 import lombok.Data;

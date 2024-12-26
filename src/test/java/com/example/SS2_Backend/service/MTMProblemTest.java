@@ -1,9 +1,11 @@
-package com.example.SS2_Backend.ss.smt.implement;
+package com.example.SS2_Backend.service;
 
 import com.example.SS2_Backend.constants.MatchingConst;
 import com.example.SS2_Backend.dto.mapper.StableMatchingProblemMapper;
 import com.example.SS2_Backend.dto.request.NewStableMatchingProblemDTO;
 import com.example.SS2_Backend.ss.smt.Matches;
+import com.example.SS2_Backend.ss.smt.implement.MTMProblem;
+import com.example.SS2_Backend.util.MatchingProblemType;
 import com.example.SS2_Backend.util.SampleDataGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,7 +23,7 @@ public class MTMProblemTest {
         numberOfIndividuals1 = 20;
         numberOfIndividuals2 = 200;
 
-        SampleDataGenerator sampleData = new SampleDataGenerator(numberOfIndividuals1, numberOfIndividuals2, numberOfProperties);
+        SampleDataGenerator sampleData = new SampleDataGenerator(MatchingProblemType.MTM ,numberOfIndividuals1, numberOfIndividuals2, numberOfProperties);
         newStableMatchingProblemDTO = sampleData.generateDto();
     }
 
@@ -32,8 +34,6 @@ public class MTMProblemTest {
         Solution solution = problem.newSolution();
         problem.evaluate(solution);
         Matches matches = (Matches) solution.getAttribute(MatchingConst.MATCHES_KEY);
-        // Check if each node's capacity is respected
-        // size here means the node's number?
         for (int i = 0; i < newStableMatchingProblemDTO.getNumberOfIndividuals(); i++) {
             // Getting individual
             int capacity = problem.getMatchingData().getCapacityOf(i);

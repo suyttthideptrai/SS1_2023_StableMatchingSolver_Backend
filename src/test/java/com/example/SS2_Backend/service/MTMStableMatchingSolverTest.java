@@ -1,6 +1,7 @@
 package com.example.SS2_Backend.service;
 
 import com.example.SS2_Backend.dto.request.NewStableMatchingProblemDTO;
+import com.example.SS2_Backend.util.MatchingProblemType;
 import com.example.SS2_Backend.util.SampleDataGenerator;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
@@ -26,26 +27,13 @@ public class MTMStableMatchingSolverTest {
     public void setUp() {
         numberOfIndividuals1 = 20;
         numberOfIndividuals2 = 200;
-        SampleDataGenerator sampleData = new SampleDataGenerator(numberOfIndividuals1, numberOfIndividuals2, numberOfProperties);
+        SampleDataGenerator sampleData = new SampleDataGenerator(MatchingProblemType.MTM, numberOfIndividuals1, numberOfIndividuals2, numberOfProperties);
         newStableMatchingProblemDTO = sampleData.generateDto();
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         validator = factory.getValidator();
 
     }
 
-    @Test
-    public void testNewDTO() {
-        newStableMatchingProblemDTO.setEvaluateFunctions(new String[]{"invalid eval func", "invalid eval func"});
-        newStableMatchingProblemDTO.setNumberOfIndividuals(0);
-        newStableMatchingProblemDTO.setNumberOfSets(0);
-        Set<ConstraintViolation<NewStableMatchingProblemDTO>> violations = validator.validate(newStableMatchingProblemDTO);
-        assertFalse(violations.isEmpty());
-    }
-    // Thử nghiệm xem đặt evaluationFunctions ở đây và chạy xem?
-    // Check trong HomeController, 
-    // Tương tự cho fitness calculation assert
-    // Set<ConstraintViolation<Contact>> violations = validator.validate(contact);
-     //   assertFalse(violations.isEmpty());
     @Test
     public void testEvaluateFunctions() {
         newStableMatchingProblemDTO.setEvaluateFunctions(new String[]{"invalid eval func", "invalid eval func"});

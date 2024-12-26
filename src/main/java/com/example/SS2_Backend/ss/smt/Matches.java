@@ -173,6 +173,11 @@ public class Matches implements Serializable {
         return matches;
     }
 
+    /**
+     * add all nodes that is matched in each turn
+     * @param nodes
+     */
+
     public void addMatchForGroup(List<Integer> nodes) {
         for (int i = 0; i < nodes.size(); i++) {
             int currentNode = nodes.get(i);
@@ -184,6 +189,11 @@ public class Matches implements Serializable {
         }
     }
 
+    /**
+     * get matches of target node
+     * @param target
+     * @return
+     */
     public Collection<Integer> getMatchesAndTarget(int target) {
         Collection<Integer> nodesToRemove = new HashSet<>();
         nodesToRemove.add(target);
@@ -191,6 +201,11 @@ public class Matches implements Serializable {
         return nodesToRemove;
     }
 
+    /**
+     * dismatch target node from a collection of nodes that was matched with target
+     * @param target
+     * @param nodeToRemove
+     */
     public void disMatch(int target, Collection<Integer> nodeToRemove) {
         matches[target].removeAll(nodeToRemove);
     }

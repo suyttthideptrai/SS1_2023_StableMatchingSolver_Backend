@@ -12,6 +12,7 @@ import com.example.SS2_Backend.ss.smt.requirement.RequirementDecoder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.moeaframework.Executor;
+import org.moeaframework.algorithm.IBEA;
 import org.moeaframework.core.NondominatedPopulation;
 import org.moeaframework.core.Solution;
 
@@ -69,35 +70,39 @@ public class SampleDataGenerator {
      */
     public static void main(String[] args) {
         int numberOfProperties = 5;
-        SampleDataGenerator generator = new SampleDataGenerator(MatchingProblemType.OTM, 20, 2000, numberOfProperties);
+        SampleDataGenerator generator = new SampleDataGenerator(MatchingProblemType.MTM, 20, 2000, numberOfProperties);
         generator.setCapacities.put(20, 1);
         generator.setCapacities.put(2000, 100);
-        generator.setCapRandomize(new boolean[]{false, false});
+        generator.setCapRandomize(new boolean[]{true, true});
         generator.setEvaluateFunctions(new String[]{DEFAULT_EVALUATE_FUNC, DEFAULT_EVALUATE_FUNC});
         generator.setFnf(DEFAULT_FITNESS_FUNC);
 
         String algo = "IBEA";
-        MatchingProblem problem = generator.generateProblem();
-
+//        MatchingProblem problem = generator.generateProblem();
+        MatchingProblem problem = StableMatchingProblemMapper.toMTM(generator.generateDto());
         // Run the algorithm
         long startTime = System.currentTimeMillis();
-        NondominatedPopulation result = new Executor()
-                .withProblem(problem)
-                .withAlgorithm(algo)
-                .withMaxEvaluations(100)
-                .withProperty("populationSize", 1000)
-                .distributeOnAllCores()
-                .run();
+//        NondominatedPopulation result = new Executor()
+//                .withProblem(problem)
+//                .withAlgorithm(algo)
+//                .withMaxEvaluations(100)
+//                .withProperty("populationSize", 1000)
+//                .distributeOnAllCores()
+//                .run();
+
+        IBEA algorithm = new IBEA(problem);
+        algorithm.run(100);
+        algorithm.getResult().display();
 
         long endTime = System.currentTimeMillis();
         double runtime = ((double) (endTime - startTime) / 1000);
         runtime = Math.round(runtime * 100.0) / 100.0;
 
         // Process and print the results
-        for (Solution solution : result) {
-            Matches matches = (Matches) solution.getAttribute("matches");
-            System.out.println("Fitness Score: " + -solution.getObjective(0));
-        }
+//        for (Solution solution : result) {
+//            Matches matches = (Matches) solution.getAttribute("matches");
+//            System.out.println("Fitness Score: " + -solution.getObjective(0));
+//        }
         System.out.println("\nExecution time: " + runtime + " Second(s) with Algorithm: " + algo);
 
     }
@@ -112,6 +117,8 @@ public class SampleDataGenerator {
         problemDTO.setIndividualSetIndices(generateSetIndices());
         problemDTO.setIndividualCapacities(generateCapacities());
         problemDTO.setNumberOfSets(numberForeachSet.length);
+        problemDTO.setNumberOfProperty(numberOfProperties);
+        problemDTO.setNumberOfIndividuals(individualNum);
         problemDTO.setIndividualProperties((double[][]) generatePW().get("property"));
         problemDTO.setIndividualWeights((double[][]) generatePW().get("weight"));
         problemDTO.setIndividualRequirements(generateRequirementString());

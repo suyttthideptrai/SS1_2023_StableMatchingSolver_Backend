@@ -30,8 +30,32 @@ import java.util.Arrays;
 public class StableMatchingProblemMapper {
 
     public static OTOProblem toOTO(NewStableMatchingProblemDTO dto) {
-        //TODO: implement OTO map logic
-        return null;
+        Requirement[][] requirements = RequirementDecoder.decode(dto.getIndividualRequirements());
+        MatchingData data = new MatchingData(
+                dto.getNumberOfIndividuals(),
+                dto.getNumberOfProperty(),
+                dto.getIndividualSetIndices(),
+                null,
+                dto.getIndividualProperties(),
+                dto.getIndividualWeights(),
+                requirements
+        );
+        data.setExcludedPairs(dto.getExcludedPairs());
+        PreferenceBuilder builder = new TwoSetPreferenceProvider(
+                data,
+                dto.getEvaluateFunctions()
+        );
+        PreferenceListWrapper preferenceLists = builder.toListWrapper();
+        FitnessEvaluator fitnessEvaluator = new TwoSetFitnessEvaluator(data);
+        return new OTOProblem(
+                dto.getProblemName(),
+                dto.getNumberOfIndividuals(),
+                dto.getNumberOfSets(),
+                data,
+                preferenceLists,
+                dto.getFitnessFunction(),
+                fitnessEvaluator
+        );
     }
 
 

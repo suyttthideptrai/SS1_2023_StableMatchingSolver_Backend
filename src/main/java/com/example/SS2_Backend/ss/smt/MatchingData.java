@@ -63,7 +63,6 @@ public class MatchingData {
         this.propertyValues = propertyValues;
         this.weights = weights;
         this.requirements = requirements;
-
     }
 
     /**

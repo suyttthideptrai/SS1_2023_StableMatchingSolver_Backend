@@ -1,18 +1,15 @@
 package com.example.SS2_Backend.util;
 
 import com.example.SS2_Backend.constants.MatchingConst.ReqTypes;
-import com.example.SS2_Backend.constants.AppConst;
 import com.example.SS2_Backend.dto.mapper.StableMatchingProblemMapper;
 import com.example.SS2_Backend.dto.request.NewStableMatchingProblemDTO;
-import com.example.SS2_Backend.model.stableMatching.Matches.Matches;
-import com.example.SS2_Backend.model.stableMatching.StableMatchingRBOProblem;
+import com.example.SS2_Backend.ss.smt.Matches;
 import com.example.SS2_Backend.ss.smt.MatchingProblem;
 import com.example.SS2_Backend.ss.smt.requirement.Requirement;
 import com.example.SS2_Backend.ss.smt.requirement.RequirementDecoder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.moeaframework.Executor;
-import org.moeaframework.algorithm.IBEA;
 import org.moeaframework.core.NondominatedPopulation;
 import org.moeaframework.core.Solution;
 
@@ -129,6 +126,7 @@ public class SampleDataGenerator {
      */
     public MatchingProblem generateProblem() {
         MatchingProblem matchingProblem;
+
         NewStableMatchingProblemDTO newDto = this.generateDto();
         switch (this.matchingProblemType) {
             case MTM -> {

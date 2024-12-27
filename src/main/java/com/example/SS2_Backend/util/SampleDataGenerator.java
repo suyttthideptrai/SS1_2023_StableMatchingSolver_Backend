@@ -54,8 +54,8 @@ public class SampleDataGenerator {
         this.individualNum = numberOfSet1 + numberOfSet2;
         this.numberForeachSet[0] = numberOfSet1;
         this.numberForeachSet[1] = numberOfSet2;
-        this.setCapacities.put(numberOfSet1, 10);
-        this.setCapacities.put(numberOfSet2, 10);
+        this.setCapacities.put(0, 10);
+        this.setCapacities.put(1, 10);
         this.numberOfProperties = numberOfProperties;
     }
 
@@ -70,16 +70,15 @@ public class SampleDataGenerator {
      */
     public static void main(String[] args) {
         int numberOfProperties = 5;
-        SampleDataGenerator generator = new SampleDataGenerator(MatchingProblemType.MTM, 20, 2000, numberOfProperties);
-        generator.setCapacities.put(20, 1);
-        generator.setCapacities.put(2000, 100);
+        SampleDataGenerator generator = new SampleDataGenerator(MatchingProblemType.MTM, 20, 200, numberOfProperties);
+        generator.setCapacities.put(0, 5);
+        generator.setCapacities.put(1, 5);
         generator.setCapRandomize(new boolean[]{true, true});
         generator.setEvaluateFunctions(new String[]{DEFAULT_EVALUATE_FUNC, DEFAULT_EVALUATE_FUNC});
         generator.setFnf(DEFAULT_FITNESS_FUNC);
 
         String algo = "IBEA";
-//        MatchingProblem problem = generator.generateProblem();
-        MatchingProblem problem = StableMatchingProblemMapper.toMTM(generator.generateDto());
+        MatchingProblem problem = generator.generateProblem();
         // Run the algorithm
         long startTime = System.currentTimeMillis();
         NondominatedPopulation result = new Executor()
@@ -90,10 +89,6 @@ public class SampleDataGenerator {
                 .distributeOnAllCores()
                 .run();
 
-//        IBEA algorithm = new IBEA(problem);
-//        algorithm.run(100);
-//        algorithm.getResult().display();
-//
         long endTime = System.currentTimeMillis();
         double runtime = ((double) (endTime - startTime) / 1000);
         runtime = Math.round(runtime * 100.0) / 100.0;
@@ -135,7 +130,6 @@ public class SampleDataGenerator {
     public MatchingProblem generateProblem() {
         MatchingProblem matchingProblem;
         NewStableMatchingProblemDTO newDto = this.generateDto();
-
         switch (this.matchingProblemType) {
             case MTM -> {
                 this.capRandomize = new boolean[]{true, true};
@@ -180,53 +174,6 @@ public class SampleDataGenerator {
         return result;
     }
 
-    private int[] generateSetIndices() {
-        int[] setIndices = new int[this.individualNum];
-        // Số set hiện tại
-        int currentSetIndex = 0;
-        // Số lượng tổng các Individual, làm giới hạn cho mỗi lần chuyển sang một Set khác
-        int currentPosition = numberForeachSet[currentSetIndex];
-        for (int i = 0; i < this.individualNum; i++) {
-            if (i >= currentPosition) {
-                currentSetIndex += 1;
-                currentPosition += numberForeachSet[currentSetIndex];
-            } else {
-                setIndices[i] = currentSetIndex + 1;
-            }
-        }
-        return setIndices;
-    }
-
-    private int[] generateCapacities() {
-        int[] capacities = new int[this.individualNum];
-        int currentSetIndex = 0;
-        // Số lượng tổng các Individual, làm giới hạn cho mỗi lần chuyển sang một Set khác
-        int currentPosition = numberForeachSet[currentSetIndex];
-        int setCurrentCap = setCapacities.get(numberForeachSet[currentSetIndex]);
-
-        for (int i = 0; i < this.individualNum; i++) {
-            // Nếu số hiện tại lớn hơn số lượng individual của set hiện tại thì +1;
-            if (i > currentPosition) {
-                currentSetIndex += 1;
-                currentPosition += numberForeachSet[currentSetIndex];
-            } else {
-                if (this.capRandomize[currentSetIndex]) {
-                    capacities[i] = RANDOM.nextInt() * setCurrentCap;
-                } else {
-                    capacities[i] = setCurrentCap;
-                }
-            }
-        }
-        return capacities;
-    }
-
-    private Requirement[][] generateRequirement() {
-        String[][] requirementString = generateRequirementString();
-        Requirement[][] individualRequirements = new Requirement[this.individualNum][this.numberOfProperties];
-        individualRequirements = RequirementDecoder.decode(requirementString);
-        return individualRequirements;
-    }
-
     private String[][] generateRequirementString() {
         String[][] individualRequirements = new String[this.individualNum][this.numberOfProperties];
 
@@ -254,6 +201,58 @@ public class SampleDataGenerator {
         }
         return individualRequirements;
     }
+
+    private int[] generateSetIndices() {
+        int[] setIndices = new int[this.individualNum];
+        // Số set hiện tại
+        int currentSetIndex = 0;
+        // Số lượng tổng các Individual, làm giới hạn cho mỗi lần chuyển sang một Set khác
+        int currentPosition = numberForeachSet[currentSetIndex];
+        for (int i = 0; i < this.individualNum; i++) {
+            if (i >= currentPosition) {
+                currentSetIndex += 1;
+                currentPosition += numberForeachSet[currentSetIndex];
+            } else {
+                setIndices[i] = currentSetIndex + 1;
+            }
+        }
+        return setIndices;
+    }
+
+    private int[] generateCapacities() {
+        int[] capacities = new int[this.individualNum];
+        int currentSetIndex = 0;
+        // Số lượng tổng các Individual, làm giới hạn cho mỗi lần chuyển sang một Set khác
+        int currentPosition = numberForeachSet[currentSetIndex];
+        int setCurrentCap = this.setCapacities.get(currentSetIndex);
+
+        for (int i = 0; i < this.individualNum; i++) {
+            // Nếu số hiện tại lớn hơn số lượng individual của set hiện tại thì +1;
+            if (i >= currentPosition) {
+                currentSetIndex += 1;
+                capacities[i] = setCurrentCap;
+                currentPosition += numberForeachSet[currentSetIndex];
+            } else {
+                if (this.capRandomize[currentSetIndex]) {
+                    capacities[i] = RANDOM.nextInt(setCurrentCap) + 1;
+                } else {
+                    capacities[i] = setCurrentCap;
+                }
+            }
+        }
+        return capacities;
+ }
+
+
+
+    private Requirement[][] generateRequirement() {
+        String[][] requirementString = generateRequirementString();
+        Requirement[][] individualRequirements = new Requirement[this.individualNum][this.numberOfProperties];
+        individualRequirements = RequirementDecoder.decode(requirementString);
+        return individualRequirements;
+    }
+
+
 
 
     private interface ObjectKeys {

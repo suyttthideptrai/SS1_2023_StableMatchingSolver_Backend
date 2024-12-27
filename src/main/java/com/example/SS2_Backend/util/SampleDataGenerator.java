@@ -7,6 +7,7 @@ import com.example.SS2_Backend.ss.smt.Matches;
 import com.example.SS2_Backend.ss.smt.MatchingProblem;
 import com.example.SS2_Backend.ss.smt.requirement.Requirement;
 import com.example.SS2_Backend.ss.smt.requirement.RequirementDecoder;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.moeaframework.Executor;
@@ -25,10 +26,11 @@ import static com.example.SS2_Backend.constants.MatchingConst.DEFAULT_FITNESS_FU
  */
 @Data
 @Slf4j
+@AllArgsConstructor
 public class SampleDataGenerator {
 
     private static final Random RANDOM = new Random(); // Random generator
-    Map<Integer, Integer> setCapacities = new HashMap<Integer, Integer>();
+    public Map<Integer, Integer> setCapacities = new HashMap<Integer, Integer>();
     // capRandomize: Căn cứ với set Capacities để generate capacity cho matching data
     // Mặc định để xử lý MTM Problem nên sẽ để cả hai đều là `true`
     boolean[] capRandomize = {true, true};
@@ -46,6 +48,9 @@ public class SampleDataGenerator {
         if (numberOfSet1 <= 0 || numberOfSet2 <= 0 || numberOfProperties <= 0) {
             throw new IllegalArgumentException("Number of sets and properties must be greater than 0");
         }
+        if (matchingProblemType == null) {
+            throw new IllegalArgumentException("Matching Problem Type should be MTM, OTM or OTO");
+        }
         this.matchingProblemType = matchingProblemType;
         this.numberForeachSet = new int[2];
         this.individualNum = numberOfSet1 + numberOfSet2;
@@ -54,12 +59,28 @@ public class SampleDataGenerator {
         this.setCapacities.put(0, 10);
         this.setCapacities.put(1, 10);
         this.numberOfProperties = numberOfProperties;
+
+        switch (this.matchingProblemType) {
+            case MTM -> this.capRandomize = new boolean[]{true, true};
+            case OTM -> this.capRandomize = new boolean[]{true, false};
+            case OTO -> this.capRandomize = new boolean[]{false, false};
+        }
     }
 
     public SampleDataGenerator(MatchingProblemType matchingProblemType, int[] numberForeachSet, int numberOfProperties) {
         this.matchingProblemType = matchingProblemType;
         this.numberForeachSet = numberForeachSet;
         this.numberOfProperties = numberOfProperties;
+
+        if (matchingProblemType == null) {
+            throw new IllegalArgumentException("Matching Problem Type should be MTM, OTM or OTO");
+        }
+
+        switch (this.matchingProblemType) {
+            case MTM -> this.capRandomize = new boolean[]{true, true};
+            case OTM -> this.capRandomize = new boolean[]{true, false};
+            case OTO -> this.capRandomize = new boolean[]{false, false};
+        }
     }
 
     /**
@@ -130,15 +151,12 @@ public class SampleDataGenerator {
         NewStableMatchingProblemDTO newDto = this.generateDto();
         switch (this.matchingProblemType) {
             case MTM -> {
-                this.capRandomize = new boolean[]{true, true};
                 matchingProblem = StableMatchingProblemMapper.toMTM(newDto);
             }
             case OTM -> {
-                this.capRandomize = new boolean[]{true, false};
                 matchingProblem = StableMatchingProblemMapper.toOTM(newDto);
             }
             case OTO -> {
-                this.capRandomize = new boolean[]{false};
                 matchingProblem = StableMatchingProblemMapper.toOTO(newDto);
             }
             default -> {

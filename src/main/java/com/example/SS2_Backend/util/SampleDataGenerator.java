@@ -1,58 +1,102 @@
 package com.example.SS2_Backend.util;
 
-import com.example.SS2_Backend.model.stableMatching.Individual;
-import com.example.SS2_Backend.model.stableMatching.Matches.Matches;
-import com.example.SS2_Backend.model.stableMatching.StableMatchingProblem;
+import com.example.SS2_Backend.constants.MatchingConst.ReqTypes;
+import com.example.SS2_Backend.dto.mapper.StableMatchingProblemMapper;
+import com.example.SS2_Backend.dto.request.NewStableMatchingProblemDTO;
+import com.example.SS2_Backend.ss.smt.Matches;
+import com.example.SS2_Backend.ss.smt.MatchingProblem;
+import com.example.SS2_Backend.ss.smt.requirement.Requirement;
+import com.example.SS2_Backend.ss.smt.requirement.RequirementDecoder;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.moeaframework.Executor;
 import org.moeaframework.core.NondominatedPopulation;
 import org.moeaframework.core.Solution;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
+
+import static com.example.SS2_Backend.constants.MatchingConst.DEFAULT_EVALUATE_FUNC;
+import static com.example.SS2_Backend.constants.MatchingConst.DEFAULT_FITNESS_FUNC;
 
 /**
  * Stable Matching Problem Testing Space.
  */
 @Data
 @Slf4j
+@AllArgsConstructor
 public class SampleDataGenerator {
 
-    // Configuration parameters
-    private String[] propNames;
-    private int numberOfSet1;
-    private int numberOfSet2;
-    private int set1Cap = 10; // Default capacity for set 1
-    private int set2Cap = 10; // Default capacity for set 2
-    private boolean randCapSet1 = false; // Randomize capacity for set 1
-    private boolean randCapSet2 = false; // Randomize capacity for set 2
-    private String f1 = "none";  // Evaluation function for set 1
-    private String f2 = "none";  // Evaluation function for set 2
-    private String fnf = "none"; // Fitness function
     private static final Random RANDOM = new Random(); // Random generator
+    public Map<Integer, Integer> setCapacities = new HashMap<Integer, Integer>();
+    // capRandomize: Căn cứ với set Capacities để generate capacity cho matching data
+    // Mặc định để xử lý MTM Problem nên sẽ để cả hai đều là `true`
+    boolean[] capRandomize = {true, true};
+    // Configuration parameters
+    private MatchingProblemType matchingProblemType = MatchingProblemType.MTM;
+    // problemSize
+    private int individualNum;
+    private int numberOfProperties;
+    // max capacity tiêu chuẩn cho mỗi set dạng map<int, int>, vd: với MTM: {0: 2, 1: 10}, 3Set: {0: 1, 1: 10, 2: 12}
+    private int[] numberForeachSet;
+    private String[] evaluateFunctions = {DEFAULT_EVALUATE_FUNC, DEFAULT_EVALUATE_FUNC};
+    private String fnf = DEFAULT_FITNESS_FUNC; // Fitness function
+
+    public SampleDataGenerator(MatchingProblemType matchingProblemType, int numberOfSet1, int numberOfSet2, int numberOfProperties) {
+        if (numberOfSet1 <= 0 || numberOfSet2 <= 0 || numberOfProperties <= 0) {
+            throw new IllegalArgumentException("Number of sets and properties must be greater than 0");
+        }
+        if (matchingProblemType == null) {
+            throw new IllegalArgumentException("Matching Problem Type should be MTM, OTM or OTO");
+        }
+        this.matchingProblemType = matchingProblemType;
+        this.numberForeachSet = new int[2];
+        this.individualNum = numberOfSet1 + numberOfSet2;
+        this.numberForeachSet[0] = numberOfSet1;
+        this.numberForeachSet[1] = numberOfSet2;
+        this.setCapacities.put(0, 10);
+        this.setCapacities.put(1, 10);
+        this.numberOfProperties = numberOfProperties;
+
+        switch (this.matchingProblemType) {
+            case MTM -> this.capRandomize = new boolean[]{true, true};
+            case OTM -> this.capRandomize = new boolean[]{true, false};
+            case OTO -> this.capRandomize = new boolean[]{false, false};
+        }
+    }
+
+    public SampleDataGenerator(MatchingProblemType matchingProblemType, int[] numberForeachSet, int numberOfProperties) {
+        this.matchingProblemType = matchingProblemType;
+        this.numberForeachSet = numberForeachSet;
+        this.numberOfProperties = numberOfProperties;
+
+        if (matchingProblemType == null) {
+            throw new IllegalArgumentException("Matching Problem Type should be MTM, OTM or OTO");
+        }
+
+        switch (this.matchingProblemType) {
+            case MTM -> this.capRandomize = new boolean[]{true, true};
+            case OTM -> this.capRandomize = new boolean[]{true, false};
+            case OTO -> this.capRandomize = new boolean[]{false, false};
+        }
+    }
 
     /**
      * Main method to demonstrate usage.
      */
     public static void main(String[] args) {
-
-        SampleDataGenerator generator = new SampleDataGenerator(20, 2000);
-        String[] propNames = {"Prop1", "Prop2", "Prop3", "Prop4"};
-        generator.setPropNames(propNames);
-        generator.setSet1Cap(1);
-        generator.setSet2Cap(100);
-        generator.setRandCapSet1(false);
-        generator.setRandCapSet2(false);
-        generator.setF1("none");
-        generator.setF2("none");
-        generator.setFnf("none");
-        // Generate the StableMatchingProblem instance
-        StableMatchingProblem problem = generator.generate();
+        int numberOfProperties = 5;
+        SampleDataGenerator generator = new SampleDataGenerator(MatchingProblemType.MTM, 20, 200, numberOfProperties);
+        generator.setCapacities.put(0, 5);
+        generator.setCapacities.put(1, 5);
+        generator.setCapRandomize(new boolean[]{true, true});
+        generator.setEvaluateFunctions(new String[]{DEFAULT_EVALUATE_FUNC, DEFAULT_EVALUATE_FUNC});
+        generator.setFnf(DEFAULT_FITNESS_FUNC);
 
         String algo = "IBEA";
-
+        MatchingProblem problem = generator.generateProblem();
         // Run the algorithm
         long startTime = System.currentTimeMillis();
         NondominatedPopulation result = new Executor()
@@ -62,6 +106,7 @@ public class SampleDataGenerator {
                 .withProperty("populationSize", 1000)
                 .distributeOnAllCores()
                 .run();
+
         long endTime = System.currentTimeMillis();
         double runtime = ((double) (endTime - startTime) / 1000);
         runtime = Math.round(runtime * 100.0) / 100.0;
@@ -69,112 +114,164 @@ public class SampleDataGenerator {
         // Process and print the results
         for (Solution solution : result) {
             Matches matches = (Matches) solution.getAttribute("matches");
-//            System.out.println("Output Matches (by Gale Shapley):\n" + matches.toString());
-//            System.out.println("Randomized Individuals Input Order (by MOEA): " + solution.getVariable(0).toString());
             System.out.println("Fitness Score: " + -solution.getObjective(0));
-//            Testing tester = new Testing(matches,
-//                    problem.getIndividuals().getNumberOfIndividual(),
-//                    problem.getIndividuals().getCapacities());
-//            System.out.println("Solution has duplicate individual? : " + tester.hasDuplicate());
         }
         System.out.println("\nExecution time: " + runtime + " Second(s) with Algorithm: " + algo);
 
     }
+
     /**
-     * Constructor for configuring generator with required sets.
+     * Generates a NewStableMatchingProblemDTO instance based on the configured parameters.
      *
-     * @param numberOfSet1 Number of individuals in set 1
-     * @param numberOfSet2 Number of individuals in set 2
+     * @return A NewStableMatchingProblemDTO object
      */
-    public SampleDataGenerator(int numberOfSet1, int numberOfSet2) {
-        this.numberOfSet1 = numberOfSet1;
-        this.numberOfSet2 = numberOfSet2;
+    public NewStableMatchingProblemDTO generateDto() {
+        NewStableMatchingProblemDTO problemDTO = new NewStableMatchingProblemDTO();
+        problemDTO.setNumberOfIndividuals(individualNum);
+        problemDTO.setNumberOfSets(numberForeachSet.length);
+        problemDTO.setNumberOfProperty(numberOfProperties);
+        problemDTO.setIndividualSetIndices(generateSetIndices());
+        problemDTO.setIndividualCapacities(generateCapacities());
+        problemDTO.setIndividualProperties((double[][]) generatePW().get("property"));
+        problemDTO.setIndividualWeights((double[][]) generatePW().get("weight"));
+        problemDTO.setIndividualRequirements(generateRequirementString());
+        problemDTO.setEvaluateFunctions(evaluateFunctions);
+        problemDTO.setFitnessFunction(fnf);
+        return problemDTO;
     }
 
     /**
-     * Generates a StableMatchingProblem instance based on the configured parameters.
+     * Generates a StableMatchingRBOProblem instance based on the configured parameters.
      *
-     * @return A StableMatchingProblem object
+     * @return StableMatchingRBOProblem
      */
-    public StableMatchingProblem generate() {
-        // Generate the individual population
-        ArrayList<Individual> individuals = generateIndividualsWithCapacity();
+    public MatchingProblem generateProblem() {
+        MatchingProblem matchingProblem;
 
-//        // Define excluded pairs
-//        int[][] excludedPairs = {
-//                {0, 3},
-//                {1, 2},
-//                {0, 2},
-//                {1, 3}
-//        };
-        // Create and configure the StableMatchingProblem instance
-        StableMatchingProblem problem = new StableMatchingProblem();
-        problem.setEvaluateFunctionForSet1(f1);
-        problem.setEvaluateFunctionForSet2(f2);
-        problem.setFitnessFunction(fnf);
-        problem.setPopulation(individuals, this.propNames, null);
-        return problem;
-    }
-
-    /**
-     * Generates a list of individuals with their respective capacities.
-     *
-     * @return A list of individuals
-     */
-    private ArrayList<Individual> generateIndividualsWithCapacity() {
-        ArrayList<Individual> individuals = new ArrayList<>();
-        individuals.addAll(createIndividuals(numberOfSet1, set1Cap, randCapSet1, 0, propNames)); // Set 1
-        individuals.addAll(createIndividuals(numberOfSet2, set2Cap, randCapSet2, 2, propNames)); // Set 2
-        return individuals;
-    }
-
-    /**
-     * Creates a list of individuals for a specific set.
-     *
-     * @param count      Number of individuals to create
-     * @param capacity   Capacity of individuals
-     * @param randomize  Whether to randomize capacity
-     * @param set        Set number (0 for Set 1, 2 for Set 2)
-     * @return A list of individuals
-     */
-    private List<Individual> createIndividuals(int count, int capacity, boolean randomize, int set, String[] propNames) {
-        List<Individual> individuals = new ArrayList<>();
-        for (int i = 0; i < count; i++) {
-            Individual individual = new Individual();
-            individual.setIndividualName("Individual " + (i + 1));
-            individual.setIndividualSet(set);
-            individual.setCapacity(randomize ? RANDOM.nextInt(capacity - 1) + 1 : capacity);
-            addPropertiesToIndividual(individual, propNames);
-            individuals.add(individual);
+        NewStableMatchingProblemDTO newDto = this.generateDto();
+        switch (this.matchingProblemType) {
+            case MTM -> {
+                matchingProblem = StableMatchingProblemMapper.toMTM(newDto);
+            }
+            case OTM -> {
+                matchingProblem = StableMatchingProblemMapper.toOTM(newDto);
+            }
+            case OTO -> {
+                matchingProblem = StableMatchingProblemMapper.toOTO(newDto);
+            }
+            default -> {
+                log.info("[ERROR] Match Problem Type hasn't been initialized yet. Terminated...");
+                matchingProblem = null;
+            }
         }
-        return individuals;
+
+        return matchingProblem;
     }
 
     /**
      * Adds properties to an individual.
-     *
-     * @param individual The individual to which properties will be added
      */
-    private void addPropertiesToIndividual(Individual individual, String[] propNames) {
-        int numProps = propNames.length;
-        for (int j = 0; j < numProps; j++) {
-            // Example property values
-            double propertyValue = RANDOM.nextDouble() * (70.0 - 20.0) + 20.0;
-            double propertyWeight = 1 + (10 - 1) * RANDOM.nextDouble();
-            String[] expression = {"", "--", "++"};
-            double propertyBound = RANDOM.nextDouble() * (70.0 - 20.0) + 20.0;
-            double propertyBound2 = RANDOM.nextDouble() * (70.0 - 20.0) + 20.0;
-            int randomType = RANDOM.nextInt(2) + 1;
-            int randomExpression = RANDOM.nextInt(2) + 1;
-
-            // Property requirements
-            String[] requirement;
-            if (randomType == 1) {
-                requirement = new String[]{String.valueOf(propertyBound), expression[randomExpression]};
-            } else {
-                requirement = new String[]{String.valueOf(propertyBound), String.valueOf(propertyBound2)};
+    private Map<String, Object> generatePW() {
+        Map<String, Object> result = new HashMap<>();
+        double[][] individualProperties = new double[this.individualNum][this.numberOfProperties];
+        double[][] individualWeights = new double[this.individualNum][this.numberOfProperties];
+        for (int i = 0; i < this.individualNum; i++) {
+            for (int j = 0; j < numberOfProperties; j++) {
+                // Example property values
+                double propertyValue = RANDOM.nextDouble() * (70.0 - 20.0) + 20.0;
+                double propertyWeight = 1 + (10 - 1) * RANDOM.nextDouble();
+                individualProperties[i][j] = propertyValue;
+                individualWeights[i][j] = propertyWeight;
             }
-            individual.setProperty(propertyValue, propertyWeight, requirement);
         }
+
+        result.put(ObjectKeys.PROPERTY, individualProperties);
+        result.put(ObjectKeys.WEIGHT, individualWeights);
+        return result;
     }
+
+    private String[][] generateRequirementString() {
+        String[][] individualRequirements = new String[this.individualNum][this.numberOfProperties];
+
+        String[] expression = {"", "--", "++"};
+        for (int i = 0; i < this.individualNum; i++) {
+            for (int j = 0; j < numberOfProperties; j++) {
+                String requirement;
+                int randomType = RANDOM.nextInt(2) + 1;
+                double propertyBound = RANDOM.nextDouble() * (70.0 - 20.0) + 20.0;
+
+                if (ReqTypes.ONE_BOUND == randomType) {
+                    int randomExpression = RANDOM.nextInt(2) + 1;
+                    requirement = propertyBound + expression[randomExpression];
+                } else if (ReqTypes.TWO_BOUND == randomType) {
+                    double propertyBound2 = RANDOM.nextDouble() * (70.0 - 20.0) + 20.0;
+                    requirement = propertyBound + ":" + propertyBound2;
+                    //  if (ReqTypes.SCALE_TARGET == randomType)
+                } else {
+                    int requirementScale = 1 + (10 - 1) * RANDOM.nextInt();
+                    requirement = String.valueOf(requirementScale);
+                }
+                individualRequirements[i][j] = requirement;
+            }
+
+        }
+        return individualRequirements;
+    }
+
+    //    private int[] generateSetIndices() {
+//        int[] setIndices = new int[individualNum];
+//        /* Finish this function
+//        * */
+//        return setIndices;
+//    }
+//
+//    private int[] generateCapacities() {
+//        int[] capacities = new int[individualNum];
+//        /* Finish this function
+//         * */
+//        return capacities;
+//    }
+    private int[] generateSetIndices() {
+        int[] setIndices = new int[individualNum];
+        int currentIndex = 0;
+        for (int i = 0; i < numberForeachSet.length; i++) {
+            int setSize = numberForeachSet[i];
+            for (int j = 0; j < setSize; j++) {
+                setIndices[currentIndex++] = i;
+            }
+        }
+        return setIndices;
+    }
+
+    private int[] generateCapacities() {
+        int[] capacities = new int[individualNum];
+        int currentIndex = 0;
+        for (int i = 0; i < numberForeachSet.length; i++) {
+            int setSize = numberForeachSet[i];
+            int setCapacity = setCapacities.get(i);
+            for (int j = 0; j < setSize; j++) {
+                if (capRandomize[i]) {
+                    capacities[currentIndex++] = 1 + RANDOM.nextInt(setCapacity - 1); // Random capacity between 1 and setCapacity
+                } else {
+                    capacities[currentIndex++] = setCapacity;
+                }
+            }
+        }
+        return capacities;
+    }
+
+
+    private Requirement[][] generateRequirement() {
+        String[][] requirementString = generateRequirementString();
+        Requirement[][] individualRequirements = new Requirement[this.individualNum][this.numberOfProperties];
+        individualRequirements = RequirementDecoder.decode(requirementString);
+        return individualRequirements;
+    }
+
+
+    private interface ObjectKeys {
+        String PROPERTY = "property";
+        String WEIGHT = "weight";
+    }
+
 }

@@ -54,8 +54,7 @@ public class StableMatchingProblemMapper {
                 data,
                 preferenceLists,
                 dto.getFitnessFunction(),
-                fitnessEvaluator
-        );
+                fitnessEvaluator);
     }
 
 

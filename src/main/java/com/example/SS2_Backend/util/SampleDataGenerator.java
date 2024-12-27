@@ -202,47 +202,47 @@ public class SampleDataGenerator {
         return individualRequirements;
     }
 
+    //    private int[] generateSetIndices() {
+//        int[] setIndices = new int[individualNum];
+//        /* Finish this function
+//        * */
+//        return setIndices;
+//    }
+//
+//    private int[] generateCapacities() {
+//        int[] capacities = new int[individualNum];
+//        /* Finish this function
+//         * */
+//        return capacities;
+//    }
     private int[] generateSetIndices() {
-        int[] setIndices = new int[this.individualNum];
-        // Số set hiện tại
-        int currentSetIndex = 0;
-        // Số lượng tổng các Individual, làm giới hạn cho mỗi lần chuyển sang một Set khác
-        int currentPosition = numberForeachSet[currentSetIndex];
-        for (int i = 0; i < this.individualNum; i++) {
-            if (i >= currentPosition) {
-                currentSetIndex += 1;
-                currentPosition += numberForeachSet[currentSetIndex];
-            } else {
-                setIndices[i] = currentSetIndex + 1;
+        int[] setIndices = new int[individualNum];
+        int currentIndex = 0;
+        for (int i = 0; i < numberForeachSet.length; i++) {
+            int setSize = numberForeachSet[i];
+            for (int j = 0; j < setSize; j++) {
+                setIndices[currentIndex++] = i;
             }
         }
         return setIndices;
     }
 
     private int[] generateCapacities() {
-        int[] capacities = new int[this.individualNum];
-        int currentSetIndex = 0;
-        // Số lượng tổng các Individual, làm giới hạn cho mỗi lần chuyển sang một Set khác
-        int currentPosition = numberForeachSet[currentSetIndex];
-        int setCurrentCap = this.setCapacities.get(currentSetIndex);
-
-        for (int i = 0; i < this.individualNum; i++) {
-            // Nếu số hiện tại lớn hơn số lượng individual của set hiện tại thì +1;
-            if (i >= currentPosition) {
-                currentSetIndex += 1;
-                capacities[i] = setCurrentCap;
-                currentPosition += numberForeachSet[currentSetIndex];
-            } else {
-                if (this.capRandomize[currentSetIndex]) {
-                    capacities[i] = RANDOM.nextInt(setCurrentCap) + 1;
+        int[] capacities = new int[individualNum];
+        int currentIndex = 0;
+        for (int i = 0; i < numberForeachSet.length; i++) {
+            int setSize = numberForeachSet[i];
+            int setCapacity = setCapacities.get(i);
+            for (int j = 0; j < setSize; j++) {
+                if (capRandomize[i]) {
+                    capacities[currentIndex++] = 1 + RANDOM.nextInt(setCapacity - 1); // Random capacity between 1 and setCapacity
                 } else {
-                    capacities[i] = setCurrentCap;
+                    capacities[currentIndex++] = setCapacity;
                 }
             }
         }
         return capacities;
- }
-
+    }
 
 
     private Requirement[][] generateRequirement() {
@@ -251,8 +251,6 @@ public class SampleDataGenerator {
         individualRequirements = RequirementDecoder.decode(requirementString);
         return individualRequirements;
     }
-
-
 
 
     private interface ObjectKeys {

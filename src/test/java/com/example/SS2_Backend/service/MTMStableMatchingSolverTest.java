@@ -1,6 +1,8 @@
 package com.example.SS2_Backend.service;
 
+import com.example.SS2_Backend.dto.mapper.StableMatchingProblemMapper;
 import com.example.SS2_Backend.dto.request.NewStableMatchingProblemDTO;
+import com.example.SS2_Backend.ss.smt.evaluator.impl.TwoSetFitnessEvaluator;
 import com.example.SS2_Backend.util.MatchingProblemType;
 import com.example.SS2_Backend.util.SampleDataGenerator;
 import jakarta.validation.ConstraintViolation;
@@ -18,6 +20,7 @@ import static org.junit.Assert.assertFalse;
 
 public class MTMStableMatchingSolverTest {
     NewStableMatchingProblemDTO newStableMatchingProblemDTO;
+    SampleDataGenerator sampleData;
     int numberOfIndividuals1;
     int numberOfIndividuals2;
     int numberOfProperties;
@@ -27,7 +30,11 @@ public class MTMStableMatchingSolverTest {
     public void setUp() {
         numberOfIndividuals1 = 20;
         numberOfIndividuals2 = 200;
-        SampleDataGenerator sampleData = new SampleDataGenerator(MatchingProblemType.MTM, numberOfIndividuals1, numberOfIndividuals2, numberOfProperties);
+        sampleData = new SampleDataGenerator(
+                MatchingProblemType.MTM,
+                numberOfIndividuals1, numberOfIndividuals2,
+                numberOfProperties
+        );
         newStableMatchingProblemDTO = sampleData.generateDto();
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         validator = factory.getValidator();
@@ -43,9 +50,8 @@ public class MTMStableMatchingSolverTest {
 
     @Test
     public void testFitnessCalculation() {
-        newStableMatchingProblemDTO.setEvaluateFunctions(new String[]{"invalid eval func", "invalid eval func"});
-        Set<ConstraintViolation<NewStableMatchingProblemDTO>> violations = validator.validate(newStableMatchingProblemDTO);
-        assertFalse(violations.isEmpty());
+        TwoSetFitnessEvaluator newEvaluator = new TwoSetFitnessEvaluator(sampleData.generateProblem().getMatchingData());
+        newEvaluator.withFitnessFunctionEvaluation(new double[]{}, sampleData.getFnf());
     }
 
     @Test

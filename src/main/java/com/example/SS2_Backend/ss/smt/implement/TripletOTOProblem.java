@@ -164,6 +164,11 @@ public class TripletOTOProblem implements MatchingProblem {
 
     }
 
+    /**
+     * find and match with a prefer node in the target set
+     * return the prefer node of target set
+     * @param nodePreferences is the preferList of current node
+     */
 
     private int matchWithTargetSet(int newNode, int targetSet,
                                    TripletPreferenceList nodePreferences,
@@ -201,6 +206,10 @@ public class TripletOTOProblem implements MatchingProblem {
 
     }
 
+    /**
+     * whether break the previous match of the preferNode when preferNode already matched
+     * return boolean valude when preferNode choose newNode or currentNode(old one)
+     */
     private boolean breakPreviousMatch(int newNode, int preferNode,
                                        Matches matches, Queue<Integer> unmatchedNodes){
         Integer[] individualMatches = matches.getSetOf(preferNode).toArray(new Integer[0]);
@@ -229,6 +238,11 @@ public class TripletOTOProblem implements MatchingProblem {
                 .toArray();
     }
 
+    /**
+     * calculate the padding for a set that stored in preferList of a  newNode
+     * @param targetSet is the number of set that calculate padding to get
+     * @param currentNewNodeSet is the current set can get with the current padding
+     */
     private int calculatePadding(int targetSet, int currentNewNodeSet){
         Map<Integer, Integer> setNums = matchingData.getSetNums();
         if(currentNewNodeSet == setNum -1) return 0 ;
@@ -247,6 +261,9 @@ public class TripletOTOProblem implements MatchingProblem {
         return paddingSize;
     }
 
+    /**
+     * calculate the position of the preferNode in the preferList of a newNode
+     */
     private int calculatePosition(int targetSet, int currentNewNodeSet){
         Map<Integer, Integer> setNums = matchingData.getSetNums();
 

@@ -1,5 +1,5 @@
-## Deprecated 
-### source code moved to [new repository here](https://github.com/FitHanuSpecialSubject/GA-Application-Java)
+## This repository is no longer maintained. 
+### source code moved to [new home here](https://github.com/FitHanuSpecialSubject/GA-Application-Java)
 
 
 # Table of Contents

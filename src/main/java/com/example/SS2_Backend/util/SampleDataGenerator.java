@@ -2,7 +2,7 @@ package com.example.SS2_Backend.util;
 
 import com.example.SS2_Backend.constants.MatchingConst.ReqTypes;
 import com.example.SS2_Backend.dto.mapper.StableMatchingProblemMapper;
-import com.example.SS2_Backend.dto.request.NewStableMatchingProblemDTO;
+import com.example.SS2_Backend.dto.request.StableMatchingProblemDTO;
 import com.example.SS2_Backend.ss.smt.Matches;
 import com.example.SS2_Backend.ss.smt.MatchingProblem;
 import com.example.SS2_Backend.ss.smt.requirement.Requirement;
@@ -121,12 +121,12 @@ public class SampleDataGenerator {
     }
 
     /**
-     * Generates a NewStableMatchingProblemDTO instance based on the configured parameters.
+     * Generates a StableMatchingProblemDTO instance based on the configured parameters.
      *
-     * @return A NewStableMatchingProblemDTO object
+     * @return A StableMatchingProblemDTO object
      */
-    public NewStableMatchingProblemDTO generateDto() {
-        NewStableMatchingProblemDTO problemDTO = new NewStableMatchingProblemDTO();
+    public StableMatchingProblemDTO generateDto() {
+        StableMatchingProblemDTO problemDTO = new StableMatchingProblemDTO();
         problemDTO.setNumberOfIndividuals(individualNum);
         problemDTO.setNumberOfSets(numberForeachSet.length);
         problemDTO.setNumberOfProperty(numberOfProperties);
@@ -148,7 +148,7 @@ public class SampleDataGenerator {
     public MatchingProblem generateProblem() {
         MatchingProblem matchingProblem;
 
-        NewStableMatchingProblemDTO newDto = this.generateDto();
+        StableMatchingProblemDTO newDto = this.generateDto();
         switch (this.matchingProblemType) {
             case MTM -> {
                 matchingProblem = StableMatchingProblemMapper.toMTM(newDto);

@@ -1,10 +1,6 @@
 package com.example.SS2_Backend.dto.mapper;
 
-import com.example.SS2_Backend.dto.request.NewStableMatchingProblemDTO;
 import com.example.SS2_Backend.dto.request.StableMatchingProblemDTO;
-import com.example.SS2_Backend.model.stableMatching.StableMatchingOTMProblem;
-import com.example.SS2_Backend.model.stableMatching.StableMatchingOTOProblem;
-import com.example.SS2_Backend.model.stableMatching.StableMatchingProblem;
 import com.example.SS2_Backend.ss.smt.MatchingData;
 import com.example.SS2_Backend.ss.smt.evaluator.FitnessEvaluator;
 import com.example.SS2_Backend.ss.smt.evaluator.impl.TwoSetFitnessEvaluator;
@@ -20,8 +16,6 @@ import com.example.SS2_Backend.ss.smt.requirement.Requirement;
 import com.example.SS2_Backend.ss.smt.requirement.RequirementDecoder;
 import com.example.SS2_Backend.util.EvaluatorUtils;
 
-import java.util.Arrays;
-
 /**
  * Mapper layer, xử lý các công việc sau đối với từng loại matching problem:
  * 1. map problem data từ dto vào StableMatchingProblem
@@ -29,7 +23,7 @@ import java.util.Arrays;
  */
 public class StableMatchingProblemMapper {
 
-    public static OTOProblem toOTO(NewStableMatchingProblemDTO dto) {
+    public static OTOProblem toOTO(StableMatchingProblemDTO dto) {
         Requirement[][] requirements = RequirementDecoder.decode(dto.getIndividualRequirements());
         MatchingData data = new MatchingData(
                 dto.getNumberOfIndividuals(),
@@ -58,7 +52,7 @@ public class StableMatchingProblemMapper {
     }
 
 
-    public static OTMProblem toOTM(NewStableMatchingProblemDTO request) {
+    public static OTMProblem toOTM(StableMatchingProblemDTO request) {
         Requirement[][] requirements = RequirementDecoder.decode(request.getIndividualRequirements());
         MatchingData data = new MatchingData(request.getNumberOfIndividuals(),
                 request.getNumberOfProperty(),
@@ -81,7 +75,7 @@ public class StableMatchingProblemMapper {
                 fitnessEvaluator);
     }
 
-    public static MTMProblem toMTM(NewStableMatchingProblemDTO request) {
+    public static MTMProblem toMTM(StableMatchingProblemDTO request) {
         Requirement[][] requirements = RequirementDecoder.decode(request.getIndividualRequirements());
         MatchingData data = new MatchingData(request.getNumberOfIndividuals(),
                 request.getNumberOfProperty(),
@@ -104,7 +98,7 @@ public class StableMatchingProblemMapper {
                 fitnessFunction,
                 fitnessEvaluator);
     }
-    public static TripletOTOProblem toTripletOTO(NewStableMatchingProblemDTO request) {
+    public static TripletOTOProblem toTripletOTO(StableMatchingProblemDTO request) {
         Requirement[][] requirements = RequirementDecoder.decode(request.getIndividualRequirements());
         MatchingData data = new MatchingData(request.getNumberOfIndividuals(),
                 request.getNumberOfProperty(),

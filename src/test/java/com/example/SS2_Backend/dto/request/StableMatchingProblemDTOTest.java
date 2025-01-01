@@ -9,9 +9,9 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
-public class NewStableMatchingProblemDTOTest {
+public class StableMatchingProblemDTOTest {
 
-    private NewStableMatchingProblemDTO dto;
+    private StableMatchingProblemDTO dto;
     private Validator validator;
 
     @BeforeEach
@@ -24,7 +24,7 @@ public class NewStableMatchingProblemDTOTest {
 
     @Test
     void testValidDTO() {
-        dto = new NewStableMatchingProblemDTO(
+        dto = new StableMatchingProblemDTO(
             "Stable Matching Problem",
             2,
             3,
@@ -44,7 +44,7 @@ public class NewStableMatchingProblemDTOTest {
             "4"
         );
 
-        Set<ConstraintViolation<NewStableMatchingProblemDTO>> violations = validator.validate(dto);
+        Set<ConstraintViolation<StableMatchingProblemDTO>> violations = validator.validate(dto);
         violations.forEach(violation -> System.out.println(violation.getMessage()));
     }
 

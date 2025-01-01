@@ -1,18 +1,15 @@
 package com.example.SS2_Backend.controller;
 
 import com.example.SS2_Backend.dto.request.GameTheoryProblemDTO;
-import com.example.SS2_Backend.dto.request.NewStableMatchingProblemDTO;
+import com.example.SS2_Backend.dto.request.StableMatchingProblemDTO;
 import com.example.SS2_Backend.dto.response.Response;
 import com.example.SS2_Backend.service.*;
 import org.springframework.http.ResponseEntity;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.example.SS2_Backend.service.GameTheorySolver;
 import com.example.SS2_Backend.service.OTMStableMatchingSolver;
 import com.example.SS2_Backend.service.StableProblemService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -49,7 +46,7 @@ public class HomeController {
 
     @Async("taskExecutor")
     @PostMapping("/stable-matching-solver")
-    public CompletableFuture<ResponseEntity<Response>> solveStableMatching(@RequestBody @Valid NewStableMatchingProblemDTO object) {
+    public CompletableFuture<ResponseEntity<Response>> solveStableMatching(@RequestBody @Valid StableMatchingProblemDTO object) {
         return CompletableFuture.completedFuture(stableMatchingSolver.solve(object));
     }
 
@@ -61,13 +58,13 @@ public class HomeController {
 
     @Async("taskExecutor")
     @PostMapping("/stable-matching-otm-solver")
-    public CompletableFuture<ResponseEntity<Response>> solveStableMatchingOTM(@RequestBody @Valid NewStableMatchingProblemDTO object) {
+    public CompletableFuture<ResponseEntity<Response>> solveStableMatchingOTM(@RequestBody @Valid StableMatchingProblemDTO object) {
         return CompletableFuture.completedFuture(stableMatchingOTMProblemDTO.solve(object));
     }
 
     @Async("taskExecutor")
     @PostMapping("/solve-triplet-matching")
-    public CompletableFuture<ResponseEntity<Response>> solveTripletMatching(@RequestBody NewStableMatchingProblemDTO object) {
+    public CompletableFuture<ResponseEntity<Response>> solveTripletMatching(@RequestBody StableMatchingProblemDTO object) {
         return CompletableFuture.completedFuture(tripletProblemRBO.solve(object));
     }
 
@@ -88,7 +85,7 @@ public class HomeController {
 
     @Async("taskExecutor")
     @PostMapping("/matching-problem-result-insights/{sessionCode}")
-    public CompletableFuture<ResponseEntity<Response>> getMatchingResultInsights(@RequestBody @Valid NewStableMatchingProblemDTO object,
+    public CompletableFuture<ResponseEntity<Response>> getMatchingResultInsights(@RequestBody @Valid StableMatchingProblemDTO object,
                                                                                  @PathVariable String sessionCode) {
         return CompletableFuture.completedFuture(stableMatchingSolver.getInsights(object,
                 sessionCode));
@@ -96,7 +93,7 @@ public class HomeController {
 
     @Async("taskExecutor")
     @PostMapping("/otm-matching-problem-result-insights/{sessionCode}")
-    public CompletableFuture<ResponseEntity<Response>> getOTMMatchingResultInsights(@RequestBody @Valid NewStableMatchingProblemDTO object,
+    public CompletableFuture<ResponseEntity<Response>> getOTMMatchingResultInsights(@RequestBody @Valid StableMatchingProblemDTO object,
                                                                                     @PathVariable String sessionCode) {
         return CompletableFuture.completedFuture(stableMatchingOTMProblemDTO.getInsights(
                 object,
@@ -105,7 +102,7 @@ public class HomeController {
 
     @Async("taskExecutor")
     @PostMapping("/rbo-triplet-problem-result-insights/{sessionCode}")
-    public CompletableFuture<ResponseEntity<Response>> getTripletMatchingResultInsights(@RequestBody NewStableMatchingProblemDTO object,
+    public CompletableFuture<ResponseEntity<Response>> getTripletMatchingResultInsights(@RequestBody StableMatchingProblemDTO object,
                                                                                         @PathVariable String sessionCode) {
         return CompletableFuture.completedFuture(tripletProblemRBO.getInsights(
                 object,

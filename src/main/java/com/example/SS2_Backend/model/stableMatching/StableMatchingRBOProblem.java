@@ -1,6 +1,6 @@
 package com.example.SS2_Backend.model.stableMatching;
 
-import com.example.SS2_Backend.dto.request.NewStableMatchingProblemDTO;
+import com.example.SS2_Backend.dto.request.StableMatchingProblemDTO;
 import com.example.SS2_Backend.model.stableMatching.Matches.Matches;
 import lombok.Data;
 import net.objecthunter.exp4j.Expression;
@@ -85,7 +85,7 @@ public class StableMatchingRBOProblem implements Problem {
      *                    Don't have to change all of those things below,
      */
 
-    public void setPopulation(NewStableMatchingProblemDTO request) {
+    public void setPopulation(StableMatchingProblemDTO request) {
         this.individualRequirements = request.getIndividualRequirements();
         this.individualWeights = request.getIndividualWeights();
         this.individualProperties = request.getIndividualProperties();

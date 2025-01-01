@@ -2,7 +2,7 @@ package com.example.SS2_Backend.service;
 
 import com.example.SS2_Backend.constants.MatchingConst;
 import com.example.SS2_Backend.dto.mapper.StableMatchingProblemMapper;
-import com.example.SS2_Backend.dto.request.NewStableMatchingProblemDTO;
+import com.example.SS2_Backend.dto.request.StableMatchingProblemDTO;
 import com.example.SS2_Backend.dto.response.Progress;
 import com.example.SS2_Backend.dto.response.Response;
 import com.example.SS2_Backend.ss.smt.result.MatchingSolutionInsights;
@@ -10,7 +10,6 @@ import com.example.SS2_Backend.ss.smt.result.MatchingSolution;
 import com.example.SS2_Backend.ss.smt.Matches;
 import com.example.SS2_Backend.ss.smt.MatchingProblem;
 import com.example.SS2_Backend.ss.smt.implement.MTMProblem;
-import com.example.SS2_Backend.util.ValidationUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.moeaframework.Executor;
@@ -24,7 +23,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.BindingResult;
 
 import java.util.*;
 
@@ -36,7 +34,7 @@ public class OTMStableMatchingSolver {
 
     private static final Integer RUN_COUNT_PER_ALGORITHM = 10;
 
-    public ResponseEntity<Response> solve(NewStableMatchingProblemDTO request) {
+    public ResponseEntity<Response> solve(StableMatchingProblemDTO request) {
 
         try {
             log.info("Validating StableMatchingProblemDTO Request ...");
@@ -164,7 +162,7 @@ public class OTMStableMatchingSolver {
         }
     }
 
-    public ResponseEntity<Response> getInsights(NewStableMatchingProblemDTO request,
+    public ResponseEntity<Response> getInsights(StableMatchingProblemDTO request,
                                                 String sessionCode) {
         String[] algorithms = MatchingConst.ALLOWED_INSIGHT_ALGORITHMS;
         simpMessagingTemplate.convertAndSendToUser(sessionCode,
